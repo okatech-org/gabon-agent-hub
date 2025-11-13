@@ -120,8 +120,8 @@ export function MinistreSidebar() {
   };
 
   return (
-    <SidebarUI className="border-none bg-background">
-      <div className="space-y-4">
+    <SidebarUI className="border-none bg-transparent">
+      <div className="space-y-3">
         {/* Header */}
         <div className="neu-card p-4">
           <Link to="/ministre/dashboard" className="flex items-center space-x-3">

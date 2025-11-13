@@ -86,7 +86,7 @@ export default function MinistreDashboard() {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="h-full flex flex-col space-y-3">
       {/* En-tête */}
       <div className="neu-card p-6">
         <div className="flex items-center justify-between">
