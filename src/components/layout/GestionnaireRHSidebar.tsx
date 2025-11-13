@@ -2,14 +2,11 @@ import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
   Users,
-  Building2,
-  Briefcase,
   FileText,
+  Briefcase,
   UserPlus,
-  Fingerprint,
-  TrendingUp,
-  Shield,
   Settings,
+  Shield,
   LogOut,
 } from "lucide-react";
 import {
@@ -33,62 +30,42 @@ const menuItems = [
   {
     title: "Tableau de bord",
     icon: LayoutDashboard,
-    href: "/dashboard",
+    href: "/rh/dashboard",
   },
   {
     title: "Agents",
     icon: Users,
-    href: "/agents",
+    href: "/rh/agents",
   },
   {
-    title: "Structures",
-    icon: Building2,
-    href: "/structures",
-  },
-  {
-    title: "Postes",
-    icon: Briefcase,
-    href: "/postes",
-  },
-  {
-    title: "Carrières & Actes",
+    title: "Actes RH",
     icon: FileText,
-    href: "/carrieres",
+    href: "/rh/actes",
   },
   {
-    title: "Recrutement",
+    title: "Affectations",
+    icon: Briefcase,
+    href: "/rh/affectations",
+  },
+  {
+    title: "Nouveau Agent",
     icon: UserPlus,
-    href: "/recrutement",
-  },
-  {
-    title: "Recensement",
-    icon: Fingerprint,
-    href: "/recensement",
-  },
-  {
-    title: "Projets de Réforme",
-    icon: TrendingUp,
-    href: "/reformes",
+    href: "/rh/agents/nouveau",
   },
 ];
 
 const adminItems = [
   {
-    title: "Administration",
-    icon: Shield,
-    href: "/admin",
-  },
-  {
     title: "Paramètres",
     icon: Settings,
-    href: "/settings",
+    href: "/rh/settings",
   },
 ];
 
-export function Sidebar() {
+export function GestionnaireRHSidebar() {
   const location = useLocation();
   const { state } = useSidebar();
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
   const collapsed = state === "collapsed";
 
   const handleSignOut = async () => {
@@ -98,14 +75,14 @@ export function Sidebar() {
   return (
     <SidebarUI className="border-r border-sidebar-border bg-sidebar">
       <SidebarHeader className="border-b border-sidebar-border p-4">
-        <Link to="/dashboard" className="flex items-center space-x-3">
+        <Link to="/rh/dashboard" className="flex items-center space-x-3">
           <div className="neu-raised h-10 w-10 flex items-center justify-center flex-shrink-0">
             <Shield className="h-5 w-5 text-primary" />
           </div>
           {!collapsed && (
             <div>
               <h2 className="text-base font-bold text-sidebar-foreground">ADMIN.GA</h2>
-              <p className="text-xs text-sidebar-foreground/70">Fonction Publique</p>
+              <p className="text-xs text-sidebar-foreground/70">Gestionnaire RH</p>
             </div>
           )}
         </Link>
@@ -170,6 +147,12 @@ export function Sidebar() {
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border p-4">
+        {!collapsed && user?.email && (
+          <div className="mb-3 px-3">
+            <p className="text-xs text-sidebar-foreground/50">Connecté en tant que</p>
+            <p className="text-xs text-sidebar-foreground font-medium truncate">{user.email}</p>
+          </div>
+        )}
         <Button
           variant="ghost"
           onClick={handleSignOut}

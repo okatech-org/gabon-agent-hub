@@ -2,15 +2,13 @@ import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
   Users,
-  Building2,
-  Briefcase,
-  FileText,
-  UserPlus,
-  Fingerprint,
   TrendingUp,
-  Shield,
+  FileText,
+  BarChart3,
   Settings,
+  Shield,
   LogOut,
+  Bot,
 } from "lucide-react";
 import {
   Sidebar as SidebarUI,
@@ -33,62 +31,47 @@ const menuItems = [
   {
     title: "Tableau de bord",
     icon: LayoutDashboard,
-    href: "/dashboard",
+    href: "/ministre/dashboard",
   },
   {
-    title: "Agents",
-    icon: Users,
-    href: "/agents",
+    title: "iAsted - Assistant IA",
+    icon: Bot,
+    href: "/ministre/dashboard?tab=iasted",
   },
   {
-    title: "Structures",
-    icon: Building2,
-    href: "/structures",
-  },
-  {
-    title: "Postes",
-    icon: Briefcase,
-    href: "/postes",
-  },
-  {
-    title: "Carrières & Actes",
-    icon: FileText,
-    href: "/carrieres",
-  },
-  {
-    title: "Recrutement",
-    icon: UserPlus,
-    href: "/recrutement",
-  },
-  {
-    title: "Recensement",
-    icon: Fingerprint,
-    href: "/recensement",
-  },
-  {
-    title: "Projets de Réforme",
+    title: "Simulations & Réformes",
     icon: TrendingUp,
-    href: "/reformes",
+    href: "/ministre/dashboard?tab=simulations",
+  },
+  {
+    title: "Effectifs & Personnel",
+    icon: Users,
+    href: "/ministre/effectifs",
+  },
+  {
+    title: "Décisions & Actes",
+    icon: FileText,
+    href: "/ministre/decisions",
+  },
+  {
+    title: "Indicateurs Clés",
+    icon: BarChart3,
+    href: "/ministre/indicateurs",
   },
 ];
 
 const adminItems = [
   {
-    title: "Administration",
-    icon: Shield,
-    href: "/admin",
-  },
-  {
     title: "Paramètres",
     icon: Settings,
-    href: "/settings",
+    href: "/ministre/settings",
   },
 ];
 
-export function Sidebar() {
+export function MinistreSidebar() {
   const location = useLocation();
   const { state } = useSidebar();
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
   const collapsed = state === "collapsed";
 
   const handleSignOut = async () => {
@@ -98,14 +81,14 @@ export function Sidebar() {
   return (
     <SidebarUI className="border-r border-sidebar-border bg-sidebar">
       <SidebarHeader className="border-b border-sidebar-border p-4">
-        <Link to="/dashboard" className="flex items-center space-x-3">
+        <Link to="/ministre/dashboard" className="flex items-center space-x-3">
           <div className="neu-raised h-10 w-10 flex items-center justify-center flex-shrink-0">
             <Shield className="h-5 w-5 text-primary" />
           </div>
           {!collapsed && (
             <div>
               <h2 className="text-base font-bold text-sidebar-foreground">ADMIN.GA</h2>
-              <p className="text-xs text-sidebar-foreground/70">Fonction Publique</p>
+              <p className="text-xs text-sidebar-foreground/70">Espace Ministre</p>
             </div>
           )}
         </Link>
@@ -114,28 +97,33 @@ export function Sidebar() {
       <SidebarContent className="px-2 py-4">
         <SidebarGroup>
           <SidebarGroupLabel className="text-sidebar-foreground/70 text-xs uppercase tracking-wider px-3 mb-2">
-            Menu Principal
+            Navigation
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1">
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={location.pathname === item.href}
-                    className={cn(
-                      "rounded-lg transition-all hover:bg-sidebar-accent",
-                      location.pathname === item.href &&
-                        "bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary"
-                    )}
-                  >
-                    <Link to={item.href} className="flex items-center gap-3 px-3 py-2">
-                      <item.icon className="h-4 w-4 flex-shrink-0" />
-                      {!collapsed && <span className="text-sm">{item.title}</span>}
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {menuItems.map((item) => {
+                const isActive = location.pathname === item.href || 
+                  (item.href.includes('?') && location.pathname + location.search === item.href);
+                
+                return (
+                  <SidebarMenuItem key={item.href}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isActive}
+                      className={cn(
+                        "rounded-lg transition-all hover:bg-sidebar-accent",
+                        isActive &&
+                          "bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary"
+                      )}
+                    >
+                      <Link to={item.href} className="flex items-center gap-3 px-3 py-2">
+                        <item.icon className="h-4 w-4 flex-shrink-0" />
+                        {!collapsed && <span className="text-sm">{item.title}</span>}
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -170,6 +158,12 @@ export function Sidebar() {
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border p-4">
+        {!collapsed && user?.email && (
+          <div className="mb-3 px-3">
+            <p className="text-xs text-sidebar-foreground/50">Connecté en tant que</p>
+            <p className="text-xs text-sidebar-foreground font-medium truncate">{user.email}</p>
+          </div>
+        )}
         <Button
           variant="ghost"
           onClick={handleSignOut}

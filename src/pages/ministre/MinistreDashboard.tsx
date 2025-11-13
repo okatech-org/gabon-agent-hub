@@ -87,9 +87,10 @@ export default function MinistreDashboard() {
   });
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      {/* En-tête */}
-      <div className="flex justify-between items-start">
+    <div className="p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* En-tête */}
+        <div className="flex justify-between items-start">
         <div>
           <h1 className="text-4xl font-bold text-foreground mb-2">
             Espace Ministre
@@ -397,6 +398,7 @@ export default function MinistreDashboard() {
           </Card>
         </TabsContent>
       </Tabs>
+      </div>
     </div>
   );
 }

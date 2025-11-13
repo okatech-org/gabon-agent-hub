@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { MainLayout } from "@/components/layout/MainLayout";
+import { MinistreLayout } from "@/components/layout/MinistreLayout";
+import { GestionnaireRHLayout } from "@/components/layout/GestionnaireRHLayout";
 import Home from "./pages/Home";
 import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
@@ -46,7 +48,7 @@ const App = () => (
             <Route
               element={
                 <ProtectedRoute>
-                  <Outlet />
+                  <GestionnaireRHLayout />
                 </ProtectedRoute>
               }
             >
@@ -62,7 +64,7 @@ const App = () => (
             <Route
               element={
                 <ProtectedRoute>
-                  <Outlet />
+                  <MinistreLayout />
                 </ProtectedRoute>
               }
             >
