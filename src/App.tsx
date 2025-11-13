@@ -14,6 +14,8 @@ import Dashboard from "./pages/Dashboard";
 import Agents from "./pages/Agents";
 import NotFound from "./pages/NotFound";
 
+import InitDemo from "./pages/InitDemo";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -28,6 +30,7 @@ const App = () => (
             <Route path="/auth/login" element={<Login />} />
             <Route path="/auth/signup" element={<Signup />} />
             <Route path="/demo-accounts" element={<DemoAccounts />} />
+            <Route path="/init-demo" element={<InitDemo />} />
             
             <Route
               element={
