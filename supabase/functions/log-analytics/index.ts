@@ -14,6 +14,10 @@ serve(async (req) => {
   try {
     const { userId, sessionId, eventType, eventData } = await req.json();
 
+    if (!userId) {
+      throw new Error('userId is required');
+    }
+
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
@@ -23,11 +27,14 @@ serve(async (req) => {
     const { error } = await supabase.from('analytics_voice_events').insert({
       user_id: userId,
       session_id: sessionId,
-      event_type: eventType,
+      event_type: eventType || 'unknown',
       event_data: eventData || {}
     });
 
-    if (error) throw error;
+    if (error) {
+      console.error('Database error:', error);
+      throw error;
+    }
 
     return new Response(JSON.stringify({ success: true }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
