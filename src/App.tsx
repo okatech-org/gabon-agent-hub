@@ -17,6 +17,7 @@ import GestionnaireRHDashboard from "./pages/rh/GestionnaireRHDashboard";
 import AgentsRH from "./pages/rh/AgentsRH";
 import ActesRH from "./pages/rh/ActesRH";
 import AffectationsRH from "./pages/rh/AffectationsRH";
+import AgentForm from "./pages/rh/AgentForm";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -45,6 +46,8 @@ const App = () => (
             >
               <Route path="/rh/dashboard" element={<GestionnaireRHDashboard />} />
               <Route path="/rh/agents" element={<AgentsRH />} />
+              <Route path="/rh/agents/nouveau" element={<AgentForm />} />
+              <Route path="/rh/agents/:id/modifier" element={<AgentForm />} />
               <Route path="/rh/actes" element={<ActesRH />} />
               <Route path="/rh/affectations" element={<AffectationsRH />} />
             </Route>

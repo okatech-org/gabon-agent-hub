@@ -280,9 +280,11 @@ export default function AgentsRH() {
                           <Button variant="ghost" size="sm">
                             <Eye className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="sm">
-                            <Edit className="w-4 h-4" />
-                          </Button>
+                          <Link to={`/rh/agents/${agent.id}/modifier`}>
+                            <Button variant="ghost" size="sm">
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                          </Link>
                           <Button variant="ghost" size="sm">
                             <FileText className="w-4 h-4" />
                           </Button>
