@@ -350,7 +350,18 @@ ${knowledgeContext}`;
         }
 
         const audioBlob = await ttsResponse.arrayBuffer();
-        audioContent = btoa(String.fromCharCode(...new Uint8Array(audioBlob)));
+        
+        // Convert ArrayBuffer to base64 in chunks to avoid stack overflow
+        const uint8Array = new Uint8Array(audioBlob);
+        const chunkSize = 8192; // Process in 8KB chunks
+        let binaryString = '';
+        
+        for (let i = 0; i < uint8Array.length; i += chunkSize) {
+          const chunk = uint8Array.slice(i, Math.min(i + chunkSize, uint8Array.length));
+          binaryString += String.fromCharCode(...Array.from(chunk));
+        }
+        
+        audioContent = btoa(binaryString);
         console.log('✅ ElevenLabs TTS generated, audio size:', audioBlob.byteLength);
       } catch (ttsError) {
         console.error('❌ TTS generation error:', ttsError);
