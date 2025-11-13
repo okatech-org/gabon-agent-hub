@@ -21,6 +21,9 @@ import AgentsRH from "./pages/rh/AgentsRH";
 import ActesRH from "./pages/rh/ActesRH";
 import AffectationsRH from "./pages/rh/AffectationsRH";
 import AgentForm from "./pages/rh/AgentForm";
+import CarrieresRH from "./pages/rh/CarrieresRH";
+import EffectifsRH from "./pages/rh/EffectifsRH";
+import RapportsRH from "./pages/rh/RapportsRH";
 import MinistreDashboard from "./pages/ministre/MinistreDashboard";
 import IAsted from "./pages/ministre/IAsted";
 import Documents from "./pages/ministre/Documents";
@@ -72,7 +75,14 @@ const App = () => (
               <Route path="/rh/agents/nouveau" element={<AgentForm />} />
               <Route path="/rh/agents/:id/modifier" element={<AgentForm />} />
               <Route path="/rh/actes" element={<ActesRH />} />
+              <Route path="/rh/carrieres" element={<CarrieresRH />} />
+              <Route path="/rh/effectifs" element={<EffectifsRH />} />
+              <Route path="/rh/rapports" element={<RapportsRH />} />
               <Route path="/rh/affectations" element={<AffectationsRH />} />
+              <Route path="/rh/recherche" element={<div className="p-6">Recherche Avancée - En cours de développement</div>} />
+              <Route path="/rh/notifications" element={<div className="p-6">Notifications - En cours de développement</div>} />
+              <Route path="/rh/demandes" element={<div className="p-6">Demandes - En cours de développement</div>} />
+              <Route path="/rh/settings" element={<div className="p-6">Paramètres - En cours de développement</div>} />
             </Route>
 
             {/* Routes Ministre - Protégées */}

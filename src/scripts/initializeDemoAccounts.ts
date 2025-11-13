@@ -35,7 +35,7 @@ const demoAccounts: DemoAccountData[] = [
     password: "Demo2024!",
     nom: "Directeur",
     prenoms: "des Ressources Humaines",
-    role: "drh_ministre"
+    role: "drh"
   },
   {
     email: "gestionnaire.demo@admin.ga",

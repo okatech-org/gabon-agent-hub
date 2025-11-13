@@ -2,21 +2,32 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, FileText, TrendingUp, AlertCircle, UserPlus, FileCheck, Briefcase, Clock } from "lucide-react";
+import { 
+  Users, FileText, TrendingUp, AlertCircle, UserPlus, FileCheck, 
+  Briefcase, Clock, Shield, BarChart3, Award, Target 
+} from "lucide-react";
 
 interface DashboardStats {
   totalAgents: number;
   actesEnAttente: number;
+  actesValides: number;
   demandesEnCours: number;
   mutationsRecentes: number;
+  avancementsEnCours: number;
+  tauxOccupationPostes: number;
+  agentsActifs: number;
 }
 
 export default function GestionnaireRHDashboard() {
   const [stats, setStats] = useState<DashboardStats>({
     totalAgents: 0,
     actesEnAttente: 0,
+    actesValides: 0,
     demandesEnCours: 0,
-    mutationsRecentes: 0
+    mutationsRecentes: 0,
+    avancementsEnCours: 0,
+    tauxOccupationPostes: 0,
+    agentsActifs: 0
   });
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
@@ -30,17 +41,33 @@ export default function GestionnaireRHDashboard() {
       setIsLoading(true);
 
       // Charger les statistiques
-      const [agentsResult, actesResult, affectationsResult] = await Promise.all([
+      const [
+        agentsResult, 
+        actesEnAttenteResult, 
+        actesValidesResult,
+        affectationsResult,
+        avancementsResult,
+        agentsActifsResult
+      ] = await Promise.all([
         supabase.from("agents").select("id", { count: "exact", head: true }),
         supabase.from("actes_administratifs").select("id", { count: "exact", head: true }).eq("statut", "brouillon"),
-        supabase.from("affectations").select("id", { count: "exact", head: true }).gte("date_debut", new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
+        supabase.from("actes_administratifs").select("id", { count: "exact", head: true }).eq("statut", "signe"),
+        supabase.from("affectations").select("id", { count: "exact", head: true }).gte("date_debut", new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()),
+        supabase.from("actes_administratifs").select("id", { count: "exact", head: true }).eq("type_acte", "avancement").eq("statut", "en_attente"),
+        supabase.from("agents").select("id", { count: "exact", head: true }).eq("statut", "actif")
       ]);
 
       setStats({
         totalAgents: agentsResult.count || 0,
-        actesEnAttente: actesResult.count || 0,
+        actesEnAttente: actesEnAttenteResult.count || 0,
+        actesValides: actesValidesResult.count || 0,
         demandesEnCours: 0, // À implémenter avec une table demandes
-        mutationsRecentes: affectationsResult.count || 0
+        mutationsRecentes: affectationsResult.count || 0,
+        avancementsEnCours: avancementsResult.count || 0,
+        tauxOccupationPostes: agentsActifsResult.count && agentsResult.count 
+          ? Math.round((agentsActifsResult.count / agentsResult.count) * 100)
+          : 0,
+        agentsActifs: agentsActifsResult.count || 0
       });
     } catch (error: any) {
       toast({
@@ -55,36 +82,40 @@ export default function GestionnaireRHDashboard() {
 
   const statCards = [
     {
-      title: "Agents Enregistrés",
-      value: stats.totalAgents,
+      title: "Agents Actifs",
+      value: stats.agentsActifs,
+      subtitle: `sur ${stats.totalAgents} total`,
       icon: Users,
       color: "text-primary",
       bgColor: "bg-primary/10",
       link: "/rh/agents"
     },
     {
-      title: "Actes en Attente",
+      title: "Actes à Valider",
       value: stats.actesEnAttente,
-      icon: FileText,
+      subtitle: `${stats.actesValides} validés`,
+      icon: FileCheck,
       color: "text-amber-600",
       bgColor: "bg-amber-100",
       link: "/rh/actes"
     },
     {
-      title: "Demandes en Cours",
-      value: stats.demandesEnCours,
-      icon: Clock,
-      color: "text-info",
-      bgColor: "bg-info/10",
-      link: "/rh/demandes"
-    },
-    {
-      title: "Mutations (30j)",
-      value: stats.mutationsRecentes,
-      icon: Briefcase,
+      title: "Avancements en Cours",
+      value: stats.avancementsEnCours,
+      subtitle: "Dossiers à traiter",
+      icon: Award,
       color: "text-success",
       bgColor: "bg-success/10",
-      link: "/rh/affectations"
+      link: "/rh/carrieres"
+    },
+    {
+      title: "Taux d'Occupation",
+      value: `${stats.tauxOccupationPostes}%`,
+      subtitle: "Effectifs",
+      icon: Target,
+      color: "text-info",
+      bgColor: "bg-info/10",
+      link: "/rh/effectifs"
     }
   ];
 
@@ -94,18 +125,18 @@ export default function GestionnaireRHDashboard() {
       <div className="neu-card p-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Tableau de Bord - Gestionnaire RH</h1>
+            <h1 className="text-3xl font-bold mb-2">Tableau de Bord - Directeur RH</h1>
             <p className="text-muted-foreground">
-              Gestion opérationnelle des dossiers et actes administratifs
+              Gestion stratégique des ressources humaines de la fonction publique
             </p>
           </div>
           <div className="neu-raised w-16 h-16 flex items-center justify-center">
-            <Users className="w-8 h-8 text-info" />
+            <Shield className="w-8 h-8 text-primary" />
           </div>
         </div>
       </div>
 
-      {/* Cartes de statistiques */}
+      {/* Cartes de statistiques - KPIs Stratégiques */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map((card) => {
           const IconComponent = card.icon;
@@ -118,13 +149,99 @@ export default function GestionnaireRHDashboard() {
                   </div>
                 </div>
                 <div className="text-3xl font-bold mb-1">
-                  {isLoading ? "..." : card.value.toLocaleString()}
+                  {isLoading ? "..." : typeof card.value === 'number' ? card.value.toLocaleString() : card.value}
                 </div>
                 <p className="text-sm font-medium text-foreground">{card.title}</p>
+                <p className="text-xs text-muted-foreground mt-1">{card.subtitle}</p>
               </div>
             </Link>
           );
         })}
+      </div>
+
+      {/* 4 Attributions Principales du DRH */}
+      <div className="neu-card p-6">
+        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+          <Shield className="w-5 h-5 text-primary" />
+          Attributions Stratégiques du DRH
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Link to="/rh/actes">
+            <div className="neu-inset p-4 rounded-lg hover:shadow-neu-button-hover transition-shadow cursor-pointer">
+              <div className="flex items-start gap-3">
+                <div className="neu-raised w-10 h-10 flex items-center justify-center flex-shrink-0">
+                  <FileCheck className="w-5 h-5 text-amber-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-1">Validation des Actes Administratifs</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Signature et validation des décisions de carrière et actes administratifs
+                  </p>
+                  <div className="mt-2 text-sm font-medium text-amber-600">
+                    {stats.actesEnAttente} acte(s) en attente de validation →
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Link>
+          
+          <Link to="/rh/carrieres">
+            <div className="neu-inset p-4 rounded-lg hover:shadow-neu-button-hover transition-shadow cursor-pointer">
+              <div className="flex items-start gap-3">
+                <div className="neu-raised w-10 h-10 flex items-center justify-center flex-shrink-0">
+                  <Award className="w-5 h-5 text-success" />
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-1">Gestion des Carrières et Avancements</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Pilotage des promotions, avancements et évolutions de carrière
+                  </p>
+                  <div className="mt-2 text-sm font-medium text-success">
+                    {stats.avancementsEnCours} dossier(s) à traiter →
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Link>
+          
+          <Link to="/rh/effectifs">
+            <div className="neu-inset p-4 rounded-lg hover:shadow-neu-button-hover transition-shadow cursor-pointer">
+              <div className="flex items-start gap-3">
+                <div className="neu-raised w-10 h-10 flex items-center justify-center flex-shrink-0">
+                  <Target className="w-5 h-5 text-info" />
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-1">Pilotage des Effectifs</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Suivi des effectifs, prévisions et gestion prévisionnelle
+                  </p>
+                  <div className="mt-2 text-sm font-medium text-info">
+                    {stats.agentsActifs} agents actifs / {stats.totalAgents} total →
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Link>
+          
+          <Link to="/rh/rapports">
+            <div className="neu-inset p-4 rounded-lg hover:shadow-neu-button-hover transition-shadow cursor-pointer">
+              <div className="flex items-start gap-3">
+                <div className="neu-raised w-10 h-10 flex items-center justify-center flex-shrink-0">
+                  <BarChart3 className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-1">Tableaux de Bord RH</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Analyses et indicateurs stratégiques RH
+                  </p>
+                  <div className="mt-2 text-sm font-medium text-primary">
+                    Voir les rapports et statistiques →
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Link>
+        </div>
       </div>
 
       {/* Actions rapides */}

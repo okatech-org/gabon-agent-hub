@@ -8,6 +8,13 @@ import {
   Settings,
   Shield,
   LogOut,
+  Bell,
+  BarChart3,
+  Search,
+  ClipboardList,
+  Award,
+  Target,
+  FileCheck,
 } from "lucide-react";
 import {
   Sidebar as SidebarUI,
@@ -28,9 +35,32 @@ const menuItems = [
     href: "/rh/agents",
   },
   {
-    title: "Actes RH",
-    icon: FileText,
+    title: "Validation des Actes",
+    icon: FileCheck,
     href: "/rh/actes",
+  },
+  {
+    title: "Carrières & Avancements",
+    icon: Award,
+    href: "/rh/carrieres",
+  },
+  {
+    title: "Pilotage des Effectifs",
+    icon: Target,
+    href: "/rh/effectifs",
+  },
+  {
+    title: "Rapports & Statistiques",
+    icon: BarChart3,
+    href: "/rh/rapports",
+  },
+];
+
+const toolsItems = [
+  {
+    title: "Nouveau Agent",
+    icon: UserPlus,
+    href: "/rh/agents/nouveau",
   },
   {
     title: "Affectations",
@@ -38,13 +68,23 @@ const menuItems = [
     href: "/rh/affectations",
   },
   {
-    title: "Nouveau Agent",
-    icon: UserPlus,
-    href: "/rh/agents/nouveau",
+    title: "Recherche Avancée",
+    icon: Search,
+    href: "/rh/recherche",
   },
 ];
 
-const adminItems = [
+const systemItems = [
+  {
+    title: "Notifications",
+    icon: Bell,
+    href: "/rh/notifications",
+  },
+  {
+    title: "Demandes",
+    icon: ClipboardList,
+    href: "/rh/demandes",
+  },
   {
     title: "Paramètres",
     icon: Settings,
@@ -74,7 +114,7 @@ export function GestionnaireRHSidebar() {
             {!collapsed && (
               <div>
                 <h2 className="text-base font-bold text-foreground">ADMIN.GA</h2>
-                <p className="text-xs text-muted-foreground">Gestionnaire RH</p>
+                <p className="text-xs text-muted-foreground">Directeur RH</p>
               </div>
             )}
           </Link>
@@ -87,11 +127,37 @@ export function GestionnaireRHSidebar() {
             <div>
               {!collapsed && (
                 <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-2">
-                  Menu Principal
+                  Gestion RH
                 </h3>
               )}
               <div className="space-y-1">
                 {menuItems.map((item) => (
+                  <Link 
+                    key={item.href}
+                    to={item.href}
+                    className={cn(
+                      "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all",
+                      location.pathname === item.href 
+                        ? "neu-inset text-primary font-medium" 
+                        : "hover:neu-raised text-foreground"
+                    )}
+                  >
+                    <item.icon className="h-4 w-4 flex-shrink-0" />
+                    {!collapsed && <span className="text-sm">{item.title}</span>}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* Outils */}
+            <div>
+              {!collapsed && (
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-2">
+                  Outils
+                </h3>
+              )}
+              <div className="space-y-1">
+                {toolsItems.map((item) => (
                   <Link 
                     key={item.href}
                     to={item.href}
@@ -117,7 +183,7 @@ export function GestionnaireRHSidebar() {
                 </h3>
               )}
               <div className="space-y-1">
-                {adminItems.map((item) => (
+                {systemItems.map((item) => (
                   <Link 
                     key={item.href}
                     to={item.href}
