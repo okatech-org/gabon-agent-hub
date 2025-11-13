@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Users, FileText, TrendingUp, AlertCircle, UserPlus, FileCheck, Briefcase, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { Users, FileText, TrendingUp, AlertCircle, UserPlus, FileCheck, Briefcase, Clock } from "lucide-react";
 
 interface DashboardStats {
   totalAgents: number;
@@ -91,7 +89,7 @@ export default function GestionnaireRHDashboard() {
   ];
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="min-h-screen bg-background p-4 md:p-6 space-y-6">
       {/* En-tête */}
       <div className="neu-card p-6">
         <div className="flex items-center justify-between">
@@ -113,21 +111,17 @@ export default function GestionnaireRHDashboard() {
           const IconComponent = card.icon;
           return (
             <Link key={card.title} to={card.link}>
-              <Card className="neu-card hover:shadow-lg transition-shadow cursor-pointer">
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
-                    {card.title}
-                  </CardTitle>
+              <div className="neu-card p-5 hover:shadow-neu-button-hover transition-shadow cursor-pointer">
+                <div className="flex items-center justify-between mb-3">
                   <div className={`neu-raised w-10 h-10 flex items-center justify-center ${card.color}`}>
                     <IconComponent className="w-5 h-5" />
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold">
-                    {isLoading ? "..." : card.value.toLocaleString()}
-                  </div>
-                </CardContent>
-              </Card>
+                </div>
+                <div className="text-3xl font-bold mb-1">
+                  {isLoading ? "..." : card.value.toLocaleString()}
+                </div>
+                <p className="text-sm font-medium text-foreground">{card.title}</p>
+              </div>
             </Link>
           );
         })}
@@ -141,106 +135,98 @@ export default function GestionnaireRHDashboard() {
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Link to="/rh/agents/nouveau">
-            <Button className="w-full h-auto py-6 flex flex-col gap-2" variant="outline">
+            <button className="neu-button w-full h-auto py-6 flex flex-col gap-2">
               <UserPlus className="w-6 h-6" />
               <span className="text-sm">Nouvel Agent</span>
-            </Button>
+            </button>
           </Link>
           <Link to="/rh/actes/nouveau">
-            <Button className="w-full h-auto py-6 flex flex-col gap-2" variant="outline">
+            <button className="neu-button w-full h-auto py-6 flex flex-col gap-2">
               <FileCheck className="w-6 h-6" />
               <span className="text-sm">Générer un Acte</span>
-            </Button>
+            </button>
           </Link>
           <Link to="/rh/affectations/nouvelle">
-            <Button className="w-full h-auto py-6 flex flex-col gap-2" variant="outline">
+            <button className="neu-button w-full h-auto py-6 flex flex-col gap-2">
               <Briefcase className="w-6 h-6" />
               <span className="text-sm">Nouvelle Affectation</span>
-            </Button>
+            </button>
           </Link>
           <Link to="/rh/recherche">
-            <Button className="w-full h-auto py-6 flex flex-col gap-2" variant="outline">
+            <button className="neu-button w-full h-auto py-6 flex flex-col gap-2">
               <Users className="w-6 h-6" />
               <span className="text-sm">Rechercher un Agent</span>
-            </Button>
+            </button>
           </Link>
         </div>
       </div>
 
       {/* Alertes et notifications */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Card className="neu-card">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <AlertCircle className="w-5 h-5 text-amber-600" />
-              Tâches Prioritaires
-            </CardTitle>
-            <CardDescription>Actions nécessitant votre attention</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {stats.actesEnAttente > 0 && (
-                <div className="neu-inset p-3 rounded-lg">
-                  <p className="text-sm font-medium">
-                    {stats.actesEnAttente} acte(s) en brouillon à finaliser
-                  </p>
-                  <Link to="/rh/actes?statut=brouillon">
-                    <Button variant="link" size="sm" className="p-0 h-auto">
-                      Voir les actes →
-                    </Button>
-                  </Link>
-                </div>
-              )}
-              {stats.totalAgents === 0 && (
-                <div className="neu-inset p-3 rounded-lg">
-                  <p className="text-sm font-medium">
-                    Aucun agent enregistré dans le système
-                  </p>
-                  <Link to="/rh/agents/nouveau">
-                    <Button variant="link" size="sm" className="p-0 h-auto">
-                      Ajouter un agent →
-                    </Button>
-                  </Link>
-                </div>
-              )}
-              {stats.actesEnAttente === 0 && stats.totalAgents > 0 && (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  Aucune tâche prioritaire pour le moment
+        <div className="neu-card p-6">
+          <h3 className="text-xl font-semibold mb-2 flex items-center gap-2">
+            <AlertCircle className="w-5 h-5 text-amber-600" />
+            Tâches Prioritaires
+          </h3>
+          <p className="text-sm text-muted-foreground mb-4">Actions nécessitant votre attention</p>
+          <div className="space-y-3">
+            {stats.actesEnAttente > 0 && (
+              <div className="neu-inset p-3 rounded-lg">
+                <p className="text-sm font-medium mb-1">
+                  {stats.actesEnAttente} acte(s) en brouillon à finaliser
                 </p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+                <Link to="/rh/actes?statut=brouillon">
+                  <span className="text-xs text-primary hover:underline">
+                    Voir les actes →
+                  </span>
+                </Link>
+              </div>
+            )}
+            {stats.totalAgents === 0 && (
+              <div className="neu-inset p-3 rounded-lg">
+                <p className="text-sm font-medium mb-1">
+                  Aucun agent enregistré dans le système
+                </p>
+                <Link to="/rh/agents/nouveau">
+                  <span className="text-xs text-primary hover:underline">
+                    Ajouter un agent →
+                  </span>
+                </Link>
+              </div>
+            )}
+            {stats.actesEnAttente === 0 && stats.totalAgents > 0 && (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                Aucune tâche prioritaire pour le moment
+              </p>
+            )}
+          </div>
+        </div>
 
-        <Card className="neu-card">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Clock className="w-5 h-5 text-info" />
-              Activité Récente
-            </CardTitle>
-            <CardDescription>Dernières opérations effectuées</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {stats.mutationsRecentes > 0 ? (
-                <div className="neu-inset p-3 rounded-lg">
-                  <p className="text-sm font-medium">
-                    {stats.mutationsRecentes} mutation(s) effectuée(s) ce mois
-                  </p>
-                  <Link to="/rh/affectations">
-                    <Button variant="link" size="sm" className="p-0 h-auto">
-                      Voir l'historique →
-                    </Button>
-                  </Link>
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  Aucune activité récente
+        <div className="neu-card p-6">
+          <h3 className="text-xl font-semibold mb-2 flex items-center gap-2">
+            <Clock className="w-5 h-5 text-info" />
+            Activité Récente
+          </h3>
+          <p className="text-sm text-muted-foreground mb-4">Dernières opérations effectuées</p>
+          <div className="space-y-3">
+            {stats.mutationsRecentes > 0 ? (
+              <div className="neu-inset p-3 rounded-lg">
+                <p className="text-sm font-medium mb-1">
+                  {stats.mutationsRecentes} mutation(s) effectuée(s) ce mois
                 </p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+                <Link to="/rh/affectations">
+                  <span className="text-xs text-primary hover:underline">
+                    Voir l'historique →
+                  </span>
+                </Link>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                Aucune activité récente
+              </p>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
