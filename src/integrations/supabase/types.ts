@@ -914,7 +914,17 @@ export type Database = {
       is_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      app_role: "admin" | "drh_ministre" | "drh_local" | "agent" | "auditeur"
+      app_role:
+        | "admin"
+        | "drh_ministre"
+        | "drh_local"
+        | "agent"
+        | "auditeur"
+        | "ministre"
+        | "secretaire_general"
+        | "directeur_cabinet"
+        | "gestionnaire"
+        | "candidat"
       statut_acte:
         | "brouillon"
         | "en_validation"
@@ -1067,7 +1077,18 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "drh_ministre", "drh_local", "agent", "auditeur"],
+      app_role: [
+        "admin",
+        "drh_ministre",
+        "drh_local",
+        "agent",
+        "auditeur",
+        "ministre",
+        "secretaire_general",
+        "directeur_cabinet",
+        "gestionnaire",
+        "candidat",
+      ],
       statut_acte: ["brouillon", "en_validation", "valide", "signe", "archive"],
       statut_agent: [
         "actif",
