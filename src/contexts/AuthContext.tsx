@@ -28,8 +28,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setSession(session);
         setUser(session?.user ?? null);
         
-        if (event === 'SIGNED_IN') {
-          navigate('/dashboard');
+        if (event === 'SIGNED_IN' && session?.user) {
+          // Rediriger en fonction du rôle
+          setTimeout(() => {
+            checkUserRoleAndRedirect(session.user.id);
+          }, 0);
         }
       }
     );
@@ -43,6 +46,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     return () => subscription.unsubscribe();
   }, [navigate]);
+
+  const checkUserRoleAndRedirect = async (userId: string) => {
+    try {
+      const { data: roles } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId);
+
+      if (roles && roles.length > 0) {
+        const userRole = roles[0].role;
+        
+        // Redirection selon le rôle
+        switch (userRole) {
+          case "gestionnaire":
+            navigate("/rh/dashboard");
+            break;
+          case "ministre":
+          case "secretaire_general":
+          case "directeur_cabinet":
+          case "drh_ministre":
+          case "drh_local":
+            navigate("/dashboard");
+            break;
+          case "agent":
+            navigate("/dashboard");
+            break;
+          case "candidat":
+            navigate("/dashboard");
+            break;
+          default:
+            navigate("/dashboard");
+        }
+      } else {
+        navigate("/dashboard");
+      }
+    } catch (error) {
+      console.error("Erreur lors de la vérification du rôle:", error);
+      navigate("/dashboard");
+    }
+  };
 
   const signUp = async (email: string, password: string, nom: string, prenoms: string) => {
     try {

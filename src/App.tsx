@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { MainLayout } from "@/components/layout/MainLayout";
@@ -10,11 +10,14 @@ import Home from "./pages/Home";
 import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
 import DemoAccounts from "./pages/DemoAccounts";
+import InitDemo from "./pages/InitDemo";
 import Dashboard from "./pages/Dashboard";
 import Agents from "./pages/Agents";
+import GestionnaireRHDashboard from "./pages/rh/GestionnaireRHDashboard";
+import AgentsRH from "./pages/rh/AgentsRH";
+import ActesRH from "./pages/rh/ActesRH";
+import AffectationsRH from "./pages/rh/AffectationsRH";
 import NotFound from "./pages/NotFound";
-
-import InitDemo from "./pages/InitDemo";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +34,20 @@ const App = () => (
             <Route path="/auth/signup" element={<Signup />} />
             <Route path="/demo-accounts" element={<DemoAccounts />} />
             <Route path="/init-demo" element={<InitDemo />} />
+            
+            {/* Routes Gestionnaire RH - Protégées */}
+            <Route
+              element={
+                <ProtectedRoute>
+                  <Outlet />
+                </ProtectedRoute>
+              }
+            >
+              <Route path="/rh/dashboard" element={<GestionnaireRHDashboard />} />
+              <Route path="/rh/agents" element={<AgentsRH />} />
+              <Route path="/rh/actes" element={<ActesRH />} />
+              <Route path="/rh/affectations" element={<AffectationsRH />} />
+            </Route>
             
             <Route
               element={
