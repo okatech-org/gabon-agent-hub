@@ -62,12 +62,12 @@ All colors MUST be HSL.
 
     --sidebar-background: var(--background);
     --sidebar-foreground: var(--foreground);
-    --sidebar-primary: 142 69% 26%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: var(--muted);
+    --sidebar-primary: var(--primary);
+    --sidebar-primary-foreground: var(--primary-foreground);
+    --sidebar-accent: var(--background);
     --sidebar-accent-foreground: var(--foreground);
     --sidebar-border: var(--border);
-    --sidebar-ring: 142 69% 26%;
+    --sidebar-ring: var(--ring);
   }
 
   .dark {
@@ -110,12 +110,12 @@ All colors MUST be HSL.
 
     --sidebar-background: var(--background);
     --sidebar-foreground: var(--foreground);
-    --sidebar-primary: 142 69% 35%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: var(--muted);
+    --sidebar-primary: var(--primary);
+    --sidebar-primary-foreground: var(--primary-foreground);
+    --sidebar-accent: var(--background);
     --sidebar-accent-foreground: var(--foreground);
     --sidebar-border: var(--border);
-    --sidebar-ring: 142 69% 35%;
+    --sidebar-ring: var(--ring);
   }
 }
 
