@@ -67,6 +67,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           case "gestionnaire":
             navigate("/rh/dashboard");
             break;
+          case "fonctionnaire":
+          case "agent":
+            navigate("/fonctionnaire/dashboard");
+            break;
           case "secretaire_general":
           case "directeur_cabinet":
           case "drh_ministre":

@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { MinistreLayout } from "@/components/layout/MinistreLayout";
+import { FonctionnaireLayout } from "@/components/layout/FonctionnaireLayout";
 import { GestionnaireRHLayout } from "@/components/layout/GestionnaireRHLayout";
 import Home from "./pages/Home";
 import Login from "./pages/auth/Login";
@@ -28,6 +29,13 @@ import Notifications from "./pages/ministre/Notifications";
 import Formations from "./pages/ministre/Formations";
 import Historique from "./pages/ministre/Historique";
 import Alertes from "./pages/ministre/Alertes";
+import EconomieFinances from "./pages/ministre/EconomieFinances";
+import SettingsPage from "./pages/ministre/Settings";
+import FonctionnaireDashboard from "./pages/fonctionnaire/Dashboard";
+import Dossier from "./pages/fonctionnaire/Dossier";
+import Actes from "./pages/fonctionnaire/Actes";
+import Demandes from "./pages/fonctionnaire/Demandes";
+import FonctionnaireNotifications from "./pages/fonctionnaire/Notifications";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -83,6 +91,24 @@ const App = () => (
               <Route path="/ministre/formations" element={<Formations />} />
               <Route path="/ministre/historique" element={<Historique />} />
               <Route path="/ministre/alertes" element={<Alertes />} />
+              <Route path="/ministre/economie-finances" element={<EconomieFinances />} />
+              <Route path="/ministre/settings" element={<SettingsPage />} />
+            </Route>
+            
+            {/* Routes Fonctionnaire - Protégées */}
+            <Route
+              element={
+                <ProtectedRoute>
+                  <FonctionnaireLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route path="/fonctionnaire/dashboard" element={<FonctionnaireDashboard />} />
+              <Route path="/fonctionnaire/dossier" element={<Dossier />} />
+              <Route path="/fonctionnaire/actes" element={<Actes />} />
+              <Route path="/fonctionnaire/demandes" element={<Demandes />} />
+              <Route path="/fonctionnaire/notifications" element={<FonctionnaireNotifications />} />
+              <Route path="/fonctionnaire/settings" element={<SettingsPage />} />
             </Route>
             
             <Route
