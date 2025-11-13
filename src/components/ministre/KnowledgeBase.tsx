@@ -9,9 +9,10 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { BookOpen, Upload, FileText, Trash2, Download, Plus, Tags, Search } from 'lucide-react';
+import { BookOpen, Upload, FileText, Trash2, Download, Plus, Tags, Search, History, Edit } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
+import { KnowledgeVersionHistory } from './KnowledgeVersionHistory';
 
 interface KnowledgeEntry {
   id: string;
@@ -24,6 +25,7 @@ interface KnowledgeEntry {
   category: string;
   tags: string[];
   is_active: boolean;
+  version_number: number;
   created_at: string;
 }
 
@@ -45,6 +47,10 @@ export const KnowledgeBase = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [uploadingFile, setUploadingFile] = useState(false);
+  const [versionHistoryOpen, setVersionHistoryOpen] = useState(false);
+  const [selectedEntryForHistory, setSelectedEntryForHistory] = useState<KnowledgeEntry | null>(null);
+  const [editingEntry, setEditingEntry] = useState<KnowledgeEntry | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   
   const [formData, setFormData] = useState({
     title: '',
@@ -144,6 +150,78 @@ export const KnowledgeBase = () => {
     }
   });
 
+  // Mutation pour mettre à jour une entrée (crée automatiquement une version)
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: typeof formData }) => {
+      let fileUrl = null;
+      let fileName = null;
+      let fileSize = null;
+
+      // Upload du fichier si présent
+      if (data.file) {
+        setUploadingFile(true);
+        const fileExt = data.file.name.split('.').pop();
+        const filePath = `${user?.id}/${Date.now()}.${fileExt}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('iasted-documents')
+          .upload(filePath, data.file);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('iasted-documents')
+          .getPublicUrl(filePath);
+
+        fileUrl = publicUrl;
+        fileName = data.file.name;
+        fileSize = data.file.size;
+        setUploadingFile(false);
+      }
+
+      // Mettre à jour l'entrée (le trigger créera automatiquement une version)
+      const updateData: any = {
+        title: data.title,
+        description: data.description,
+        content: data.content,
+        category: data.category,
+        tags: data.tags.split(',').map(t => t.trim()).filter(t => t),
+        updated_at: new Date().toISOString()
+      };
+
+      if (fileUrl) {
+        updateData.file_url = fileUrl;
+        updateData.file_name = fileName;
+        updateData.file_size = fileSize;
+      }
+
+      const { error } = await supabase
+        .from('iasted_knowledge_base' as any)
+        .update(updateData)
+        .eq('id', id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['knowledge-base'] });
+      setEditDialogOpen(false);
+      setEditingEntry(null);
+      setFormData({
+        title: '',
+        description: '',
+        content: '',
+        category: '',
+        tags: '',
+        file: null
+      });
+      toast.success('Document mis à jour (nouvelle version créée)');
+    },
+    onError: (error) => {
+      console.error('Error updating entry:', error);
+      toast.error('Erreur lors de la mise à jour');
+    }
+  });
+
   // Mutation pour supprimer une entrée
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -169,13 +247,35 @@ export const KnowledgeBase = () => {
       toast.error('Le titre et la catégorie sont requis');
       return;
     }
-    createMutation.mutate(formData);
+    if (editingEntry) {
+      updateMutation.mutate({ id: editingEntry.id, data: formData });
+    } else {
+      createMutation.mutate(formData);
+    }
+  };
+
+  const handleEdit = (entry: KnowledgeEntry) => {
+    setEditingEntry(entry);
+    setFormData({
+      title: entry.title,
+      description: entry.description || '',
+      content: entry.content || '',
+      category: entry.category,
+      tags: entry.tags?.join(', ') || '',
+      file: null
+    });
+    setEditDialogOpen(true);
   };
 
   const formatFileSize = (bytes: number) => {
     if (bytes < 1024) return bytes + ' B';
     if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
     return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  };
+
+  const handleShowHistory = (entry: KnowledgeEntry) => {
+    setSelectedEntryForHistory(entry);
+    setVersionHistoryOpen(true);
   };
 
   return (
@@ -296,6 +396,123 @@ export const KnowledgeBase = () => {
         </Dialog>
       </div>
 
+      {/* Dialog d'édition */}
+      <Dialog open={editDialogOpen} onOpenChange={(open) => {
+        setEditDialogOpen(open);
+        if (!open) {
+          setEditingEntry(null);
+          setFormData({
+            title: '',
+            description: '',
+            content: '',
+            category: '',
+            tags: '',
+            file: null
+          });
+        }
+      }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Modifier le document</DialogTitle>
+            <DialogDescription>
+              Une nouvelle version sera créée automatiquement lors de la sauvegarde
+            </DialogDescription>
+          </DialogHeader>
+          
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-title">Titre *</Label>
+              <Input
+                id="edit-title"
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                placeholder="Ex: Statut Général de la Fonction Publique"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="edit-category">Catégorie *</Label>
+              <Select
+                value={formData.category}
+                onValueChange={(value) => setFormData({ ...formData, category: value })}
+                required
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionner une catégorie" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map(cat => (
+                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="edit-description">Description</Label>
+              <Textarea
+                id="edit-description"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                placeholder="Brève description du document"
+                rows={2}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="edit-content">Contenu / Notes</Label>
+              <Textarea
+                id="edit-content"
+                value={formData.content}
+                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                placeholder="Contenu textuel, extraits importants, ou notes..."
+                rows={6}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="edit-tags">Mots-clés (séparés par des virgules)</Label>
+              <Input
+                id="edit-tags"
+                value={formData.tags}
+                onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+                placeholder="Ex: retraite, recrutement, avancement"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="edit-file">Nouveau fichier (optionnel)</Label>
+              <Input
+                id="edit-file"
+                type="file"
+                onChange={(e) => setFormData({ ...formData, file: e.target.files?.[0] || null })}
+                accept=".pdf,.doc,.docx,.txt,.md,.xls,.xlsx"
+              />
+              {formData.file && (
+                <p className="text-sm text-muted-foreground">
+                  Nouveau fichier: {formData.file.name} ({formatFileSize(formData.file.size)})
+                </p>
+              )}
+              {editingEntry?.file_name && !formData.file && (
+                <p className="text-sm text-muted-foreground">
+                  Fichier actuel: {editingEntry.file_name}
+                </p>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-2 pt-4">
+              <Button type="button" variant="outline" onClick={() => setEditDialogOpen(false)}>
+                Annuler
+              </Button>
+              <Button type="submit" disabled={updateMutation.isPending || uploadingFile}>
+                {uploadingFile ? 'Upload en cours...' : updateMutation.isPending ? 'Mise à jour...' : 'Enregistrer'}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
       {/* Filtres et recherche */}
       <div className="flex gap-4">
         <div className="flex-1 relative">
@@ -342,18 +559,40 @@ export const KnowledgeBase = () => {
                     <CardTitle className="flex items-center gap-2">
                       <FileText className="h-5 w-5" />
                       {entry.title}
+                      <Badge variant="outline" className="ml-2 text-xs">
+                        v{entry.version_number}
+                      </Badge>
                     </CardTitle>
                     <CardDescription className="mt-1">
                       {entry.description}
                     </CardDescription>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => deleteMutation.mutate(entry.id)}
-                  >
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
+                  <div className="flex gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleEdit(entry)}
+                      title="Modifier"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleShowHistory(entry)}
+                      title="Voir l'historique"
+                    >
+                      <History className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => deleteMutation.mutate(entry.id)}
+                      title="Supprimer"
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
                 </div>
                 <div className="flex items-center gap-2 mt-2">
                   <Badge variant="secondary">{entry.category}</Badge>
@@ -390,6 +629,19 @@ export const KnowledgeBase = () => {
             </Card>
           ))}
         </div>
+      )}
+
+      {/* Dialog de l'historique des versions */}
+      {selectedEntryForHistory && (
+        <KnowledgeVersionHistory
+          knowledgeId={selectedEntryForHistory.id}
+          currentVersion={selectedEntryForHistory.version_number}
+          isOpen={versionHistoryOpen}
+          onClose={() => {
+            setVersionHistoryOpen(false);
+            setSelectedEntryForHistory(null);
+          }}
+        />
       )}
     </div>
   );
