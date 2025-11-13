@@ -1,4 +1,5 @@
 import { Building2, Users, FileText, TrendingUp, Calendar, BookOpen, CheckCircle2, Shield, Database, UserCheck, AlertCircle, LineChart } from "lucide-react";
+import { Link } from "react-router-dom";
 import heroImage from "@/assets/hero-fonction-publique.jpg";
 import servicePublicImage from "@/assets/service-public.jpg";
 import ministereImage from "@/assets/ministere.jpg";
@@ -27,12 +28,16 @@ export default function Home() {
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
-            <button className="neu-button neu-button-admin text-sm">
-              Connexion administration
-            </button>
-            <button className="neu-button neu-button-citizen text-sm">
-              Connexion agent / citoyen
-            </button>
+            <Link to="/auth/login">
+              <button className="neu-button neu-button-admin text-sm">
+                Connexion administration
+              </button>
+            </Link>
+            <Link to="/auth/login">
+              <button className="neu-button neu-button-citizen text-sm">
+                Connexion agent / citoyen
+              </button>
+            </Link>
           </div>
         </header>
 
@@ -57,12 +62,16 @@ export default function Home() {
               </p>
 
               <div className="flex flex-wrap gap-3 pt-2">
-                <button className="neu-button neu-button-admin">
-                  Je suis fonctionnaire
-                </button>
-                <button className="neu-button neu-button-citizen">
-                  Je suis citoyen / candidat
-                </button>
+                <Link to="/auth/login">
+                  <button className="neu-button neu-button-admin">
+                    Je suis fonctionnaire
+                  </button>
+                </Link>
+                <Link to="/auth/login">
+                  <button className="neu-button neu-button-citizen">
+                    Je suis citoyen / candidat
+                  </button>
+                </Link>
               </div>
             </div>
 
