@@ -1,5 +1,6 @@
 import { Building2, Users, FileText, TrendingUp, Calendar, BookOpen, CheckCircle2, Shield, Database, UserCheck, AlertCircle, LineChart } from "lucide-react";
 import { Link } from "react-router-dom";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import heroImage from "@/assets/hero-fonction-publique.jpg";
 import servicePublicImage from "@/assets/service-public.jpg";
 import ministereImage from "@/assets/ministere.jpg";
@@ -27,7 +28,8 @@ export default function Home() {
               </p>
             </div>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex items-center flex-wrap gap-2">
+            <ThemeToggle />
             <Link to="/auth/login">
               <button className="neu-button neu-button-admin text-sm">
                 Connexion administration

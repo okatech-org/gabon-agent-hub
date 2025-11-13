@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
 import { toast } from "sonner";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 interface DemoAccount {
   id: string;
@@ -219,25 +220,28 @@ export default function DemoAccounts() {
       <div className="w-full max-w-7xl space-y-6 md:space-y-8">
         {/* Header */}
         <header className="neu-card px-4 py-4 md:px-6 md:py-5">
-          <div className="flex items-center gap-4">
-            <Link to="/auth/login">
-              <button className="neu-raised w-12 h-12 flex items-center justify-center hover:scale-105 transition-transform">
-                <ArrowLeft className="w-5 h-5" />
-              </button>
-            </Link>
-            <div className="flex items-center gap-3">
-              <div className="neu-raised w-12 h-12 flex items-center justify-center">
-                <Shield className="h-7 w-7 text-secondary" />
-              </div>
-              <div>
-                <h1 className="text-xl md:text-2xl font-bold">
-                  Comptes Démo - Accès Direct
-                </h1>
-                <p className="text-xs md:text-sm text-muted-foreground">
-                  Découvrez ADMIN.GA avec différents profils d'utilisateurs
-                </p>
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <Link to="/auth/login">
+                <button className="neu-raised w-12 h-12 flex items-center justify-center hover:scale-105 transition-transform">
+                  <ArrowLeft className="w-5 h-5" />
+                </button>
+              </Link>
+              <div className="flex items-center gap-3">
+                <div className="neu-raised w-12 h-12 flex items-center justify-center">
+                  <Shield className="h-7 w-7 text-secondary" />
+                </div>
+                <div>
+                  <h1 className="text-xl md:text-2xl font-bold">
+                    Comptes Démo - Accès Direct
+                  </h1>
+                  <p className="text-xs md:text-sm text-muted-foreground">
+                    Découvrez ADMIN.GA avec différents profils d'utilisateurs
+                  </p>
+                </div>
               </div>
             </div>
+            <ThemeToggle />
           </div>
         </header>
 

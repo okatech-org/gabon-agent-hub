@@ -11,6 +11,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { LogOut, User, Bell } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 export function Header() {
   const { user, signOut } = useAuth();
@@ -26,6 +27,8 @@ export function Header() {
         <SidebarTrigger />
         
         <div className="flex-1" />
+
+        <ThemeToggle />
 
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="h-5 w-5" />

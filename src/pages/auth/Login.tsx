@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Shield, FileText, ArrowLeft } from "lucide-react";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -29,13 +30,14 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4 relative overflow-hidden">
       <div className="w-full max-w-md space-y-6 relative z-10">
-        {/* Bouton retour */}
-        <div className="flex justify-start">
+        {/* Bouton retour et thème */}
+        <div className="flex justify-between items-center">
           <Link to="/">
             <button className="neu-raised w-12 h-12 flex items-center justify-center hover:scale-105 transition-transform">
               <ArrowLeft className="w-5 h-5" />
             </button>
           </Link>
+          <ThemeToggle />
         </div>
 
         <div className="text-center space-y-2">
