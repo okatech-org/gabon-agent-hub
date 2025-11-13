@@ -18,6 +18,7 @@ import AgentsRH from "./pages/rh/AgentsRH";
 import ActesRH from "./pages/rh/ActesRH";
 import AffectationsRH from "./pages/rh/AffectationsRH";
 import AgentForm from "./pages/rh/AgentForm";
+import MinistreDashboard from "./pages/ministre/MinistreDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -55,6 +56,17 @@ const App = () => (
               <Route path="/rh/agents/:id/modifier" element={<AgentForm />} />
               <Route path="/rh/actes" element={<ActesRH />} />
               <Route path="/rh/affectations" element={<AffectationsRH />} />
+            </Route>
+
+            {/* Routes Ministre - Protégées */}
+            <Route
+              element={
+                <ProtectedRoute>
+                  <Outlet />
+                </ProtectedRoute>
+              }
+            >
+              <Route path="/ministre/dashboard" element={<MinistreDashboard />} />
             </Route>
             
             <Route

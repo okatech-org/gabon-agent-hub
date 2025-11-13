@@ -59,10 +59,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         // Redirection selon le rôle
         switch (userRole) {
+          case "ministre":
+            navigate("/ministre/dashboard");
+            break;
           case "gestionnaire":
             navigate("/rh/dashboard");
             break;
-          case "ministre":
           case "secretaire_general":
           case "directeur_cabinet":
           case "drh_ministre":
