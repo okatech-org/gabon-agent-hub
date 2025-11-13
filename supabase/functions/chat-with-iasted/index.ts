@@ -317,47 +317,63 @@ ${knowledgeContext}`;
     if (generateAudio && responseText) {
       console.log('Generating TTS...');
       
-      if (ELEVENLABS_API_KEY) {
-        // ElevenLabs TTS (meilleure qualité)
-        const ttsResponse = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
-          method: 'POST',
-          headers: {
-            'xi-api-key': ELEVENLABS_API_KEY,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            text: responseText,
-            model_id: 'eleven_multilingual_v2',
-            voice_settings: {
-              stability: 0.5,
-              similarity_boost: 0.75,
-            }
-          }),
-        });
+      try {
+        if (ELEVENLABS_API_KEY) {
+          // ElevenLabs TTS (meilleure qualité)
+          console.log('Using ElevenLabs TTS with voice:', voiceId);
+          const ttsResponse = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+            method: 'POST',
+            headers: {
+              'xi-api-key': ELEVENLABS_API_KEY,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              text: responseText,
+              model_id: 'eleven_multilingual_v2',
+              voice_settings: {
+                stability: 0.5,
+                similarity_boost: 0.75,
+              }
+            }),
+          });
 
-        if (ttsResponse.ok) {
-          const audioBlob = await ttsResponse.arrayBuffer();
-          audioContent = btoa(String.fromCharCode(...new Uint8Array(audioBlob)));
-        }
-      } else if (OPENAI_API_KEY) {
-        // Fallback OpenAI TTS
-        const ttsResponse = await fetch('https://api.openai.com/v1/audio/speech', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${OPENAI_API_KEY}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            model: 'tts-1',
-            input: responseText,
-            voice: voiceId,
-          }),
-        });
+          if (ttsResponse.ok) {
+            const audioBlob = await ttsResponse.arrayBuffer();
+            audioContent = btoa(String.fromCharCode(...new Uint8Array(audioBlob)));
+            console.log('✅ ElevenLabs TTS generated, audio size:', audioBlob.byteLength);
+          } else {
+            const errorText = await ttsResponse.text();
+            console.error('❌ ElevenLabs TTS failed:', ttsResponse.status, errorText);
+          }
+        } else if (OPENAI_API_KEY) {
+          // Fallback OpenAI TTS
+          console.log('Using OpenAI TTS with voice:', voiceId);
+          const ttsResponse = await fetch('https://api.openai.com/v1/audio/speech', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${OPENAI_API_KEY}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              model: 'tts-1',
+              input: responseText,
+              voice: voiceId,
+            }),
+          });
 
-        if (ttsResponse.ok) {
-          const audioBlob = await ttsResponse.arrayBuffer();
-          audioContent = btoa(String.fromCharCode(...new Uint8Array(audioBlob)));
+          if (ttsResponse.ok) {
+            const audioBlob = await ttsResponse.arrayBuffer();
+            audioContent = btoa(String.fromCharCode(...new Uint8Array(audioBlob)));
+            console.log('✅ OpenAI TTS generated, audio size:', audioBlob.byteLength);
+          } else {
+            const errorText = await ttsResponse.text();
+            console.error('❌ OpenAI TTS failed:', ttsResponse.status, errorText);
+          }
+        } else {
+          console.warn('⚠️ No TTS API key available (neither ElevenLabs nor OpenAI)');
         }
+      } catch (ttsError) {
+        console.error('❌ TTS generation error:', ttsError);
       }
     }
 
