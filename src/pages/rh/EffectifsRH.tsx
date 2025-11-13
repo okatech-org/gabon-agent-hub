@@ -1,399 +1,425 @@
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from "react";
+import { Target, TrendingUp, Users, AlertTriangle, BarChart3, Calendar, Building2, Download } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Target, Users, TrendingUp, TrendingDown, AlertTriangle, BarChart3, PieChart } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Progress } from "@/components/ui/progress";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { Bar, BarChart, Line, LineChart, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Legend } from "recharts";
+import { toast } from "@/lib/toast";
 
-interface EffectifsStats {
-  totalAgents: number;
-  agentsActifs: number;
-  agentsRetraite: number;
-  agentsDetaches: number;
-  tauxOccupation: number;
-  tendanceMensuelle: number;
-  departsPrevisionnels: number;
-}
+const effectifsParStructure = [
+  { structure: "Direction Générale", effectif_actuel: 45, effectif_cible: 50, taux: 90 },
+  { structure: "Direction RH", effectif_actuel: 82, effectif_cible: 85, taux: 96 },
+  { structure: "Direction Financière", effectif_actuel: 58, effectif_cible: 60, taux: 97 },
+  { structure: "Services Techniques", effectif_actuel: 120, effectif_cible: 150, taux: 80 },
+  { structure: "Services Administratifs", effectif_actuel: 95, effectif_cible: 100, taux: 95 },
+];
 
-interface RepartitionCategorie {
-  categorie: string;
-  count: number;
-  pourcentage: number;
-}
+const evolutionEffectifs = [
+  { mois: "Jan", reel: 385, previsionnel: 390, cible: 395 },
+  { mois: "Fév", reel: 390, previsionnel: 395, cible: 400 },
+  { mois: "Mar", reel: 392, previsionnel: 400, cible: 405 },
+  { mois: "Avr", reel: 395, previsionnel: 405, cible: 410 },
+  { mois: "Mai", reel: 400, previsionnel: 410, cible: 415 },
+  { mois: "Juin", reel: 400, previsionnel: 415, cible: 420 },
+];
 
-interface RepartitionGrade {
-  grade: string;
-  count: number;
-  pourcentage: number;
-}
+const mouvementsPrevisionnels = [
+  { mois: "Jan", entrees: 8, sorties: 3, mutation_interne: 5 },
+  { mois: "Fév", entrees: 10, sorties: 5, mutation_interne: 7 },
+  { mois: "Mar", entrees: 5, sorties: 3, mutation_interne: 4 },
+  { mois: "Avr", entrees: 12, sorties: 7, mutation_interne: 6 },
+  { mois: "Mai", entrees: 8, sorties: 3, mutation_interne: 5 },
+  { mois: "Juin", entrees: 6, sorties: 6, mutation_interne: 8 },
+];
 
 export default function EffectifsRH() {
-  const [stats, setStats] = useState<EffectifsStats>({
-    totalAgents: 0,
-    agentsActifs: 0,
-    agentsRetraite: 0,
-    agentsDetaches: 0,
-    tauxOccupation: 0,
-    tendanceMensuelle: 0,
-    departsPrevisionnels: 0
-  });
-  const [repartitionCategories, setRepartitionCategories] = useState<RepartitionCategorie[]>([]);
-  const [repartitionGrades, setRepartitionGrades] = useState<RepartitionGrade[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const { toast } = useToast();
+  const [periode, setPeriode] = useState("6mois");
+  const [viewType, setViewType] = useState("structure");
 
-  useEffect(() => {
-    loadEffectifsData();
-  }, []);
-
-  const loadEffectifsData = async () => {
-    try {
-      setIsLoading(true);
-
-      // Charger les statistiques globales
-      const [
-        totalResult, 
-        actifsResult, 
-        retraiteResult, 
-        detachesResult,
-        categoriesResult,
-        gradesResult
-      ] = await Promise.all([
-        supabase.from("agents").select("id", { count: "exact", head: true }),
-        supabase.from("agents").select("id", { count: "exact", head: true }).eq("statut", "actif"),
-        supabase.from("agents").select("id", { count: "exact", head: true }).eq("statut", "retraite"),
-        supabase.from("agents").select("id", { count: "exact", head: true }).eq("statut", "detache"),
-        supabase.from("agents").select("categorie"),
-        supabase.from("agents").select("grade")
-      ]);
-
-      const total = totalResult.count || 0;
-      const actifs = actifsResult.count || 0;
-
-      // Calculer la répartition par catégorie
-      const categoriesData = categoriesResult.data || [];
-      const categoriesCount: Record<string, number> = {};
-      categoriesData.forEach((agent: any) => {
-        const cat = agent.categorie || "Non défini";
-        categoriesCount[cat] = (categoriesCount[cat] || 0) + 1;
-      });
-      
-      const categoriesArray = Object.entries(categoriesCount).map(([categorie, count]) => ({
-        categorie,
-        count,
-        pourcentage: total > 0 ? Math.round((count / total) * 100) : 0
-      }));
-
-      // Calculer la répartition par grade
-      const gradesData = gradesResult.data || [];
-      const gradesCount: Record<string, number> = {};
-      gradesData.forEach((agent: any) => {
-        const grade = agent.grade || "Non défini";
-        gradesCount[grade] = (gradesCount[grade] || 0) + 1;
-      });
-      
-      const gradesArray = Object.entries(gradesCount)
-        .map(([grade, count]) => ({
-          grade,
-          count,
-          pourcentage: total > 0 ? Math.round((count / total) * 100) : 0
-        }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 10); // Top 10 grades
-
-      setStats({
-        totalAgents: total,
-        agentsActifs: actifs,
-        agentsRetraite: retraiteResult.count || 0,
-        agentsDetaches: detachesResult.count || 0,
-        tauxOccupation: total > 0 ? Math.round((actifs / total) * 100) : 0,
-        tendanceMensuelle: 2.5, // À calculer avec des données historiques
-        departsPrevisionnels: Math.floor(total * 0.03) // Estimation 3% de départs
-      });
-
-      setRepartitionCategories(categoriesArray);
-      setRepartitionGrades(gradesArray);
-    } catch (error: any) {
-      toast({
-        title: "Erreur",
-        description: "Impossible de charger les données d'effectifs",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
-    }
+  const handleExport = () => {
+    toast.success("Export du rapport de pilotage en cours...");
   };
+
+  const chartConfig = {
+    effectifs: {
+      label: "Effectifs",
+    },
+  };
+
+  const effectifTotal = effectifsParStructure.reduce((sum, s) => sum + s.effectif_actuel, 0);
+  const effectifCibleTotal = effectifsParStructure.reduce((sum, s) => sum + s.effectif_cible, 0);
+  const tauxCouverture = Math.round((effectifTotal / effectifCibleTotal) * 100);
+  const ecartEffectif = effectifCibleTotal - effectifTotal;
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-6 space-y-6">
-      {/* En-tête */}
+      {/* Header */}
       <div className="neu-card p-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">Pilotage des Effectifs</h1>
-            <p className="text-muted-foreground">
-              Suivi des effectifs, prévisions et gestion prévisionnelle des emplois
-            </p>
+          <div className="flex items-center gap-4">
+            <div className="neu-raised w-14 h-14 flex items-center justify-center">
+              <Target className="w-7 h-7 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold mb-1">Pilotage des Effectifs</h1>
+              <p className="text-muted-foreground">
+                Suivi et planification des ressources humaines
+              </p>
+            </div>
           </div>
-          <div className="neu-raised w-16 h-16 flex items-center justify-center">
-            <Target className="w-8 h-8 text-info" />
+          <div className="flex gap-2">
+            <Select value={periode} onValueChange={setPeriode}>
+              <SelectTrigger className="w-[150px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="3mois">3 mois</SelectItem>
+                <SelectItem value="6mois">6 mois</SelectItem>
+                <SelectItem value="1an">1 an</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button variant="outline" onClick={handleExport}>
+              <Download className="w-4 h-4 mr-2" />
+              Exporter
+            </Button>
           </div>
         </div>
       </div>
 
-      {/* KPIs Principaux */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* KPIs */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="neu-card">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Effectif Total</p>
-                <p className="text-3xl font-bold">{isLoading ? "..." : stats.totalAgents}</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Tous statuts confondus
-                </p>
+                <p className="text-sm text-muted-foreground">Effectif Actuel</p>
+                <p className="text-2xl font-bold">{effectifTotal}</p>
+                <p className="text-xs text-muted-foreground mt-1">agents</p>
               </div>
-              <Users className="w-10 h-10 text-primary" />
+              <Users className="w-8 h-8 text-primary" />
             </div>
           </CardContent>
         </Card>
-
         <Card className="neu-card">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Agents Actifs</p>
-                <p className="text-3xl font-bold">{isLoading ? "..." : stats.agentsActifs}</p>
-                <div className="flex items-center gap-1 mt-1">
-                  <Badge variant="outline" className="text-xs bg-success/10 text-success border-success/20">
-                    {stats.tauxOccupation}% d'occupation
-                  </Badge>
+                <p className="text-sm text-muted-foreground">Effectif Cible</p>
+                <p className="text-2xl font-bold">{effectifCibleTotal}</p>
+                <p className="text-xs text-muted-foreground mt-1">agents</p>
+              </div>
+              <Target className="w-8 h-8 text-secondary" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="neu-card">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Taux de Couverture</p>
+                <p className="text-2xl font-bold">{tauxCouverture}%</p>
+                <Progress value={tauxCouverture} className="mt-2" />
+              </div>
+              <TrendingUp className="w-8 h-8 text-success" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="neu-card">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Écart</p>
+                <p className="text-2xl font-bold">{ecartEffectif}</p>
+                <p className="text-xs text-amber-500 mt-1">postes à pourvoir</p>
+              </div>
+              <AlertTriangle className="w-8 h-8 text-amber-500" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Main Content */}
+      <Tabs defaultValue="repartition" className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="repartition">Répartition</TabsTrigger>
+          <TabsTrigger value="evolution">Évolution</TabsTrigger>
+          <TabsTrigger value="previsions">Prévisions</TabsTrigger>
+          <TabsTrigger value="alertes">Alertes</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="repartition" className="mt-6 space-y-6">
+          <Card className="neu-card">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Effectifs par Structure</CardTitle>
+                  <CardDescription>Comparaison effectif actuel vs cible</CardDescription>
                 </div>
+                <Select value={viewType} onValueChange={setViewType}>
+                  <SelectTrigger className="w-[200px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="structure">Par Structure</SelectItem>
+                    <SelectItem value="categorie">Par Catégorie</SelectItem>
+                    <SelectItem value="grade">Par Grade</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-              <div className="neu-raised w-10 h-10 flex items-center justify-center">
-                <div className="w-3 h-3 rounded-full bg-success"></div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardHeader>
+            <CardContent>
+              <ChartContainer config={chartConfig} className="h-[400px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={effectifsParStructure}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis 
+                      dataKey="structure" 
+                      angle={-45}
+                      textAnchor="end"
+                      height={100}
+                    />
+                    <YAxis />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Legend />
+                    <Bar dataKey="effectif_actuel" fill="hsl(var(--primary))" name="Effectif actuel" />
+                    <Bar dataKey="effectif_cible" fill="hsl(var(--secondary))" name="Effectif cible" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartContainer>
+            </CardContent>
+          </Card>
 
-        <Card className="neu-card">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Tendance Mensuelle</p>
-                <p className="text-3xl font-bold flex items-center gap-2">
-                  {stats.tendanceMensuelle > 0 ? "+" : ""}{stats.tendanceMensuelle}%
-                  {stats.tendanceMensuelle > 0 ? (
-                    <TrendingUp className="w-5 h-5 text-success" />
-                  ) : (
-                    <TrendingDown className="w-5 h-5 text-destructive" />
-                  )}
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Évolution des effectifs
-                </p>
-              </div>
-              <BarChart3 className="w-10 h-10 text-info" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="neu-card">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Départs Prévisionnels</p>
-                <p className="text-3xl font-bold">{isLoading ? "..." : stats.departsPrevisionnels}</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Prochains 12 mois
-                </p>
-              </div>
-              <AlertTriangle className="w-10 h-10 text-amber-500" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Répartition par Statut */}
-      <Card className="neu-card">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="w-5 h-5" />
-            Répartition par Statut
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="neu-inset p-4 rounded-lg">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium">Actifs</span>
-                <Badge variant="default">{stats.agentsActifs}</Badge>
-              </div>
-              <div className="w-full bg-muted rounded-full h-2">
-                <div 
-                  className="bg-success h-2 rounded-full transition-all" 
-                  style={{ width: `${stats.tauxOccupation}%` }}
-                />
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">{stats.tauxOccupation}% de l'effectif total</p>
-            </div>
-
-            <div className="neu-inset p-4 rounded-lg">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium">Détachés</span>
-                <Badge variant="secondary">{stats.agentsDetaches}</Badge>
-              </div>
-              <div className="w-full bg-muted rounded-full h-2">
-                <div 
-                  className="bg-amber-500 h-2 rounded-full transition-all" 
-                  style={{ 
-                    width: `${stats.totalAgents > 0 ? Math.round((stats.agentsDetaches / stats.totalAgents) * 100) : 0}%` 
-                  }}
-                />
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {stats.totalAgents > 0 ? Math.round((stats.agentsDetaches / stats.totalAgents) * 100) : 0}% de l'effectif total
-              </p>
-            </div>
-
-            <div className="neu-inset p-4 rounded-lg">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium">Retraités</span>
-                <Badge variant="outline">{stats.agentsRetraite}</Badge>
-              </div>
-              <div className="w-full bg-muted rounded-full h-2">
-                <div 
-                  className="bg-muted-foreground h-2 rounded-full transition-all" 
-                  style={{ 
-                    width: `${stats.totalAgents > 0 ? Math.round((stats.agentsRetraite / stats.totalAgents) * 100) : 0}%` 
-                  }}
-                />
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {stats.totalAgents > 0 ? Math.round((stats.agentsRetraite / stats.totalAgents) * 100) : 0}% de l'effectif total
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Répartition par Catégorie */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Card className="neu-card">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <PieChart className="w-5 h-5" />
-              Répartition par Catégorie
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="text-center py-8 text-muted-foreground">Chargement...</div>
-            ) : repartitionCategories.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">Aucune donnée disponible</div>
-            ) : (
-              <div className="space-y-3">
-                {repartitionCategories.map((cat) => (
-                  <div key={cat.categorie} className="neu-inset p-3 rounded-lg">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium">{cat.categorie}</span>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-muted-foreground">{cat.count} agents</span>
-                        <Badge variant="outline">{cat.pourcentage}%</Badge>
+          <div className="grid grid-cols-1 gap-4">
+            {effectifsParStructure.map((item, index) => (
+              <Card key={index} className="neu-card">
+                <CardContent className="pt-6">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="neu-raised w-10 h-10 flex items-center justify-center">
+                        <Building2 className="w-5 h-5 text-primary" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold">{item.structure}</h4>
+                        <p className="text-sm text-muted-foreground">
+                          {item.effectif_actuel} / {item.effectif_cible} agents
+                        </p>
                       </div>
                     </div>
-                    <div className="w-full bg-muted rounded-full h-2">
-                      <div 
-                        className="bg-primary h-2 rounded-full transition-all" 
-                        style={{ width: `${cat.pourcentage}%` }}
-                      />
-                    </div>
+                    <Badge variant={item.taux >= 95 ? "default" : item.taux >= 85 ? "secondary" : "destructive"}>
+                      {item.taux}%
+                    </Badge>
                   </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card className="neu-card">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="w-5 h-5" />
-              Top 10 Grades
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="text-center py-8 text-muted-foreground">Chargement...</div>
-            ) : repartitionGrades.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">Aucune donnée disponible</div>
-            ) : (
-              <div className="space-y-3">
-                {repartitionGrades.map((grade) => (
-                  <div key={grade.grade} className="neu-inset p-3 rounded-lg">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium truncate">{grade.grade}</span>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-muted-foreground">{grade.count}</span>
-                        <Badge variant="outline">{grade.pourcentage}%</Badge>
-                      </div>
-                    </div>
-                    <div className="w-full bg-muted rounded-full h-2">
-                      <div 
-                        className="bg-info h-2 rounded-full transition-all" 
-                        style={{ width: `${grade.pourcentage}%` }}
-                      />
-                    </div>
+                  <Progress value={item.taux} className="h-2" />
+                  <div className="flex justify-between text-xs text-muted-foreground mt-2">
+                    <span>Écart: {item.effectif_cible - item.effectif_actuel} postes</span>
+                    <span>{item.taux}% de couverture</span>
                   </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Alertes et Recommandations */}
-      <Card className="neu-card">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <AlertTriangle className="w-5 h-5 text-amber-500" />
-            Alertes et Recommandations
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {stats.departsPrevisionnels > 0 && (
-              <div className="neu-inset p-4 rounded-lg border-l-4 border-amber-500">
-                <h4 className="font-semibold mb-1">Départs prévisionnels à anticiper</h4>
-                <p className="text-sm text-muted-foreground">
-                  {stats.departsPrevisionnels} départ(s) prévisible(s) dans les 12 prochains mois. 
-                  Planifier le recrutement et la formation des remplaçants.
-                </p>
-              </div>
-            )}
-            
-            {stats.tauxOccupation < 85 && (
-              <div className="neu-inset p-4 rounded-lg border-l-4 border-info">
-                <h4 className="font-semibold mb-1">Taux d'occupation en deçà du seuil optimal</h4>
-                <p className="text-sm text-muted-foreground">
-                  Le taux d'occupation actuel est de {stats.tauxOccupation}%. 
-                  Envisager un plan de recrutement pour atteindre 90-95%.
-                </p>
-              </div>
-            )}
-
-            <div className="neu-inset p-4 rounded-lg border-l-4 border-success">
-              <h4 className="font-semibold mb-1">Gestion Prévisionnelle des Emplois et Compétences (GPEC)</h4>
-              <p className="text-sm text-muted-foreground">
-                Analyser régulièrement les pyramides des âges, les compétences critiques et 
-                planifier les besoins en recrutement et formation.
-              </p>
-            </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
-        </CardContent>
-      </Card>
+        </TabsContent>
+
+        <TabsContent value="evolution" className="mt-6">
+          <Card className="neu-card">
+            <CardHeader>
+              <CardTitle>Évolution des Effectifs</CardTitle>
+              <CardDescription>Suivi réel vs prévisionnel vs cible</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ChartContainer config={chartConfig} className="h-[400px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={evolutionEffectifs}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="mois" />
+                    <YAxis />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Legend />
+                    <Line 
+                      type="monotone" 
+                      dataKey="reel" 
+                      stroke="hsl(var(--primary))" 
+                      strokeWidth={2}
+                      name="Effectif réel"
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="previsionnel" 
+                      stroke="hsl(var(--secondary))" 
+                      strokeWidth={2}
+                      strokeDasharray="5 5"
+                      name="Prévisionnel"
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="cible" 
+                      stroke="hsl(var(--success))" 
+                      strokeWidth={2}
+                      strokeDasharray="3 3"
+                      name="Cible"
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </ChartContainer>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="previsions" className="mt-6">
+          <Card className="neu-card">
+            <CardHeader>
+              <CardTitle>Mouvements Prévisionnels</CardTitle>
+              <CardDescription>Entrées, sorties et mutations internes</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ChartContainer config={chartConfig} className="h-[400px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={mouvementsPrevisionnels}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="mois" />
+                    <YAxis />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Legend />
+                    <Bar dataKey="entrees" fill="#22c55e" name="Entrées" />
+                    <Bar dataKey="sorties" fill="#ef4444" name="Sorties" />
+                    <Bar dataKey="mutation_interne" fill="#3b82f6" name="Mutations internes" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartContainer>
+            </CardContent>
+          </Card>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+            <Card className="neu-card">
+              <CardHeader>
+                <CardTitle className="text-lg">Recrutements Planifiés</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {[
+                    { poste: "Attaché d'Administration", nb: 5, date: "T2 2024" },
+                    { poste: "Secrétaire", nb: 3, date: "T2 2024" },
+                    { poste: "Technicien", nb: 8, date: "T3 2024" },
+                  ].map((item, index) => (
+                    <div key={index} className="neu-inset p-3 rounded-lg">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-medium text-sm">{item.poste}</span>
+                        <Badge>{item.nb}</Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground">{item.date}</p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="neu-card">
+              <CardHeader>
+                <CardTitle className="text-lg">Départs Prévisibles</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {[
+                    { motif: "Retraite", nb: 6, date: "T2 2024" },
+                    { motif: "Démission", nb: 2, date: "T2 2024" },
+                    { motif: "Fin de contrat", nb: 4, date: "T3 2024" },
+                  ].map((item, index) => (
+                    <div key={index} className="neu-inset p-3 rounded-lg">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-medium text-sm">{item.motif}</span>
+                        <Badge variant="destructive">{item.nb}</Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground">{item.date}</p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="neu-card">
+              <CardHeader>
+                <CardTitle className="text-lg">Mobilité Interne</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {[
+                    { type: "Mutations demandées", nb: 12, statut: "En cours" },
+                    { type: "Affectations programmées", nb: 8, statut: "Validées" },
+                    { type: "Détachements", nb: 3, statut: "En attente" },
+                  ].map((item, index) => (
+                    <div key={index} className="neu-inset p-3 rounded-lg">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-medium text-sm">{item.type}</span>
+                        <Badge variant="outline">{item.nb}</Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground">{item.statut}</p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="alertes" className="mt-6">
+          <div className="space-y-4">
+            {[
+              {
+                type: "warning",
+                titre: "Sous-effectif critique",
+                message: "Services Techniques : 20 postes vacants (taux de couverture 80%)",
+                structure: "Services Techniques",
+              },
+              {
+                type: "info",
+                titre: "Départs en retraite prochains",
+                message: "6 agents partent à la retraite au T2 2024. Planifier les remplacements.",
+                structure: "Multiple",
+              },
+              {
+                type: "warning",
+                titre: "Mobilité interne élevée",
+                message: "12 demandes de mutation en attente. Impact sur la répartition des effectifs.",
+                structure: "Direction RH",
+              },
+              {
+                type: "success",
+                titre: "Objectif atteint",
+                message: "Direction Financière : taux de couverture 97% (objectif: 95%)",
+                structure: "Direction Financière",
+              },
+            ].map((alerte, index) => (
+              <Card key={index} className="neu-card">
+                <CardContent className="pt-6">
+                  <div className="flex items-start gap-4">
+                    <div className={`neu-raised w-10 h-10 flex items-center justify-center flex-shrink-0 ${
+                      alerte.type === "warning" ? "text-amber-500" : 
+                      alerte.type === "success" ? "text-success" : 
+                      "text-info"
+                    }`}>
+                      <AlertTriangle className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h4 className="font-semibold">{alerte.titre}</h4>
+                        <Badge variant="outline">{alerte.structure}</Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground">{alerte.message}</p>
+                    </div>
+                    <Button size="sm" variant="outline">
+                      Traiter
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
-

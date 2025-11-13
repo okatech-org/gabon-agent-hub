@@ -1,148 +1,143 @@
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
+import { Award, TrendingUp, Users, FileText, Search, Filter, Plus, Eye, CheckCircle } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Award, TrendingUp, Users, CheckCircle, Clock, XCircle, Filter } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/lib/toast";
 
-interface DossierAvancement {
+interface Agent {
   id: string;
-  agent_id: string;
-  agent?: {
     matricule: string;
     nom: string;
     prenoms: string;
     grade: string;
+  echelon: string;
     categorie: string;
-  };
-  type_avancement: string;
-  grade_actuel: string;
-  grade_propose: string;
-  date_demande: string;
-  statut: "en_attente" | "approuve" | "rejete" | "en_cours";
-  date_traitement?: string;
-  observations?: string;
+  anciennete_grade: number;
+  anciennete_echelon: number;
+  date_dernier_avancement: string;
+  eligible_avancement: boolean;
+  eligible_promotion: boolean;
 }
 
+const mockAgents: Agent[] = [
+  {
+    id: "1",
+    matricule: "FP-2018-00123",
+    nom: "MBONGO",
+    prenoms: "Jean-Claude",
+    grade: "Attaché Principal",
+    echelon: "3",
+    categorie: "A",
+    anciennete_grade: 6,
+    anciennete_echelon: 3,
+    date_dernier_avancement: "2021-01-15",
+    eligible_avancement: true,
+    eligible_promotion: false,
+  },
+  {
+    id: "2",
+    matricule: "FP-2016-00456",
+    nom: "OBAME",
+    prenoms: "Marie-Louise",
+    grade: "Secrétaire d'Administration Principal",
+    echelon: "5",
+    categorie: "B",
+    anciennete_grade: 8,
+    anciennete_echelon: 2,
+    date_dernier_avancement: "2022-03-20",
+    eligible_avancement: false,
+    eligible_promotion: true,
+  },
+  {
+    id: "3",
+    matricule: "FP-2019-00789",
+    nom: "NGUEMA",
+    prenoms: "Paul",
+    grade: "Attaché",
+    echelon: "2",
+    categorie: "A",
+    anciennete_grade: 5,
+    anciennete_echelon: 4,
+    date_dernier_avancement: "2020-06-10",
+    eligible_avancement: true,
+    eligible_promotion: false,
+  },
+];
+
 export default function CarrieresRH() {
-  const [dossiers, setDossiers] = useState<DossierAvancement[]>([]);
-  const [filterStatut, setFilterStatut] = useState<string>("tous");
-  const [filterType, setFilterType] = useState<string>("tous");
-  const [isLoading, setIsLoading] = useState(true);
-  const { toast } = useToast();
+  const [agents, setAgents] = useState<Agent[]>(mockAgents);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterCategorie, setFilterCategorie] = useState("tous");
+  const [filterEligibilite, setFilterEligibilite] = useState("tous");
+  const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
+  const [justification, setJustification] = useState("");
 
-  useEffect(() => {
-    loadDossiers();
-  }, []);
-
-  const loadDossiers = async () => {
-    try {
-      setIsLoading(true);
-      // Pour l'instant, on simule avec les actes de type avancement
-      const { data, error } = await supabase
-        .from("actes_administratifs")
-        .select(`
-          id,
-          agent_id,
-          type_acte,
-          statut,
-          date_creation,
-          date_signature,
-          objet,
-          agents (
-            matricule,
-            nom,
-            prenoms,
-            grade,
-            categorie
-          )
-        `)
-        .eq("type_acte", "avancement")
-        .order("date_creation", { ascending: false });
-
-      if (error) throw error;
-
-      // Transformer les données pour correspondre à notre interface
-      const transformedData = (data || []).map((acte: any) => ({
-        id: acte.id,
-        agent_id: acte.agent_id,
-        agent: acte.agents,
-        type_avancement: acte.type_acte,
-        grade_actuel: acte.agents?.grade || "N/A",
-        grade_propose: "Grade supérieur", // À implémenter avec une vraie logique
-        date_demande: acte.date_creation,
-        statut: acte.statut === "signe" ? "approuve" : acte.statut === "brouillon" ? "en_attente" : "en_cours",
-        date_traitement: acte.date_signature,
-        observations: acte.objet
-      }));
-
-      setDossiers(transformedData);
-    } catch (error: any) {
-      toast({
-        title: "Erreur",
-        description: "Impossible de charger les dossiers d'avancement",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
-    }
+  const handleInitierAvancement = (agent: Agent) => {
+    toast.success(`Dossier d'avancement initié pour ${agent.nom} ${agent.prenoms}`);
+    setSelectedAgent(null);
+    setJustification("");
   };
 
-  const filteredDossiers = dossiers.filter((dossier) => {
-    if (filterStatut !== "tous" && dossier.statut !== filterStatut) return false;
-    if (filterType !== "tous" && dossier.type_avancement !== filterType) return false;
-    return true;
+  const handleInitierPromotion = (agent: Agent) => {
+    toast.success(`Dossier de promotion initié pour ${agent.nom} ${agent.prenoms}`);
+    setSelectedAgent(null);
+    setJustification("");
+  };
+
+  const filteredAgents = agents.filter(agent => {
+    const matchesSearch = 
+      agent.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      agent.prenoms.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      agent.matricule.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesCategorie = filterCategorie === "tous" || agent.categorie === filterCategorie;
+    
+    const matchesEligibilite = 
+      filterEligibilite === "tous" ||
+      (filterEligibilite === "avancement" && agent.eligible_avancement) ||
+      (filterEligibilite === "promotion" && agent.eligible_promotion);
+
+    return matchesSearch && matchesCategorie && matchesEligibilite;
   });
 
-  const getStatutBadge = (statut: string) => {
-    const badges = {
-      en_attente: { variant: "secondary" as const, label: "En attente", icon: Clock },
-      en_cours: { variant: "outline" as const, label: "En cours", icon: Clock },
-      approuve: { variant: "default" as const, label: "Approuvé", icon: CheckCircle },
-      rejete: { variant: "destructive" as const, label: "Rejeté", icon: XCircle }
-    };
-    return badges[statut as keyof typeof badges] || badges.en_attente;
-  };
-
-  const stats = {
-    total: dossiers.length,
-    enAttente: dossiers.filter(d => d.statut === "en_attente").length,
-    enCours: dossiers.filter(d => d.statut === "en_cours").length,
-    approuves: dossiers.filter(d => d.statut === "approuve").length,
-  };
+  const eligiblesAvancement = agents.filter(a => a.eligible_avancement).length;
+  const eligiblesPromotion = agents.filter(a => a.eligible_promotion).length;
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-6 space-y-6">
-      {/* En-tête */}
+      {/* Header */}
       <div className="neu-card p-6">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">Gestion des Carrières et Avancements</h1>
-            <p className="text-muted-foreground">
-              Pilotage des promotions, avancements et évolutions de carrière des agents
-            </p>
+        <div className="flex items-center gap-4">
+          <div className="neu-raised w-14 h-14 flex items-center justify-center">
+            <Award className="w-7 h-7 text-primary" />
           </div>
-          <div className="neu-raised w-16 h-16 flex items-center justify-center">
-            <Award className="w-8 h-8 text-success" />
+          <div>
+            <h1 className="text-3xl font-bold mb-1">Carrières & Avancements</h1>
+            <p className="text-muted-foreground">
+              Gestion des parcours professionnels et promotions
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Statistiques */}
+      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="neu-card">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Total Dossiers</p>
-                <p className="text-2xl font-bold">{stats.total}</p>
+                <p className="text-sm text-muted-foreground">Agents suivis</p>
+                <p className="text-2xl font-bold">{agents.length}</p>
               </div>
-              <Award className="w-8 h-8 text-primary" />
+              <Users className="w-8 h-8 text-primary" />
             </div>
           </CardContent>
         </Card>
@@ -150,10 +145,11 @@ export default function CarrieresRH() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">En Attente</p>
-                <p className="text-2xl font-bold">{stats.enAttente}</p>
+                <p className="text-sm text-muted-foreground">Éligibles avancement</p>
+                <p className="text-2xl font-bold">{eligiblesAvancement}</p>
+                <p className="text-xs text-success mt-1">Échelon supérieur</p>
               </div>
-              <Clock className="w-8 h-8 text-amber-500" />
+              <TrendingUp className="w-8 h-8 text-success" />
             </div>
           </CardContent>
         </Card>
@@ -161,10 +157,11 @@ export default function CarrieresRH() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">En Cours</p>
-                <p className="text-2xl font-bold">{stats.enCours}</p>
+                <p className="text-sm text-muted-foreground">Éligibles promotion</p>
+                <p className="text-2xl font-bold">{eligiblesPromotion}</p>
+                <p className="text-xs text-info mt-1">Grade supérieur</p>
               </div>
-              <TrendingUp className="w-8 h-8 text-info" />
+              <Award className="w-8 h-8 text-info" />
             </div>
           </CardContent>
         </Card>
@@ -172,170 +169,322 @@ export default function CarrieresRH() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Approuvés</p>
-                <p className="text-2xl font-bold">{stats.approuves}</p>
+                <p className="text-sm text-muted-foreground">Dossiers en cours</p>
+                <p className="text-2xl font-bold">12</p>
+                <p className="text-xs text-muted-foreground mt-1">Commission en attente</p>
               </div>
-              <CheckCircle className="w-8 h-8 text-success" />
+              <FileText className="w-8 h-8 text-amber-500" />
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Filtres */}
+      {/* Filters */}
       <Card className="neu-card">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Filter className="w-5 h-5" />
-            Filtres
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Select value={filterStatut} onValueChange={setFilterStatut}>
+        <CardContent className="pt-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="Rechercher un agent..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Select value={filterCategorie} onValueChange={setFilterCategorie}>
               <SelectTrigger>
-                <SelectValue placeholder="Filtrer par statut" />
+                <SelectValue placeholder="Catégorie" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="tous">Tous les statuts</SelectItem>
-                <SelectItem value="en_attente">En attente</SelectItem>
-                <SelectItem value="en_cours">En cours</SelectItem>
-                <SelectItem value="approuve">Approuvé</SelectItem>
-                <SelectItem value="rejete">Rejeté</SelectItem>
+                <SelectItem value="tous">Toutes catégories</SelectItem>
+                <SelectItem value="A">Catégorie A</SelectItem>
+                <SelectItem value="B">Catégorie B</SelectItem>
+                <SelectItem value="C">Catégorie C</SelectItem>
+                <SelectItem value="D">Catégorie D</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={filterType} onValueChange={setFilterType}>
+            <Select value={filterEligibilite} onValueChange={setFilterEligibilite}>
               <SelectTrigger>
-                <SelectValue placeholder="Filtrer par type" />
+                <SelectValue placeholder="Éligibilité" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="tous">Tous les types</SelectItem>
-                <SelectItem value="avancement">Avancement</SelectItem>
-                <SelectItem value="promotion">Promotion</SelectItem>
-                <SelectItem value="reclassement">Reclassement</SelectItem>
+                <SelectItem value="tous">Tous</SelectItem>
+                <SelectItem value="avancement">Éligibles avancement</SelectItem>
+                <SelectItem value="promotion">Éligibles promotion</SelectItem>
               </SelectContent>
             </Select>
           </div>
         </CardContent>
       </Card>
 
-      {/* Liste des dossiers */}
+      {/* Main Content */}
+      <Tabs defaultValue="suivi" className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="suivi">Suivi Carrières</TabsTrigger>
+          <TabsTrigger value="avancements">Avancements</TabsTrigger>
+          <TabsTrigger value="promotions">Promotions</TabsTrigger>
+          <TabsTrigger value="historique">Historique</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="suivi" className="mt-6">
       <Card className="neu-card">
         <CardHeader>
-          <CardTitle>Dossiers d'Avancement ({filteredDossiers.length})</CardTitle>
+              <CardTitle>Agents ({filteredAgents.length})</CardTitle>
+              <CardDescription>Suivi individuel des parcours professionnels</CardDescription>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
-            <div className="text-center py-8 text-muted-foreground">
-              Chargement des dossiers...
-            </div>
-          ) : filteredDossiers.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <Award className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p>Aucun dossier d'avancement trouvé</p>
-            </div>
-          ) : (
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Agent</TableHead>
                     <TableHead>Matricule</TableHead>
-                    <TableHead>Grade Actuel</TableHead>
-                    <TableHead>Grade Proposé</TableHead>
-                    <TableHead>Date Demande</TableHead>
-                    <TableHead>Statut</TableHead>
+                      <TableHead>Grade actuel</TableHead>
+                      <TableHead>Échelon</TableHead>
+                      <TableHead>Ancienneté grade</TableHead>
+                      <TableHead>Ancienneté échelon</TableHead>
+                      <TableHead>Éligibilité</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredDossiers.map((dossier) => {
-                    const statutBadge = getStatutBadge(dossier.statut);
-                    const StatusIcon = statutBadge.icon;
-                    return (
-                      <TableRow key={dossier.id}>
+                    {filteredAgents.map((agent) => (
+                      <TableRow key={agent.id}>
+                        <TableCell className="font-medium">
+                          {agent.nom} {agent.prenoms}
+                        </TableCell>
+                        <TableCell>{agent.matricule}</TableCell>
                         <TableCell>
-                          <div>
-                            <p className="font-medium">{dossier.agent?.nom}</p>
-                            <p className="text-sm text-muted-foreground">{dossier.agent?.prenoms}</p>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline">{agent.categorie}</Badge>
+                            <span className="text-sm">{agent.grade}</span>
                           </div>
                         </TableCell>
-                        <TableCell className="font-medium">
-                          {dossier.agent?.matricule || "N/A"}
-                        </TableCell>
+                        <TableCell>{agent.echelon}</TableCell>
+                        <TableCell>{agent.anciennete_grade} ans</TableCell>
+                        <TableCell>{agent.anciennete_echelon} ans</TableCell>
                         <TableCell>
-                          <Badge variant="outline">{dossier.grade_actuel}</Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="bg-success/10 text-success border-success/20">
-                            {dossier.grade_propose}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {format(new Date(dossier.date_demande), "dd/MM/yyyy", { locale: fr })}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={statutBadge.variant} className="flex items-center gap-1 w-fit">
-                            <StatusIcon className="w-3 h-3" />
-                            {statutBadge.label}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center justify-end gap-2">
-                            <Button variant="ghost" size="sm">
-                              Examiner
-                            </Button>
-                            {dossier.statut === "en_attente" && (
-                              <>
-                                <Button variant="default" size="sm" className="bg-success hover:bg-success/90">
-                                  Approuver
-                                </Button>
-                                <Button variant="destructive" size="sm">
-                                  Rejeter
-                                </Button>
-                              </>
+                          <div className="flex flex-wrap gap-1">
+                            {agent.eligible_avancement && (
+                              <Badge className="bg-green-500">Avancement</Badge>
+                            )}
+                            {agent.eligible_promotion && (
+                              <Badge className="bg-blue-500">Promotion</Badge>
+                            )}
+                            {!agent.eligible_avancement && !agent.eligible_promotion && (
+                              <Badge variant="secondary">Non éligible</Badge>
                             )}
                           </div>
                         </TableCell>
+                        <TableCell className="text-right">
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => setSelectedAgent(agent)}
+                              >
+                                <Eye className="w-4 h-4 mr-2" />
+                                Voir
+                            </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-2xl">
+                              <DialogHeader>
+                                <DialogTitle>Dossier Carrière</DialogTitle>
+                                <DialogDescription>
+                                  {agent.nom} {agent.prenoms} - {agent.matricule}
+                                </DialogDescription>
+                              </DialogHeader>
+                              <div className="space-y-6">
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div>
+                                    <Label className="text-muted-foreground">Grade actuel</Label>
+                                    <p className="font-medium">{agent.grade}</p>
+                                  </div>
+                                  <div>
+                                    <Label className="text-muted-foreground">Échelon</Label>
+                                    <p className="font-medium">{agent.echelon}</p>
+                                  </div>
+                                  <div>
+                                    <Label className="text-muted-foreground">Catégorie</Label>
+                                    <Badge>{agent.categorie}</Badge>
+                                  </div>
+                                  <div>
+                                    <Label className="text-muted-foreground">Ancienneté grade</Label>
+                                    <p className="font-medium">{agent.anciennete_grade} ans</p>
+                                  </div>
+                                  <div>
+                                    <Label className="text-muted-foreground">Ancienneté échelon</Label>
+                                    <p className="font-medium">{agent.anciennete_echelon} ans</p>
+                                  </div>
+                                  <div>
+                                    <Label className="text-muted-foreground">Dernier avancement</Label>
+                                    <p className="font-medium">
+                                      {new Date(agent.date_dernier_avancement).toLocaleDateString('fr-FR')}
+                                    </p>
+                                  </div>
+                                </div>
+
+                                {(agent.eligible_avancement || agent.eligible_promotion) && (
+                                  <>
+                                    <div>
+                                      <Label htmlFor="justification">Justification / Observations</Label>
+                                      <Textarea
+                                        id="justification"
+                                        placeholder="Motivations, mérites, formations suivies..."
+                                        value={justification}
+                                        onChange={(e) => setJustification(e.target.value)}
+                                        rows={4}
+                                        className="mt-2"
+                                      />
+                                    </div>
+
+                                    <div className="flex gap-3">
+                                      {agent.eligible_avancement && (
+                                        <Button
+                                          onClick={() => handleInitierAvancement(agent)}
+                                          className="flex-1"
+                                        >
+                                          <TrendingUp className="w-4 h-4 mr-2" />
+                                          Initier avancement d'échelon
+                                </Button>
+                                      )}
+                                      {agent.eligible_promotion && (
+                                        <Button
+                                          onClick={() => handleInitierPromotion(agent)}
+                                          className="flex-1"
+                                          variant="secondary"
+                                        >
+                                          <Award className="w-4 h-4 mr-2" />
+                                          Initier promotion de grade
+                                </Button>
+                                      )}
+                                    </div>
+                              </>
+                            )}
+                          </div>
+                            </DialogContent>
+                          </Dialog>
+                        </TableCell>
                       </TableRow>
-                    );
-                  })}
+                    ))}
                 </TableBody>
               </Table>
             </div>
-          )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="avancements" className="mt-6">
+          <Card className="neu-card">
+            <CardHeader>
+              <CardTitle>Avancements d'Échelon</CardTitle>
+              <CardDescription>{eligiblesAvancement} agents éligibles</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {filteredAgents.filter(a => a.eligible_avancement).map((agent) => (
+                  <div key={agent.id} className="neu-card p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h4 className="font-semibold">{agent.nom} {agent.prenoms}</h4>
+                          <Badge variant="outline">{agent.matricule}</Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {agent.grade} - Échelon {agent.echelon} → Échelon {parseInt(agent.echelon) + 1}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Ancienneté échelon: {agent.anciennete_echelon} ans
+                        </p>
+                      </div>
+                      <Button size="sm">
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        Initier
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="promotions" className="mt-6">
+          <Card className="neu-card">
+            <CardHeader>
+              <CardTitle>Promotions de Grade</CardTitle>
+              <CardDescription>{eligiblesPromotion} agents éligibles</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {filteredAgents.filter(a => a.eligible_promotion).map((agent) => (
+                  <div key={agent.id} className="neu-card p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h4 className="font-semibold">{agent.nom} {agent.prenoms}</h4>
+                          <Badge variant="outline">{agent.matricule}</Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {agent.grade} (Cat. {agent.categorie})
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Ancienneté grade: {agent.anciennete_grade} ans
+                        </p>
+                      </div>
+                      <Button size="sm" variant="secondary">
+                        <Award className="w-4 h-4 mr-2" />
+                        Initier
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
         </CardContent>
       </Card>
+        </TabsContent>
 
-      {/* Informations complémentaires */}
+        <TabsContent value="historique" className="mt-6">
       <Card className="neu-card">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="w-5 h-5" />
-            Recommandations
-          </CardTitle>
+              <CardTitle>Historique des Mouvements</CardTitle>
+              <CardDescription>Avancements et promotions traités</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            <div className="neu-inset p-4 rounded-lg">
-              <h4 className="font-semibold mb-2">Critères d'avancement</h4>
-              <ul className="text-sm text-muted-foreground space-y-1">
-                <li>• Ancienneté requise dans le grade</li>
-                <li>• Évaluation des performances</li>
-                <li>• Formation continue</li>
-                <li>• Disponibilité des postes dans le grade supérieur</li>
-              </ul>
+                {[
+                  { agent: "MBONGO Jean", type: "Avancement", from: "Échelon 2", to: "Échelon 3", date: "2024-01-15" },
+                  { agent: "OBAME Marie", type: "Promotion", from: "Secrétaire", to: "Secrétaire Principal", date: "2023-12-10" },
+                  { agent: "NGUEMA Paul", type: "Avancement", from: "Échelon 1", to: "Échelon 2", date: "2023-11-20" },
+                ].map((item, index) => (
+                  <div key={index} className="neu-inset p-4 rounded-lg">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <Badge>{item.type}</Badge>
+                          <span className="font-medium">{item.agent}</span>
             </div>
-            {stats.enAttente > 0 && (
-              <div className="neu-inset p-4 rounded-lg border-l-4 border-amber-500">
-                <p className="text-sm">
-                  <span className="font-semibold">{stats.enAttente} dossier(s)</span> nécessite(nt) votre validation pour avancement.
-                </p>
-              </div>
-            )}
+                        <p className="text-sm text-muted-foreground">
+                          {item.from} → {item.to}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {new Date(item.date).toLocaleDateString('fr-FR')}
+                        </p>
+                      </div>
+                      <Badge variant="outline" className="bg-green-50">
+                        <CheckCircle className="w-3 h-3 mr-1" />
+                        Validé
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
           </div>
         </CardContent>
       </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
-
