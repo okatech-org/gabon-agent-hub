@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { 
@@ -9,11 +9,39 @@ import {
   Shield,
 } from "lucide-react";
 import { IAstedButton } from "@/components/ministre/IAstedButton";
-import { IAstedInterface } from "@/components/ministre/IAstedInterface";
+import { IastedChat } from "@/components/ministre/IastedChat";
+import { useVoiceInteraction } from "@/hooks/useVoiceInteraction";
 
 export default function MinistreDashboard() {
-  const [isIastedOpen, setIsIastedOpen] = useState(false);
-  const [showIastedInterface, setShowIastedInterface] = useState(false);
+  const [isIastedChatOpen, setIsIastedChatOpen] = useState(false);
+  const [clickCount, setClickCount] = useState(0);
+  const clickTimerRef = useRef<NodeJS.Timeout | null>(null);
+  
+  const {
+    handleInteraction,
+    isListening,
+    isThinking,
+    isSpeaking,
+  } = useVoiceInteraction();
+
+  const handleIAstedClick = () => {
+    setClickCount(prev => prev + 1);
+
+    if (clickTimerRef.current) {
+      clearTimeout(clickTimerRef.current);
+    }
+
+    clickTimerRef.current = setTimeout(() => {
+      if (clickCount === 0) {
+        // Premier clic : interaction vocale
+        handleInteraction();
+      } else {
+        // Deuxième clic : ouvrir la modal
+        setIsIastedChatOpen(true);
+      }
+      setClickCount(0);
+    }, 300);
+  };
 
   // Statistiques globales des agents
   const { data: statsAgents } = useQuery({
@@ -178,15 +206,18 @@ export default function MinistreDashboard() {
       
       {/* iAsted Button */}
       <IAstedButton 
-        onClick={() => setShowIastedInterface(!showIastedInterface)}
+        onClick={handleIAstedClick}
         size="lg"
-        isInterfaceOpen={showIastedInterface}
+        isInterfaceOpen={isIastedChatOpen}
+        voiceListening={isListening}
+        voiceSpeaking={isSpeaking}
+        voiceProcessing={isThinking}
       />
       
-      {/* iAsted Interface */}
-      <IAstedInterface 
-        isOpen={showIastedInterface}
-        onClose={() => setShowIastedInterface(false)}
+      {/* iAsted Chat Modal */}
+      <IastedChat 
+        isOpen={isIastedChatOpen}
+        onClose={() => setIsIastedChatOpen(false)}
       />
     </>
   );

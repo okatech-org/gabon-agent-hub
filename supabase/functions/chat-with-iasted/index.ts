@@ -38,7 +38,7 @@ serve(async (req) => {
   }
 
   try {
-    const { sessionId, userId, audioBase64, langHint = 'fr', voiceId = 'alloy', generateAudio = true } = await req.json();
+    const { sessionId, userId, audioBase64, textMessage, langHint = 'fr', voiceId = 'alloy', generateAudio = true, aiModel = 'gemini' } = await req.json();
 
     if (!sessionId || !userId) {
       throw new Error('sessionId and userId are required');
@@ -52,28 +52,33 @@ serve(async (req) => {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    // 1. Transcription audio (OpenAI Whisper)
-    console.log('Starting transcription...');
-    const audioBuffer = Uint8Array.from(atob(audioBase64), c => c.charCodeAt(0));
-    const audioBlob = new Blob([audioBuffer], { type: 'audio/webm' });
-    
-    const formData = new FormData();
-    formData.append('file', audioBlob, 'audio.webm');
-    formData.append('model', 'whisper-1');
-    formData.append('language', langHint);
+    let transcript = textMessage || '';
 
-    const transcriptionResponse = await fetch('https://api.openai.com/v1/audio/transcriptions', {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${OPENAI_API_KEY}` },
-      body: formData,
-    });
+    // 1. Transcription audio si audio fourni (OpenAI Whisper)
+    if (audioBase64 && !textMessage) {
+      console.log('Starting transcription...');
+      const audioBuffer = Uint8Array.from(atob(audioBase64), c => c.charCodeAt(0));
+      const audioBlob = new Blob([audioBuffer], { type: 'audio/webm' });
+      
+      const formData = new FormData();
+      formData.append('file', audioBlob, 'audio.webm');
+      formData.append('model', 'whisper-1');
+      formData.append('language', langHint);
 
-    if (!transcriptionResponse.ok) {
-      throw new Error(`Transcription failed: ${await transcriptionResponse.text()}`);
+      const transcriptionResponse = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${OPENAI_API_KEY}` },
+        body: formData,
+      });
+
+      if (!transcriptionResponse.ok) {
+        throw new Error(`Transcription failed: ${await transcriptionResponse.text()}`);
+      }
+
+      const { text } = await transcriptionResponse.json();
+      transcript = text;
+      console.log('Transcription:', transcript);
     }
-
-    const { text: transcript } = await transcriptionResponse.json();
-    console.log('Transcription:', transcript);
 
     // Sauvegarder message utilisateur
     await supabase.from('conversation_messages').insert({
@@ -111,31 +116,63 @@ serve(async (req) => {
       content: m.content
     })) || [];
 
-    // 4. Prompt système iAsted
+    // 4. Génération réponse avec sélection du modèle
     const SYSTEM_PROMPT = `Tu es **iAsted**, l'Assistant IA ministériel officiel du **Ministre de la Fonction Publique de la République Gabonaise**.
+Tu t'adresses au Ministre par « Excellence ». Sois concis, professionnel et orienté action.`;
 
-Tu es intégré dans la plateforme gouvernementale et tu es utilisé par le Ministre et son cabinet.
-
-Tu t'adresses au Ministre par « Excellence » ou « Monsieur/Madame le/la Ministre » selon le contexte, avec un ton respectueux, clair et opérationnel.
-
-Ta mission est d'être un **copilote décisionnel pour la Fonction publique gabonaise**, capable de :
-1. **Analyser** des informations sur les effectifs, emplois et carrières des agents publics
-2. **Produire** rapidement des synthèses, notes, fiches de briefing
-3. **Alerter & prioriser** : signaler les points de blocage, risques, lourdeurs administratives
-
-IMPORTANT : 
-- Réponds de manière concise et directe
-- Utilise un ton professionnel mais humain
-- Propose des actions concrètes
-- Ne fais pas de longs discours, sois efficace
-- Adapte-toi au contexte vocal : phrases courtes, claires`;
-
-    // 5. Appel LLM (Gemini via Lovable AI ou GPT/Claude si préféré)
-    console.log('Calling LLM...');
+    console.log(`Using AI model: ${aiModel}`);
     let responseText = '';
 
-    if (LOVABLE_API_KEY) {
-      // Utiliser Lovable AI (Gemini)
+    if (aiModel === 'gpt' || aiModel === 'openai') {
+      // OpenAI GPT-5-mini
+      const aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${OPENAI_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-5-mini-2025-08-07',
+          messages: [
+            { role: 'system', content: SYSTEM_PROMPT },
+            ...conversationHistory
+          ],
+          max_completion_tokens: 500,
+        }),
+      });
+
+      if (!aiResponse.ok) {
+        throw new Error(`OpenAI failed: ${await aiResponse.text()}`);
+      }
+
+      const aiData = await aiResponse.json();
+      responseText = aiData.choices[0].message.content;
+    } else if (aiModel === 'claude') {
+      // Claude via Lovable AI
+      const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-5',
+          messages: [
+            { role: 'system', content: SYSTEM_PROMPT },
+            ...conversationHistory
+          ],
+          max_tokens: 500,
+        }),
+      });
+
+      if (!aiResponse.ok) {
+        throw new Error(`Lovable AI (Claude) failed: ${await aiResponse.text()}`);
+      }
+
+      const aiData = await aiResponse.json();
+      responseText = aiData.choices[0].message.content;
+    } else {
+      // Default: Gemini via Lovable AI
       const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -148,41 +185,16 @@ IMPORTANT :
             { role: 'system', content: SYSTEM_PROMPT },
             ...conversationHistory
           ],
-        }),
-      });
-
-      if (!aiResponse.ok) {
-        throw new Error(`Lovable AI failed: ${await aiResponse.text()}`);
-      }
-
-      const aiData = await aiResponse.json();
-      responseText = aiData.choices[0].message.content;
-    } else if (OPENAI_API_KEY) {
-      // Fallback sur OpenAI GPT
-      const aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${OPENAI_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [
-            { role: 'system', content: SYSTEM_PROMPT },
-            ...conversationHistory
-          ],
           max_tokens: 500,
         }),
       });
 
       if (!aiResponse.ok) {
-        throw new Error(`OpenAI failed: ${await aiResponse.text()}`);
+        throw new Error(`Lovable AI (Gemini) failed: ${await aiResponse.text()}`);
       }
 
       const aiData = await aiResponse.json();
       responseText = aiData.choices[0].message.content;
-    } else {
-      throw new Error('No AI API key configured');
     }
 
     console.log('LLM response:', responseText);
