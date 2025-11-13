@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { IastedChat } from "@/components/ministre/IastedChat";
+import { SimulationPanel } from "@/components/ministre/SimulationPanel";
 
 export default function MinistreDashboard() {
   const [isIastedOpen, setIsIastedOpen] = useState(false);
@@ -126,9 +127,10 @@ export default function MinistreDashboard() {
       )}
 
       <Tabs defaultValue="vision" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="vision">Vision Globale</TabsTrigger>
           <TabsTrigger value="decisions">Décisions</TabsTrigger>
+          <TabsTrigger value="simulations">Simulations</TabsTrigger>
           <TabsTrigger value="reformes">Réformes</TabsTrigger>
           <TabsTrigger value="alertes">Alertes</TabsTrigger>
         </TabsList>
@@ -283,6 +285,11 @@ export default function MinistreDashboard() {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Simulations */}
+        <TabsContent value="simulations" className="space-y-6">
+          <SimulationPanel />
         </TabsContent>
 
         {/* Réformes */}

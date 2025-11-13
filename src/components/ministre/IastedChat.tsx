@@ -22,20 +22,32 @@ export function IastedChat() {
     { 
       label: 'Analyse des effectifs', 
       icon: Users,
-      prompt: 'Donne-moi une analyse détaillée des effectifs de la fonction publique avec les tendances et recommandations.' ,
+      prompt: 'Donne-moi une analyse détaillée des effectifs de la fonction publique avec répartition par corps, provinces et catégories. Identifie les provinces à risque pour les départs à la retraite dans les 5 prochaines années.',
       action: 'effectifs'
     },
     { 
       label: 'État des actes', 
       icon: FileText,
-      prompt: 'Quel est l\'état actuel des actes administratifs en attente de validation ?',
+      prompt: 'Quel est l\'état actuel des actes administratifs en attente de validation ? Donne-moi un résumé par type d\'acte et les impacts chiffrés.',
       action: 'actes'
     },
     { 
-      label: 'Simulation départs retraite', 
+      label: 'Simulation réforme', 
       icon: BarChart3,
-      prompt: 'Simule l\'impact des départs à la retraite sur les 5 prochaines années et propose des solutions.',
+      prompt: 'Simule l\'impact d\'un gel des recrutements de catégorie A pendant 3 ans sur la continuité du service public. Analyse les effets sur les effectifs, la pyramide des âges et propose des solutions alternatives.',
+      action: 'simulation'
+    },
+    {
+      label: 'Pyramide des âges',
+      icon: Users,
+      prompt: 'Analyse la pyramide des âges de la fonction publique et identifie les pics de départs à la retraite prévus. Quelles sont les directions les plus impactées ?',
       action: 'effectifs'
+    },
+    {
+      label: 'Note au PM',
+      icon: FileText,
+      prompt: 'Rédige une note de 2 pages au Premier ministre sur l\'avancement du recensement biométrique, ton institutionnel, avec les derniers chiffres et recommandations.',
+      action: 'redaction'
     },
   ];
 
