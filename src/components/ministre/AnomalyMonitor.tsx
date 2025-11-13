@@ -77,14 +77,14 @@ export const AnomalyMonitor = () => {
     queryKey: ['anomaly-alerts'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('iasted_anomaly_alerts')
+        .from('iasted_anomaly_alerts' as any)
         .select('*')
         .is('resolved_at', null)
         .order('created_at', { ascending: false })
         .limit(10);
 
       if (error) throw error;
-      return data as AnomalyAlert[];
+      return data as any as AnomalyAlert[];
     },
     refetchInterval: autoRefresh ? 30000 : false // Rafraîchir toutes les 30 secondes si activé
   });
@@ -94,13 +94,13 @@ export const AnomalyMonitor = () => {
     queryKey: ['performance-stats'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('iasted_performance_stats')
+        .from('iasted_performance_stats' as any)
         .select('*')
         .order('time_bucket', { ascending: false })
         .limit(12); // Dernière heure (12 x 5 minutes)
 
       if (error) throw error;
-      return data as PerformanceStats[];
+      return data as any as PerformanceStats[];
     },
     refetchInterval: autoRefresh ? 30000 : false
   });
@@ -109,11 +109,11 @@ export const AnomalyMonitor = () => {
   const acknowledgeMutation = useMutation({
     mutationFn: async (alertId: string) => {
       const { error } = await supabase
-        .from('iasted_anomaly_alerts')
+        .from('iasted_anomaly_alerts' as any)
         .update({ 
           acknowledged: true,
           acknowledged_at: new Date().toISOString()
-        })
+        } as any)
         .eq('id', alertId);
 
       if (error) throw error;
