@@ -547,14 +547,11 @@ export const useVoiceInteraction = () => {
         const { data: chatData, error: chatError } = await supabase.functions.invoke('chat-with-iasted', {
           body: { 
             sessionId,
+            userId: user.id,
             audioBase64: base64Data,
-            voiceId: selectedVoiceId,
+            voiceId: selectedVoiceId || 'alloy',
             langHint: 'fr',
-            settings: {
-              silenceDuration,
-              silenceThreshold,
-              continuousMode
-            }
+            generateAudio: true
           }
         });
 
@@ -590,14 +587,19 @@ export const useVoiceInteraction = () => {
           return;
         }
 
+        // Extract correct field names from edge function response
+        const userText = chatData.transcript || chatData.userText || '';
+        const responseText = chatData.responseText || chatData.answer || '';
+        const audioContent = chatData.audioContent || chatData.audio_base64 || '';
+
         // Check for "non" to close conversation
-        const userTextLower = chatData.userText.toLowerCase().trim();
+        const userTextLower = userText.toLowerCase().trim();
         if (['non', 'non merci', 'c\'est bon', 'ça suffit', 'stop', 'arrête'].includes(userTextLower)) {
           console.log('👋 User said no, closing conversation');
           
           const userMessage: VoiceInteractionMessage = {
             role: 'user',
-            content: chatData.userText
+            content: userText
           };
           
           const farewellMessage: VoiceInteractionMessage = {
@@ -623,15 +625,13 @@ export const useVoiceInteraction = () => {
         // Update messages
         const userMessage: VoiceInteractionMessage = {
           role: 'user',
-          content: chatData.userText
+          content: userText
         };
-        
-        const audioBase64 = chatData.audio_base64 || chatData.audioContent;
 
         const assistantMessage: VoiceInteractionMessage = {
           role: 'assistant',
-          content: chatData.answer,
-          audio_base64: audioBase64
+          content: responseText,
+          audio_base64: audioContent
         };
 
         setMessages(prev => [...prev, userMessage, assistantMessage]);
@@ -649,10 +649,10 @@ export const useVoiceInteraction = () => {
         });
 
         // Play audio response with auto-restart based on follow-up question
-        if (audioBase64) {
+        if (audioContent) {
           console.log('🔊 Playing audio response...');
           const shouldAutoRestart = chatData.hasFollowUpQuestion || continuousMode;
-          await playAudioResponse(audioBase64, shouldAutoRestart);
+          await playAudioResponse(audioContent, shouldAutoRestart);
         } else {
           console.log('ℹ️ No audio to play, returning to idle');
           setVoiceState('idle');
