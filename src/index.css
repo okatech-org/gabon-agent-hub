@@ -182,20 +182,40 @@ All colors MUST be HSL.
     transform: translateY(0);
   }
 
-  .neu-button-primary {
-    background: hsl(var(--primary));
-    color: hsl(var(--primary-foreground));
-    box-shadow: 4px 4px 10px hsla(142, 69%, 26%, 0.55), -4px -4px 10px hsla(0, 0%, 100%, 0.7);
-  }
-
-  .neu-button-primary:hover {
-    box-shadow: 5px 5px 12px hsla(142, 69%, 26%, 0.6), -5px -5px 12px hsla(0, 0%, 100%, 0.8);
-  }
-
-  .neu-button-secondary {
-    background: hsl(var(--secondary));
+  /* Bouton pour agents/admin (interne) - Bleu autorité */
+  .neu-button-admin {
+    background: linear-gradient(145deg, hsl(var(--secondary)), hsl(214 84% 52%));
     color: hsl(var(--secondary-foreground));
-    box-shadow: 4px 4px 10px hsla(214, 84%, 56%, 0.55), -4px -4px 10px hsla(0, 0%, 100%, 0.7);
+    box-shadow: 
+      4px 4px 10px rgba(37, 99, 235, 0.3),
+      -4px -4px 10px hsl(var(--neu-light)),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  }
+
+  .neu-button-admin:hover {
+    background: linear-gradient(145deg, hsl(214 84% 58%), hsl(214 84% 54%));
+    box-shadow: 
+      5px 5px 12px rgba(37, 99, 235, 0.35),
+      -5px -5px 12px hsl(var(--neu-light)),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  }
+
+  /* Bouton pour citoyens (externe) - Vert accueillant */
+  .neu-button-citizen {
+    background: linear-gradient(145deg, hsl(var(--primary)), hsl(142 69% 23%));
+    color: hsl(var(--primary-foreground));
+    box-shadow: 
+      4px 4px 10px rgba(16, 185, 129, 0.3),
+      -4px -4px 10px hsl(var(--neu-light)),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  .neu-button-citizen:hover {
+    background: linear-gradient(145deg, hsl(142 69% 28%), hsl(142 69% 25%));
+    box-shadow: 
+      5px 5px 12px rgba(16, 185, 129, 0.35),
+      -5px -5px 12px hsl(var(--neu-light)),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
   }
 
   .icon-pill {

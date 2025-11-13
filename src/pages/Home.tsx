@@ -27,10 +27,10 @@ export default function Home() {
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
-            <button className="neu-button text-sm">
+            <button className="neu-button neu-button-admin text-sm">
               Connexion administration
             </button>
-            <button className="neu-button neu-button-primary text-sm">
+            <button className="neu-button neu-button-citizen text-sm">
               Connexion agent / citoyen
             </button>
           </div>
@@ -57,10 +57,10 @@ export default function Home() {
               </p>
 
               <div className="flex flex-wrap gap-3 pt-2">
-                <button className="neu-button neu-button-primary">
+                <button className="neu-button neu-button-admin">
                   Je suis fonctionnaire
                 </button>
-                <button className="neu-button">
+                <button className="neu-button neu-button-citizen">
                   Je suis citoyen / candidat
                 </button>
               </div>
@@ -257,7 +257,7 @@ export default function Home() {
                 droits et obligations.
               </li>
             </ul>
-            <button className="neu-button neu-button-primary mt-2">
+            <button className="neu-button neu-button-admin mt-2">
               Accéder à mon espace fonctionnaire
             </button>
             <p className="text-xs text-muted-foreground">
@@ -293,10 +293,10 @@ export default function Home() {
               <li>Suivre en temps réel l'avancement de votre candidature.</li>
             </ul>
             <div className="flex flex-wrap gap-3 mt-2">
-              <button className="neu-button neu-button-primary">
+              <button className="neu-button neu-button-citizen">
                 Voir les concours ouverts
               </button>
-              <button className="neu-button">Créer mon espace candidat</button>
+              <button className="neu-button neu-button-citizen">Créer mon espace candidat</button>
             </div>
             <p className="text-xs text-muted-foreground">
               Transparence, égalité d'accès, sélection par le mérite.
