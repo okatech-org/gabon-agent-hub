@@ -5,3 +5,15 @@ verify_jwt = false
 
 [functions.iasted-agent]
 verify_jwt = true
+
+[functions.chat-with-iasted]
+verify_jwt = true
+
+[functions.list-voices]
+verify_jwt = true
+
+[functions.log-analytics]
+verify_jwt = true
+
+[functions.debrief-session]
+verify_jwt = true
