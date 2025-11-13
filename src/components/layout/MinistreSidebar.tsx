@@ -9,6 +9,13 @@ import {
   Shield,
   LogOut,
   Bot,
+  DollarSign,
+  FolderOpen,
+  FileCheck,
+  Bell,
+  GraduationCap,
+  History,
+  AlertTriangle,
 } from "lucide-react";
 import {
   Sidebar as SidebarUI,
@@ -43,6 +50,50 @@ const menuItems = [
     icon: TrendingUp,
     href: "/ministre/dashboard?tab=simulations",
   },
+];
+
+const economieFinancesItems = [
+  {
+    title: "Économie & Finances",
+    icon: DollarSign,
+    href: "/ministre/economie-finances",
+  },
+];
+
+const actionsGestionItems = [
+  {
+    title: "Documents",
+    icon: FolderOpen,
+    href: "/ministre/documents",
+  },
+  {
+    title: "Réglementations",
+    icon: FileCheck,
+    href: "/ministre/reglementations",
+  },
+  {
+    title: "Notifications",
+    icon: Bell,
+    href: "/ministre/notifications",
+  },
+  {
+    title: "Formations",
+    icon: GraduationCap,
+    href: "/ministre/formations",
+  },
+  {
+    title: "Historique",
+    icon: History,
+    href: "/ministre/historique",
+  },
+  {
+    title: "Alertes",
+    icon: AlertTriangle,
+    href: "/ministre/alertes",
+  },
+];
+
+const vueGlobaleItems = [
   {
     title: "Effectifs & Personnel",
     icon: Users,
@@ -95,6 +146,7 @@ export function MinistreSidebar() {
       </SidebarHeader>
 
       <SidebarContent className="px-2 py-4">
+        {/* Dashboard Principal */}
         <SidebarGroup>
           <SidebarGroupLabel className="text-sidebar-foreground/70 text-xs uppercase tracking-wider px-3 mb-2">
             Navigation
@@ -128,6 +180,94 @@ export function MinistreSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
+        {/* Économie & Finances */}
+        <SidebarGroup className="mt-6">
+          <SidebarGroupLabel className="text-sidebar-foreground/70 text-xs uppercase tracking-wider px-3 mb-2">
+            Économie & Finances
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu className="space-y-1">
+              {economieFinancesItems.map((item) => (
+                <SidebarMenuItem key={item.href}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={location.pathname === item.href}
+                    className={cn(
+                      "rounded-lg transition-all hover:bg-sidebar-accent",
+                      location.pathname === item.href &&
+                        "bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary"
+                    )}
+                  >
+                    <Link to={item.href} className="flex items-center gap-3 px-3 py-2">
+                      <item.icon className="h-4 w-4 flex-shrink-0" />
+                      {!collapsed && <span className="text-sm">{item.title}</span>}
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Actions & Gestion */}
+        <SidebarGroup className="mt-6">
+          <SidebarGroupLabel className="text-sidebar-foreground/70 text-xs uppercase tracking-wider px-3 mb-2">
+            Actions & Gestion
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu className="space-y-1">
+              {actionsGestionItems.map((item) => (
+                <SidebarMenuItem key={item.href}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={location.pathname === item.href}
+                    className={cn(
+                      "rounded-lg transition-all hover:bg-sidebar-accent",
+                      location.pathname === item.href &&
+                        "bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary"
+                    )}
+                  >
+                    <Link to={item.href} className="flex items-center gap-3 px-3 py-2">
+                      <item.icon className="h-4 w-4 flex-shrink-0" />
+                      {!collapsed && <span className="text-sm">{item.title}</span>}
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Vue Globale */}
+        <SidebarGroup className="mt-6">
+          <SidebarGroupLabel className="text-sidebar-foreground/70 text-xs uppercase tracking-wider px-3 mb-2">
+            Vue Globale
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu className="space-y-1">
+              {vueGlobaleItems.map((item) => (
+                <SidebarMenuItem key={item.href}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={location.pathname === item.href}
+                    className={cn(
+                      "rounded-lg transition-all hover:bg-sidebar-accent",
+                      location.pathname === item.href &&
+                        "bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary"
+                    )}
+                  >
+                    <Link to={item.href} className="flex items-center gap-3 px-3 py-2">
+                      <item.icon className="h-4 w-4 flex-shrink-0" />
+                      {!collapsed && <span className="text-sm">{item.title}</span>}
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Système */}
         <SidebarGroup className="mt-6">
           <SidebarGroupLabel className="text-sidebar-foreground/70 text-xs uppercase tracking-wider px-3 mb-2">
             Système
