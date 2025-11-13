@@ -8,8 +8,8 @@ import digitalisationImage from "@/assets/digitalisation.jpg";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-background flex justify-center px-4 py-6 md:py-10">
-      <div className="w-full max-w-6xl space-y-6 md:space-y-8">
+    <div className="min-h-screen bg-background flex justify-center px-2 md:px-4 py-6 md:py-10">
+      <div className="w-full max-w-7xl space-y-6 md:space-y-8">
         {/* Top header / navigation */}
         <header className="neu-card px-4 py-4 md:px-6 md:py-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div className="flex items-center gap-3">
