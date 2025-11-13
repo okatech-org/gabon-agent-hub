@@ -16,49 +16,49 @@ interface DemoAccount {
 
 const demoAccounts: DemoAccount[] = [
   {
-    email: "ministre.demo@fonctionpublique.ga",
+    email: "ministre.demo@admin.ga",
     password: "Demo2024!",
     nom: "Ministre",
     prenoms: "de la Fonction Publique",
     role: "ministre"
   },
   {
-    email: "sg.demo@fonctionpublique.ga",
+    email: "sg.demo@admin.ga",
     password: "Demo2024!",
     nom: "Secrétaire Général",
     prenoms: "du Ministère",
     role: "secretaire_general"
   },
   {
-    email: "cabinet.demo@fonctionpublique.ga",
+    email: "cabinet.demo@admin.ga",
     password: "Demo2024!",
     nom: "Directeur",
     prenoms: "de Cabinet",
     role: "directeur_cabinet"
   },
   {
-    email: "drh.demo@fonctionpublique.ga",
+    email: "drh.demo@admin.ga",
     password: "Demo2024!",
     nom: "Directeur",
     prenoms: "des Ressources Humaines",
     role: "drh_ministre"
   },
   {
-    email: "gestionnaire.demo@fonctionpublique.ga",
+    email: "gestionnaire.demo@admin.ga",
     password: "Demo2024!",
     nom: "Gestionnaire",
     prenoms: "RH",
     role: "gestionnaire"
   },
   {
-    email: "fonctionnaire.demo@fonctionpublique.ga",
+    email: "fonctionnaire.demo@admin.ga",
     password: "Demo2024!",
     nom: "Agent",
     prenoms: "Fonctionnaire",
     role: "agent"
   },
   {
-    email: "candidat.demo@fonctionpublique.ga",
+    email: "candidat.demo@admin.ga",
     password: "Demo2024!",
     nom: "Candidat",
     prenoms: "aux Concours",
