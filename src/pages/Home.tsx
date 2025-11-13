@@ -1,730 +1,434 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowRight, Users, FileText, Award, TrendingUp, BookOpen, Newspaper, Shield } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Building2, Users, FileText, TrendingUp, Calendar, BookOpen } from "lucide-react";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header Navigation */}
-      <header className="border-b bg-card shadow-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+    <div className="min-h-screen bg-background flex justify-center px-4 py-6 md:py-10">
+      <div className="w-full max-w-6xl space-y-6 md:space-y-8">
+        {/* Top header / navigation */}
+        <header className="neu-card px-4 py-4 md:px-6 md:py-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div className="flex items-center gap-3">
-            <Shield className="h-8 w-8 text-primary" />
+            <div className="neu-raised flex items-center justify-center w-10 h-10">
+              <span className="text-sm font-bold text-primary">GA</span>
+            </div>
             <div>
-              <h1 className="text-xl font-bold text-foreground">ADMIN.GA</h1>
-              <p className="text-xs text-muted-foreground">Fonction Publique du Gabon</p>
+              <h1 className="text-xl md:text-2xl font-bold">
+                ADMIN.GA – Portail de la Fonction Publique
+              </h1>
+              <p className="text-xs md:text-sm text-muted-foreground">
+                Plateforme officielle du Ministère de la Fonction Publique de la
+                République Gabonaise
+              </p>
             </div>
           </div>
-          <nav className="hidden md:flex items-center gap-4">
-            <Link to="/auth/login" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-              Connexion
-            </Link>
-            <Link to="/auth/signup">
-              <Button size="sm">Créer un compte</Button>
-            </Link>
-          </nav>
-        </div>
-      </header>
+          <div className="flex flex-wrap gap-2">
+            <button className="neu-button text-sm">
+              Connexion administration
+            </button>
+            <button className="neu-button neu-button-primary text-sm">
+              Connexion agent / citoyen
+            </button>
+          </div>
+        </header>
 
-      {/* Hero Section */}
-      <section className="relative bg-background py-20 lg:py-32">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center space-y-8">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4">
-              <Shield className="h-4 w-4" />
-              Portail Officiel de la Fonction Publique
-            </div>
-            
-            <h1 className="text-4xl md:text-6xl font-bold text-foreground leading-tight">
-              ADMIN.GA – La Fonction Publique gabonaise, au service du citoyen
-            </h1>
-            
-            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
-              La plateforme digitale officielle qui simplifie vos démarches administratives. 
-              Modernisation, transparence et efficacité au cœur de la transformation de l'administration gabonaise.
-            </p>
+        {/* HERO */}
+        <section className="neu-card px-5 py-6 md:px-8 md:py-8 space-y-6">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+            <div className="space-y-3 md:max-w-xl">
+              <p className="text-xs md:text-sm uppercase tracking-wide text-muted-foreground">
+                Portail digital officiel
+              </p>
+              <h2 className="text-2xl md:text-3xl font-bold leading-snug">
+                ADMIN.GA – La Fonction Publique gabonaise, au service du citoyen
+              </h2>
+              <p className="text-sm md:text-base text-muted-foreground">
+                Digitalisation des démarches, simplification des procédures,
+                transparence et modernisation : ADMIN.GA centralise la gestion
+                des agents publics et l'accès aux concours de la Fonction
+                Publique.
+              </p>
+              <p className="text-xs md:text-sm italic text-muted-foreground">
+                « Servir l'État, c'est servir chaque citoyen. »
+              </p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-6">
-              <Link to="/auth/login?type=agent">
-                <Button size="lg" className="min-w-[200px]">
-                  <Users className="mr-2 h-5 w-5" />
+              <div className="flex flex-wrap gap-3 pt-2">
+                <button className="neu-button neu-button-primary">
                   Je suis fonctionnaire
-                </Button>
-              </Link>
-              <Link to="/auth/signup?type=candidat">
-                <Button size="lg" variant="outline" className="min-w-[200px]">
-                  <Award className="mr-2 h-5 w-5" />
+                </button>
+                <button className="neu-button">
                   Je suis citoyen / candidat
-                </Button>
-              </Link>
+                </button>
+              </div>
             </div>
 
-            <p className="text-sm text-muted-foreground italic pt-4">
-              "Servir l'État, c'est servir chaque citoyen."
+            {/* Stats rapides */}
+            <div className="grid grid-cols-2 gap-3 md:gap-4 md:w-72">
+              <StatCard
+                label="Agents recensés"
+                value="92 000+"
+                subtitle="Fonctionnaires et contractuels"
+                icon={<Users className="w-5 h-5" />}
+                color="text-secondary"
+              />
+              <StatCard
+                label="Concours ouverts"
+                value="3"
+                subtitle="Inscriptions en ligne"
+                icon={<FileText className="w-5 h-5" />}
+                color="text-accent"
+              />
+              <StatCard
+                label="Actes traités"
+                value="1 248"
+                subtitle="Titularisations, promotions…"
+                icon={<TrendingUp className="w-5 h-5" />}
+                color="text-primary"
+              />
+              <StatCard
+                label="Services en ligne"
+                value="15+"
+                subtitle="Démarches dématérialisées"
+                icon={<Building2 className="w-5 h-5" />}
+                color="text-info"
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* À propos de la Fonction Publique */}
+        <section className="neu-card px-5 py-6 md:px-8 md:py-7 space-y-4">
+          <h3 className="text-lg md:text-xl font-semibold">
+            Comprendre la Fonction Publique gabonaise
+          </h3>
+          <p className="text-sm md:text-base text-muted-foreground">
+            La Fonction Publique regroupe l'ensemble des femmes et des hommes
+            qui travaillent pour l'État et les établissements publics. Chaque
+            jour, ils assurent la continuité des services essentiels :
+            éducation, santé, sécurité, justice, finances publiques, gestion du
+            territoire, et bien plus encore.
+          </p>
+          <div className="grid md:grid-cols-2 gap-4 text-sm md:text-base text-muted-foreground">
+            <div className="space-y-2">
+              <h4 className="font-semibold text-foreground">
+                Un rôle central dans l'État
+              </h4>
+              <p>
+                La Fonction Publique est le bras opérationnel de l'État. Elle
+                met en œuvre les politiques publiques décidées par les
+                autorités, et veille à ce que chaque citoyenne et chaque citoyen
+                bénéficie de services de qualité, partout sur le territoire.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <h4 className="font-semibold text-foreground">
+                Nos valeurs de service public
+              </h4>
+              <ul className="list-disc list-inside space-y-1">
+                <li>Neutralité – servir tous les citoyens, sans distinction.</li>
+                <li>
+                  Intégrité – agir avec honnêteté, transparence et loyauté.
+                </li>
+                <li>Efficacité – rechercher des solutions rapides et fiables.</li>
+                <li>Proximité – rester à l'écoute des besoins du terrain.</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        {/* Ministère de la Fonction Publique */}
+        <section className="neu-card px-5 py-6 md:px-8 md:py-7 space-y-4">
+          <h3 className="text-lg md:text-xl font-semibold">
+            Le Ministère de la Fonction Publique
+          </h3>
+          <p className="text-sm md:text-base text-muted-foreground">
+            Le Ministère de la Fonction Publique conçoit, met en œuvre et
+            suit la politique de l'État en matière de gestion des ressources
+            humaines publiques. Il accompagne les ministères et institutions
+            dans l'organisation de leurs services et dans la gestion de leurs
+            agents.
+          </p>
+          <div className="grid md:grid-cols-2 gap-4 text-sm md:text-base text-muted-foreground">
+            <div>
+              <h4 className="font-semibold text-foreground mb-1">
+                Missions principales
+              </h4>
+              <ul className="list-disc list-inside space-y-1">
+                <li>
+                  Gérer la carrière des agents publics : recrutement,
+                  titularisation, avancement, mobilité, retraite.
+                </li>
+                <li>
+                  Organiser l'administration : structures, postes, effectifs et
+                  compétences.
+                </li>
+                <li>
+                  Conduire la réforme et la modernisation de la Fonction
+                  Publique.
+                </li>
+                <li>
+                  Digitaliser l'action publique avec des outils comme ADMIN.GA.
+                </li>
+              </ul>
+            </div>
+            <div className="neu-inset p-4 md:p-5 text-sm md:text-base rounded-xl">
+              <h4 className="font-semibold text-foreground mb-2">
+                La Fonction Publique au cœur de la Nouvelle République
+              </h4>
+              <p className="text-muted-foreground">
+                Assainissement des fichiers, recensement biométrique des agents,
+                lutte contre les agents fictifs, transparence dans les
+                nominations et les concours : le ministère s'engage pour une
+                administration exemplaire et responsable.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Je suis fonctionnaire / Je suis citoyen */}
+        <section className="grid md:grid-cols-2 gap-6 md:gap-8">
+          {/* Fonctionnaire */}
+          <div className="neu-card px-5 py-6 md:px-7 md:py-7 space-y-4">
+            <h3 className="text-lg md:text-xl font-semibold">
+              Je suis fonctionnaire
+            </h3>
+            <p className="text-sm md:text-base text-muted-foreground">
+              ADMIN.GA est votre point d'entrée unique pour suivre votre
+              parcours professionnel, accéder à vos documents et dialoguer avec
+              l'administration.
+            </p>
+            <ul className="list-disc list-inside space-y-1 text-sm md:text-base text-muted-foreground">
+              <li>
+                Consulter votre dossier administratif, vos affectations et votre
+                grade.
+              </li>
+              <li>
+                Télécharger vos actes : titularisation, promotions, mutations,
+                retraite.
+              </li>
+              <li>
+                Suivre l'avancement de vos démarches en ligne, sans déplacement.
+              </li>
+              <li>
+                Accéder aux textes de référence et guides pratiques sur vos
+                droits et obligations.
+              </li>
+            </ul>
+            <button className="neu-button neu-button-primary mt-2">
+              Accéder à mon espace fonctionnaire
+            </button>
+            <p className="text-xs text-muted-foreground">
+              Connexion sécurisée avec vos identifiants ou votre matricule
+              fonction publique.
             </p>
           </div>
-        </div>
-      </section>
 
-      {/* À propos de la Fonction Publique */}
-      <section className="py-16 lg:py-24 bg-background">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto space-y-8">
-            <div className="text-center space-y-4">
-              <h2 className="text-3xl md:text-4xl font-bold text-foreground">
-                À propos de la Fonction Publique
-              </h2>
-              <p className="text-lg text-muted-foreground">
-                Un pilier essentiel de l'État au service de tous les Gabonais
-              </p>
+          {/* Citoyen / candidat */}
+          <div className="neu-card px-5 py-6 md:px-7 md:py-7 space-y-4">
+            <h3 className="text-lg md:text-xl font-semibold">
+              Je suis citoyen / candidat aux concours
+            </h3>
+            <p className="text-sm md:text-base text-muted-foreground">
+              Vous souhaitez rejoindre la Fonction Publique ou mieux comprendre
+              ses métiers ? ADMIN.GA vous informe et vous guide à chaque étape.
+            </p>
+            <ul className="list-disc list-inside space-y-1 text-sm md:text-base text-muted-foreground">
+              <li>Consulter la liste des concours et avis de recrutement.</li>
+              <li>
+                Découvrir les métiers de la Fonction Publique et leurs missions.
+              </li>
+              <li>
+                Créer un espace candidat et déposer votre dossier en ligne.
+              </li>
+              <li>Suivre en temps réel l'avancement de votre candidature.</li>
+            </ul>
+            <div className="flex flex-wrap gap-3 mt-2">
+              <button className="neu-button neu-button-primary">
+                Voir les concours ouverts
+              </button>
+              <button className="neu-button">Créer mon espace candidat</button>
             </div>
-
-            <div className="prose prose-lg max-w-none text-foreground/90">
-              <p className="text-lg leading-relaxed">
-                La <strong>Fonction Publique</strong> représente l'ensemble des agents qui travaillent pour l'État 
-                et les collectivités territoriales. Ces femmes et ces hommes assurent quotidiennement le fonctionnement 
-                de nos services publics : éducation, santé, sécurité, administration, justice, et bien d'autres domaines essentiels.
-              </p>
-
-              <p className="text-lg leading-relaxed">
-                <strong>Qui sont les agents publics ?</strong> Ce sont des fonctionnaires titulaires, des contractuels, 
-                des agents stagiaires qui ont choisi de mettre leurs compétences au service de l'intérêt général. 
-                Ils incarnent les valeurs fondamentales du service public gabonais.
-              </p>
-
-              <div className="grid md:grid-cols-2 gap-6 my-8">
-                <Card className="border-l-4 border-l-primary shadow-lg">
-                  <CardHeader>
-                    <CardTitle className="text-lg">Nos principes fondamentaux</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    <div className="flex items-start gap-2">
-                      <div className="w-2 h-2 rounded-full bg-primary mt-2" />
-                      <p className="text-sm"><strong>Continuité du service public</strong> – L'État ne s'arrête jamais</p>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <div className="w-2 h-2 rounded-full bg-primary mt-2" />
-                      <p className="text-sm"><strong>Égalité d'accès</strong> – Tous les citoyens sont traités équitablement</p>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <div className="w-2 h-2 rounded-full bg-primary mt-2" />
-                      <p className="text-sm"><strong>Neutralité</strong> – Impartialité et respect de tous</p>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <div className="w-2 h-2 rounded-full bg-primary mt-2" />
-                      <p className="text-sm"><strong>Intégrité</strong> – Probité et lutte contre la corruption</p>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="border-l-4 border-l-secondary shadow-lg">
-                  <CardHeader>
-                    <CardTitle className="text-lg">Notre engagement</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm leading-relaxed">
-                      La Fonction Publique s'engage à servir tous les Gabonais avec efficacité, proximité et transparence. 
-                      Chaque agent public est un maillon essentiel dans la chaîne de service qui relie l'État au citoyen.
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
+            <p className="text-xs text-muted-foreground">
+              Transparence, égalité d'accès, sélection par le mérite.
+            </p>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Le Ministère de la Fonction Publique */}
-      <section className="py-16 lg:py-24 bg-muted/50">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto space-y-8">
-            <div className="text-center space-y-4">
-              <h2 className="text-3xl md:text-4xl font-bold text-foreground">
-                Le Ministère de la Fonction Publique
-              </h2>
-              <p className="text-lg text-muted-foreground">
-                Pilote de la transformation de l'administration gabonaise
-              </p>
-            </div>
-
-            <div className="space-y-6">
-              <Card className="shadow-lg">
-                <CardHeader>
-                  <CardTitle>Notre mission</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-foreground/90">
-                    Le Ministère de la Fonction Publique a pour mission de <strong>gérer l'ensemble des ressources humaines 
-                    de l'État</strong>. Il organise les corps et les carrières, prépare et met en œuvre les réformes administratives, 
-                    et conduit la modernisation et la digitalisation de l'administration.
-                  </p>
-                  <p className="text-foreground/90">
-                    Dans le cadre de la <strong>Nouvelle République</strong>, le Ministère s'est engagé dans une vaste entreprise 
-                    d'assainissement et de transparence, avec pour objectifs :
-                  </p>
-                  <ul className="space-y-3 mt-4">
-                    <li className="flex items-start gap-3">
-                      <div className="rounded-full bg-primary/10 p-1.5 mt-0.5">
-                        <ArrowRight className="h-4 w-4 text-primary" />
-                      </div>
-                      <div>
-                        <strong className="text-foreground">Recensement biométrique des agents</strong>
-                        <p className="text-sm text-muted-foreground">Identifier tous les agents publics avec fiabilité et lutter contre les "agents fictifs"</p>
-                      </div>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <div className="rounded-full bg-primary/10 p-1.5 mt-0.5">
-                        <ArrowRight className="h-4 w-4 text-primary" />
-                      </div>
-                      <div>
-                        <strong className="text-foreground">Assainissement des fichiers de la masse salariale</strong>
-                        <p className="text-sm text-muted-foreground">Nettoyer les bases de données pour une gestion rigoureuse et transparente</p>
-                      </div>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <div className="rounded-full bg-primary/10 p-1.5 mt-0.5">
-                        <ArrowRight className="h-4 w-4 text-primary" />
-                      </div>
-                      <div>
-                        <strong className="text-foreground">Modernisation des procédures administratives</strong>
-                        <p className="text-sm text-muted-foreground">Simplifier et digitaliser pour un service plus rapide et plus efficace</p>
-                      </div>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <div className="rounded-full bg-primary/10 p-1.5 mt-0.5">
-                        <ArrowRight className="h-4 w-4 text-primary" />
-                      </div>
-                      <div>
-                        <strong className="text-foreground">Amélioration du service rendu au citoyen</strong>
-                        <p className="text-sm text-muted-foreground">Placer le citoyen au cœur de l'action publique</p>
-                      </div>
-                    </li>
-                  </ul>
-                </CardContent>
-              </Card>
-            </div>
+        {/* Modernisation & digitalisation */}
+        <section className="neu-card px-5 py-6 md:px-8 md:py-7 space-y-4">
+          <h3 className="text-lg md:text-xl font-semibold">
+            Modernisation & Digitalisation de l'administration
+          </h3>
+          <p className="text-sm md:text-base text-muted-foreground">
+            La République Gabonaise a engagé une transformation profonde de son
+            administration. Avec ADMIN.GA, la Fonction Publique passe au
+            numérique pour mieux servir les agents et les citoyens.
+          </p>
+          <div className="grid md:grid-cols-2 gap-4 text-sm md:text-base text-muted-foreground">
+            <ul className="list-disc list-inside space-y-1">
+              <li>
+                Digitalisation des procédures : moins de papier, moins de
+                déplacements.
+              </li>
+              <li>
+                Dématérialisation des archives : dossiers sécurisés et faciles à
+                retrouver.
+              </li>
+              <li>Identifiant unique de l'agent public.</li>
+            </ul>
+            <ul className="list-disc list-inside space-y-1">
+              <li>
+                Recensement biométrique des agents pour fiabiliser les
+                effectifs.
+              </li>
+              <li>
+                Lutte contre les agents fictifs et optimisation de la masse
+                salariale.
+              </li>
+              <li>
+                Plus de traçabilité, plus de transparence, plus de qualité de
+                service.
+              </li>
+            </ul>
           </div>
-        </div>
-      </section>
+          <p className="text-sm md:text-base italic text-muted-foreground mt-4">
+            « Une fonction publique plus efficace, plus proche, plus moderne. »
+          </p>
+        </section>
 
-      {/* Je suis fonctionnaire */}
-      <section className="py-16 lg:py-24 bg-background">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
-              <div className="space-y-6">
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium">
-                  <Users className="h-4 w-4" />
-                  Espace Fonctionnaire
-                </div>
-                <h2 className="text-3xl md:text-4xl font-bold text-foreground">
-                  Votre espace personnel ADMIN.GA
-                </h2>
-                <p className="text-lg text-muted-foreground">
-                  Accédez à tous vos documents administratifs et suivez l'évolution de votre carrière en toute simplicité.
-                </p>
-                <Link to="/auth/login?type=agent">
-                  <Button size="lg">
-                    Se connecter
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </Link>
-              </div>
-
-              <div className="space-y-4">
-                <Card className="shadow-md hover:shadow-xl transition-all">
-                  <CardHeader>
-                    <div className="flex items-start gap-4">
-                      <div className="rounded-lg bg-primary/10 p-3">
-                        <FileText className="h-6 w-6 text-primary" />
-                      </div>
-                      <div>
-                        <CardTitle>Consulter votre dossier administratif</CardTitle>
-                        <CardDescription>
-                          Accédez à votre dossier complet : affectations, grades, échelons, historique de carrière
-                        </CardDescription>
-                      </div>
-                    </div>
-                  </CardHeader>
-                </Card>
-
-                <Card className="shadow-md hover:shadow-xl transition-all">
-                  <CardHeader>
-                    <div className="flex items-start gap-4">
-                      <div className="rounded-lg bg-secondary/10 p-3">
-                        <Award className="h-6 w-6 text-secondary" />
-                      </div>
-                      <div>
-                        <CardTitle>Télécharger vos actes</CardTitle>
-                        <CardDescription>
-                          Obtenez vos actes administratifs en ligne : titularisation, promotion, retraite, mutations
-                        </CardDescription>
-                      </div>
-                    </div>
-                  </CardHeader>
-                </Card>
-
-                <Card className="shadow-md hover:shadow-xl transition-all">
-                  <CardHeader>
-                    <div className="flex items-start gap-4">
-                      <div className="rounded-lg bg-accent/10 p-3">
-                        <TrendingUp className="h-6 w-6 text-accent" />
-                      </div>
-                      <div>
-                        <CardTitle>Suivre vos démarches</CardTitle>
-                        <CardDescription>
-                          Suivez l'avancement de vos demandes : retraite, régularisation, demande d'acte en temps réel
-                        </CardDescription>
-                      </div>
-                    </div>
-                  </CardHeader>
-                </Card>
-
-                <Card className="shadow-md hover:shadow-xl transition-all">
-                  <CardHeader>
-                    <div className="flex items-start gap-4">
-                      <div className="rounded-lg bg-primary/10 p-3">
-                        <BookOpen className="h-6 w-6 text-primary" />
-                      </div>
-                      <div>
-                        <CardTitle>Vos droits et obligations</CardTitle>
-                        <CardDescription>
-                          Accédez aux informations sur vos droits, devoirs et les règles régissant la fonction publique
-                        </CardDescription>
-                      </div>
-                    </div>
-                  </CardHeader>
-                </Card>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Je suis citoyen / candidat */}
-      <section className="py-16 lg:py-24 bg-muted/50">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
-              <div className="order-2 lg:order-1 space-y-4">
-                <Card className="shadow-md hover:shadow-xl transition-all">
-                  <CardHeader>
-                    <div className="flex items-start gap-4">
-                      <div className="rounded-lg bg-secondary/10 p-3">
-                        <Newspaper className="h-6 w-6 text-secondary" />
-                      </div>
-                      <div>
-                        <CardTitle>Concours et recrutements</CardTitle>
-                        <CardDescription>
-                          Consultez la liste complète des concours ouverts et les avis de recrutement de la fonction publique
-                        </CardDescription>
-                      </div>
-                    </div>
-                  </CardHeader>
-                </Card>
-
-                <Card className="hover:shadow-lg transition-shadow">
-                  <CardHeader>
-                    <div className="flex items-start gap-4">
-                      <div className="rounded-lg bg-accent/10 p-3">
-                        <Users className="h-6 w-6 text-accent" />
-                      </div>
-                      <div>
-                        <CardTitle>Découvrir les métiers publics</CardTitle>
-                        <CardDescription>
-                          Explorez les différents corps, grades et missions de la fonction publique gabonaise
-                        </CardDescription>
-                      </div>
-                    </div>
-                  </CardHeader>
-                </Card>
-
-                <Card className="hover:shadow-lg transition-shadow">
-                  <CardHeader>
-                    <div className="flex items-start gap-4">
-                      <div className="rounded-lg bg-primary/10 p-3">
-                        <FileText className="h-6 w-6 text-primary" />
-                      </div>
-                      <div>
-                        <CardTitle>Postuler en ligne</CardTitle>
-                        <CardDescription>
-                          Créez votre espace candidat, déposez votre dossier et suivez votre candidature en temps réel
-                        </CardDescription>
-                      </div>
-                    </div>
-                  </CardHeader>
-                </Card>
-
-                <Card className="hover:shadow-lg transition-shadow">
-                  <CardHeader>
-                    <div className="flex items-start gap-4">
-                      <div className="rounded-lg bg-secondary/10 p-3">
-                        <Shield className="h-6 w-6 text-secondary" />
-                      </div>
-                      <div>
-                        <CardTitle>Transparence et égalité</CardTitle>
-                        <CardDescription>
-                          Tous les citoyens ont un accès égal aux emplois publics selon leurs mérites et compétences
-                        </CardDescription>
-                      </div>
-                    </div>
-                  </CardHeader>
-                </Card>
-              </div>
-
-              <div className="order-1 lg:order-2 space-y-6">
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-secondary/10 text-secondary rounded-full text-sm font-medium">
-                  <Award className="h-4 w-4" />
-                  Espace Citoyen / Candidat
-                </div>
-                <h2 className="text-3xl md:text-4xl font-bold text-foreground">
-                  Rejoignez la Fonction Publique
-                </h2>
-                <p className="text-lg text-muted-foreground">
-                  Découvrez les opportunités de carrière au service de l'État et déposez votre candidature 
-                  en toute simplicité et en toute transparence.
-                </p>
-                <Link to="/auth/signup?type=candidat">
-                  <Button size="lg" variant="secondary">
-                    Créer mon espace candidat
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Modernisation & Digitalisation */}
-      <section className="py-16 lg:py-24 bg-background">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto space-y-8">
-            <div className="text-center space-y-4">
-              <h2 className="text-3xl md:text-4xl font-bold text-foreground">
-                Modernisation & Digitalisation de l'administration
-              </h2>
-              <p className="text-lg text-muted-foreground">
-                Une fonction publique plus efficace, plus proche, plus moderne
-              </p>
-            </div>
-
-            <div className="prose prose-lg max-w-none text-foreground/90">
-              <p className="text-lg leading-relaxed">
-                La transformation numérique de l'administration gabonaise n'est pas qu'un projet technique : 
-                c'est une <strong>révolution dans la manière de servir les citoyens</strong>. En digitalisant 
-                nos procédures et nos archives, nous réduisons les délais, améliorons la traçabilité et 
-                renforçons la qualité du service public.
-              </p>
-
-              <div className="grid md:grid-cols-3 gap-6 my-8">
-                <Card className="text-center">
-                  <CardHeader>
-                    <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-2">
-                      <FileText className="h-6 w-6 text-primary" />
-                    </div>
-                    <CardTitle className="text-lg">Identifiant unique</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">
-                      Chaque agent dispose d'un identifiant numérique unique qui centralise toutes ses informations administratives
-                    </p>
-                  </CardContent>
-                </Card>
-
-                <Card className="text-center">
-                  <CardHeader>
-                    <div className="mx-auto w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center mb-2">
-                      <Users className="h-6 w-6 text-secondary" />
-                    </div>
-                    <CardTitle className="text-lg">Recensement biométrique</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">
-                      Fiabilisation des effectifs et lutte contre les fraudes grâce à l'identification biométrique
-                    </p>
-                  </CardContent>
-                </Card>
-
-                <Card className="text-center">
-                  <CardHeader>
-                    <div className="mx-auto w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center mb-2">
-                      <TrendingUp className="h-6 w-6 text-accent" />
-                    </div>
-                    <CardTitle className="text-lg">Traçabilité totale</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">
-                      Chaque acte, chaque décision est enregistré et consultable, garantissant transparence et auditabilité
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
-
-              <Card className="bg-gradient-to-r from-primary/5 to-secondary/5 border-none">
-                <CardHeader>
-                  <CardTitle className="text-2xl">L'impact de la digitalisation</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-start gap-3">
-                    <div className="rounded-full bg-primary/20 p-1 mt-1">
-                      <ArrowRight className="h-4 w-4 text-primary" />
-                    </div>
-                    <div>
-                      <strong className="text-foreground">Moins de lenteurs administratives</strong>
-                      <p className="text-sm text-muted-foreground">Les processus digitalisés sont plus rapides et plus fluides</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="rounded-full bg-primary/20 p-1 mt-1">
-                      <ArrowRight className="h-4 w-4 text-primary" />
-                    </div>
-                    <div>
-                      <strong className="text-foreground">Plus de traçabilité</strong>
-                      <p className="text-sm text-muted-foreground">Chaque étape est documentée et consultable à tout moment</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="rounded-full bg-primary/20 p-1 mt-1">
-                      <ArrowRight className="h-4 w-4 text-primary" />
-                    </div>
-                    <div>
-                      <strong className="text-foreground">Meilleure qualité de service</strong>
-                      <p className="text-sm text-muted-foreground">Les citoyens et les agents bénéficient d'un service plus réactif et plus fiable</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <blockquote className="text-xl text-center italic text-primary font-medium py-8 border-l-4 border-primary pl-6 my-8">
-                "La modernisation de la fonction publique, c'est la modernisation du quotidien des Gabonaises et des Gabonais."
-              </blockquote>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Actualités & Communiqués */}
-      <section className="py-16 lg:py-24 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto space-y-8">
-            <div className="text-center space-y-4">
-              <h2 className="text-3xl md:text-4xl font-bold text-foreground">
+        {/* Actualités & Ressources */}
+        <section className="grid lg:grid-cols-2 gap-6 md:gap-8">
+          {/* Actualités */}
+          <div className="neu-card px-5 py-6 md:px-7 md:py-7 space-y-4">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-primary" />
+              <h3 className="text-lg md:text-xl font-semibold">
                 Actualités & Communiqués
-              </h2>
-              <p className="text-lg text-muted-foreground">
-                Restez informés des dernières nouvelles de la Fonction Publique
-              </p>
+              </h3>
             </div>
-
-            <div className="grid md:grid-cols-3 gap-6">
-              <Card className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="text-xs text-muted-foreground mb-2">12 Novembre 2025</div>
-                  <CardTitle className="text-lg">Lancement de la campagne de recensement biométrique 2025</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Le Ministère annonce le démarrage de la nouvelle phase du recensement biométrique. 
-                    Tous les agents sont invités à se faire recenser avant le 15 décembre 2025.
-                  </p>
-                  <Button variant="link" className="p-0 h-auto">
-                    Lire la suite <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="text-xs text-muted-foreground mb-2">08 Novembre 2025</div>
-                  <CardTitle className="text-lg">Ouverture des concours de recrutement 2025-2026</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Plus de 2 000 postes sont ouverts dans divers corps de la fonction publique. 
-                    Les candidatures sont ouvertes jusqu'au 30 novembre 2025 sur ADMIN.GA.
-                  </p>
-                  <Button variant="link" className="p-0 h-auto">
-                    Voir les postes <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="text-xs text-muted-foreground mb-2">05 Novembre 2025</div>
-                  <CardTitle className="text-lg">Publication du nouveau statut général de la fonction publique</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Le nouveau statut général modernise le cadre juridique de la fonction publique gabonaise 
-                    et renforce les droits des agents.
-                  </p>
-                  <Button variant="link" className="p-0 h-auto">
-                    Consulter le texte <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-
-            <div className="text-center pt-6">
-              <Button variant="outline" size="lg">
-                Voir toutes les actualités
-              </Button>
+            <p className="text-sm md:text-base text-muted-foreground">
+              Suivez les dernières actualités du Ministère de la Fonction
+              Publique, les annonces officielles et les grandes étapes de la
+              réforme.
+            </p>
+            <div className="space-y-3 text-sm text-muted-foreground">
+              <NewsItem
+                title="Lancement d'ADMIN.GA pour tous les agents publics"
+                date="12 novembre 2025"
+                description="Le Ministère de la Fonction Publique met en ligne ADMIN.GA, le premier portail digital entièrement dédié à la gestion de la carrière des agents publics et aux candidatures aux concours."
+              />
+              <NewsItem
+                title="Campagne nationale de recensement biométrique"
+                date="5 novembre 2025"
+                description="Une nouvelle phase de recensement biométrique est ouverte pour les agents publics afin d'actualiser les effectifs et de renforcer la fiabilité des données."
+              />
+              <NewsItem
+                title="Publication du Guide numérique du fonctionnaire"
+                date="28 octobre 2025"
+                description="Le nouveau Guide du fonctionnaire est disponible en version électronique sur ADMIN.GA."
+              />
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* Ressources & Infos utiles */}
-      <section className="py-16 lg:py-24 bg-background">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto space-y-8">
-            <div className="text-center space-y-4">
-              <h2 className="text-3xl md:text-4xl font-bold text-foreground">
-                Ressources & Informations utiles
-              </h2>
-              <p className="text-lg text-muted-foreground">
-                Guides, textes de loi et réponses à vos questions
-              </p>
+          {/* Ressources */}
+          <div className="neu-card px-5 py-6 md:px-7 md:py-7 space-y-4">
+            <div className="flex items-center gap-2">
+              <BookOpen className="w-5 h-5 text-secondary" />
+              <h3 className="text-lg md:text-xl font-semibold">
+                Ressources & informations utiles
+              </h3>
             </div>
-
-            <div className="grid md:grid-cols-2 gap-6">
-              <Card className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="flex items-start gap-4">
-                    <div className="rounded-lg bg-primary/10 p-3">
-                      <BookOpen className="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                      <CardTitle>Textes de base</CardTitle>
-                      <CardDescription className="mt-2">
-                        • Statut général de la fonction publique<br />
-                        • Loi sur le recensement biométrique<br />
-                        • Décrets d'application récents<br />
-                        • Code de déontologie des agents publics
-                      </CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <Button variant="link" className="p-0 h-auto">
-                    Accéder aux textes <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="flex items-start gap-4">
-                    <div className="rounded-lg bg-secondary/10 p-3">
-                      <FileText className="h-6 w-6 text-secondary" />
-                    </div>
-                    <div>
-                      <CardTitle>Guides pratiques</CardTitle>
-                      <CardDescription className="mt-2">
-                        • Guide du fonctionnaire<br />
-                        • Guide du candidat aux concours<br />
-                        • Comment utiliser ADMIN.GA<br />
-                        • Procédures de demande de retraite
-                      </CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <Button variant="link" className="p-0 h-auto">
-                    Télécharger les guides <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-
-            <Card className="bg-accent/5">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Newspaper className="h-5 w-5 text-accent" />
-                  Questions fréquentes (FAQ)
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="border-l-2 border-accent/30 pl-4">
-                  <h4 className="font-semibold text-foreground mb-1">Comment créer mon compte agent sur ADMIN.GA ?</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Cliquez sur "Je suis fonctionnaire" puis "Créer un compte". Vous aurez besoin de votre matricule 
-                    et de votre numéro de téléphone enregistré dans le système.
-                  </p>
-                </div>
-                <div className="border-l-2 border-accent/30 pl-4">
-                  <h4 className="font-semibold text-foreground mb-1">Comment postuler à un concours ?</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Créez un espace candidat, consultez les concours ouverts, vérifiez les conditions d'éligibilité 
-                    et déposez votre dossier en ligne avec les pièces requises.
-                  </p>
-                </div>
-                <div className="border-l-2 border-accent/30 pl-4">
-                  <h4 className="font-semibold text-foreground mb-1">Je ne suis pas recensé, que dois-je faire ?</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Contactez immédiatement votre direction des ressources humaines pour régulariser votre situation. 
-                    Le recensement est obligatoire pour tous les agents publics.
-                  </p>
-                </div>
-                <div className="pt-4">
-                  <Button variant="outline">
-                    Voir toutes les questions
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            <p className="text-sm md:text-base text-muted-foreground">
+              Besoin de précisions ? Retrouvez les principaux textes, guides et
+              réponses à vos questions.
+            </p>
+            <ul className="space-y-2 text-sm md:text-base text-muted-foreground">
+              <li>• Statut général de la Fonction Publique</li>
+              <li>• Lois et décrets récents sur la Function Publique</li>
+              <li>• Guide du fonctionnaire gabonais (PDF)</li>
+              <li>• Guide du candidat aux concours</li>
+              <li>• FAQ – Compte agent & compte candidat</li>
+              <li>• Assistance & support en ligne</li>
+            </ul>
+            <button className="neu-button mt-2">Accéder à toutes les ressources</button>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Footer */}
-      <footer className="bg-card border-t py-12">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <div className="grid md:grid-cols-3 gap-8 mb-8">
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <Shield className="h-6 w-6 text-primary" />
-                  <span className="font-bold text-lg">ADMIN.GA</span>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Portail officiel du Ministère de la Fonction Publique de la République Gabonaise
-                </p>
-              </div>
-
-              <div className="space-y-4">
-                <h4 className="font-semibold text-foreground">Liens utiles</h4>
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li><a href="#" className="hover:text-foreground transition-colors">Mentions légales</a></li>
-                  <li><a href="#" className="hover:text-foreground transition-colors">Protection des données</a></li>
-                  <li><a href="#" className="hover:text-foreground transition-colors">Accessibilité</a></li>
-                  <li><a href="#" className="hover:text-foreground transition-colors">Plan du site</a></li>
-                </ul>
-              </div>
-
-              <div className="space-y-4">
-                <h4 className="font-semibold text-foreground">Contact</h4>
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li>Ministère de la Fonction Publique</li>
-                  <li>Libreville, Gabon</li>
-                  <li>Tél: +241 XX XX XX XX</li>
-                  <li>Email: contact@fonction-publique.ga</li>
-                </ul>
-              </div>
-            </div>
-
-            <div className="pt-8 border-t text-center text-sm text-muted-foreground">
-              <p>© 2025 République Gabonaise - Ministère de la Fonction Publique. Tous droits réservés.</p>
-              <p className="mt-2 text-xs">
-                Développé dans le cadre de la Nouvelle République • Pour une administration moderne, transparente et efficace
-              </p>
-            </div>
+        {/* Footer */}
+        <footer className="neu-card px-4 py-4 md:px-6 md:py-5 text-xs md:text-sm flex flex-col md:flex-row md:items-center md:justify-between gap-2 text-muted-foreground">
+          <div>
+            <p className="font-medium text-foreground">
+              Portail officiel du Ministère de la Fonction Publique de la
+              République Gabonaise
+            </p>
+            <p>
+              © {new Date().getFullYear()} – La Fonction Publique, au service de
+              tous.
+            </p>
           </div>
+          <div className="flex flex-wrap gap-3">
+            <a href="#" className="hover:underline hover:text-foreground transition-colors">
+              Mentions légales
+            </a>
+            <a href="#" className="hover:underline hover:text-foreground transition-colors">
+              Protection des données
+            </a>
+            <a href="#" className="hover:underline hover:text-foreground transition-colors">
+              Contact & support
+            </a>
+          </div>
+        </footer>
+      </div>
+    </div>
+  );
+}
+
+/* Sous-composants */
+
+interface StatCardProps {
+  label: string;
+  value: string;
+  subtitle: string;
+  icon: React.ReactNode;
+  color: string;
+}
+
+function StatCard({ label, value, subtitle, icon, color }: StatCardProps) {
+  return (
+    <div className="neu-card-sm px-3 py-3 md:px-4 md:py-4 text-xs md:text-sm">
+      <div className="flex items-center justify-between gap-2">
+        <div>
+          <p className="text-muted-foreground">{label}</p>
+          <p className="text-lg md:text-xl font-bold">{value}</p>
+          <p className="text-[0.7rem] md:text-xs text-muted-foreground">
+            {subtitle}
+          </p>
         </div>
-      </footer>
+        <div className={`icon-pill ${color}`}>
+          {icon}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+interface NewsItemProps {
+  title: string;
+  date: string;
+  description: string;
+}
+
+function NewsItem({ title, date, description }: NewsItemProps) {
+  return (
+    <div className="neu-inset p-3 md:p-4 rounded-xl">
+      <p className="text-[0.7rem] md:text-xs uppercase tracking-wide text-muted-foreground mb-1">
+        {date}
+      </p>
+      <h4 className="font-semibold text-foreground mb-1">{title}</h4>
+      <p className="text-xs md:text-sm text-muted-foreground">
+        {description}
+      </p>
+      <button className="neu-button mt-2 text-xs px-3 py-2">
+        Lire le communiqué
+      </button>
     </div>
   );
 }

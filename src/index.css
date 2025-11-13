@@ -8,15 +8,15 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Light modern design with soft shadows - inspired by clean dashboard UIs */
-    --background: 210 20% 96%;
-    --foreground: 222 47% 11%;
+    /* Neomorphic design with soft shadows */
+    --background: 0 0% 88%; /* #e0e0e0 */
+    --foreground: 220 26% 14%; /* #111827 */
 
-    --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card: 0 0% 88%;
+    --card-foreground: 220 26% 14%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover: 0 0% 88%;
+    --popover-foreground: 220 26% 14%;
 
     /* Gabon flag colors inspired - Blue and Green */
     --primary: 142 69% 26%; /* Gabon green */
@@ -25,11 +25,11 @@ All colors MUST be HSL.
     --secondary: 214 84% 56%; /* Gabon blue */
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 210 20% 92%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 0 0% 92%;
+    --muted-foreground: 220 13% 46%; /* #6b7280 */
 
     --accent: 47 96% 53%; /* Gabon yellow accent */
-    --accent-foreground: 222 47% 11%;
+    --accent-foreground: 220 26% 14%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
@@ -47,14 +47,18 @@ All colors MUST be HSL.
     --input: 214 32% 91%;
     --ring: 142 69% 26%;
 
-    --radius: 0.75rem;
+    --radius: 1.125rem;
     
-    /* Soft shadows for modern look */
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.03);
-    --shadow: 0 2px 8px 0 rgb(0 0 0 / 0.06);
-    --shadow-md: 0 4px 12px 0 rgb(0 0 0 / 0.08);
-    --shadow-lg: 0 8px 24px 0 rgb(0 0 0 / 0.10);
-    --shadow-xl: 0 12px 32px 0 rgb(0 0 0 / 0.12);
+    /* Neomorphic shadows */
+    --neu-light: 0 0% 100%; /* #ffffff */
+    --neu-dark: 0 0% 75%; /* #bebebe */
+    
+    --shadow-neu: 8px 8px 16px hsl(var(--neu-dark)), -8px -8px 16px hsl(var(--neu-light));
+    --shadow-neu-sm: 4px 4px 8px hsl(var(--neu-dark)), -4px -4px 8px hsl(var(--neu-light));
+    --shadow-neu-inset: inset 6px 6px 12px hsl(var(--neu-dark)), inset -6px -6px 12px hsl(var(--neu-light));
+    --shadow-neu-button: 3px 3px 6px hsl(var(--neu-dark)), -3px -3px 6px hsl(var(--neu-light));
+    --shadow-neu-button-hover: 4px 4px 8px hsl(var(--neu-dark)), -4px -4px 8px hsl(var(--neu-light));
+    --shadow-neu-button-active: inset 2px 2px 4px hsl(var(--neu-dark)), inset -2px -2px 4px hsl(var(--neu-light));
 
     --sidebar-background: 215 25% 15%;
     --sidebar-foreground: 0 0% 95%;
@@ -122,5 +126,94 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Neomorphic component styles */
+@layer components {
+  .neu-card {
+    background: hsl(var(--background));
+    box-shadow: var(--shadow-neu);
+    border-radius: 1.125rem;
+    border: none;
+  }
+
+  .neu-card-sm {
+    background: hsl(var(--background));
+    box-shadow: var(--shadow-neu-sm);
+    border-radius: 0.875rem;
+    border: none;
+  }
+
+  .neu-inset {
+    background: hsl(var(--background));
+    box-shadow: var(--shadow-neu-inset);
+    border-radius: 0.875rem;
+  }
+
+  .neu-raised {
+    background: hsl(var(--background));
+    box-shadow: 6px 6px 12px hsl(var(--neu-dark)), -6px -6px 12px hsl(var(--neu-light));
+    border-radius: 9999px;
+  }
+
+  .neu-button {
+    background: hsl(var(--background));
+    box-shadow: var(--shadow-neu-button);
+    border: none;
+    border-radius: 0.875rem;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: hsl(var(--foreground));
+    cursor: pointer;
+    transition: all 0.15s ease;
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .neu-button:hover {
+    box-shadow: var(--shadow-neu-button-hover);
+    transform: translateY(-1px);
+  }
+
+  .neu-button:active {
+    box-shadow: var(--shadow-neu-button-active);
+    transform: translateY(0);
+  }
+
+  .neu-button-primary {
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+    box-shadow: 4px 4px 10px hsla(142, 69%, 26%, 0.55), -4px -4px 10px hsla(0, 0%, 100%, 0.7);
+  }
+
+  .neu-button-primary:hover {
+    box-shadow: 5px 5px 12px hsla(142, 69%, 26%, 0.6), -5px -5px 12px hsla(0, 0%, 100%, 0.8);
+  }
+
+  .neu-button-secondary {
+    background: hsl(var(--secondary));
+    color: hsl(var(--secondary-foreground));
+    box-shadow: 4px 4px 10px hsla(214, 84%, 56%, 0.55), -4px -4px 10px hsla(0, 0%, 100%, 0.7);
+  }
+
+  .icon-pill {
+    width: 40px;
+    height: 40px;
+    border-radius: 9999px;
+    background: hsl(var(--background));
+    box-shadow: 4px 4px 8px hsl(var(--neu-dark)), -4px -4px 8px hsl(var(--neu-light));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .neu-card {
+      border-radius: 0.875rem;
+      box-shadow: var(--shadow-neu-sm);
+    }
   }
 }
