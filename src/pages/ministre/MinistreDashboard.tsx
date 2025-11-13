@@ -13,6 +13,7 @@ import { IAstedButton } from "@/components/ministre/IAstedButton";
 import { IastedChat } from "@/components/ministre/IastedChat";
 import { useVoiceInteraction } from "@/hooks/useVoiceInteraction";
 import { AnomalyMonitor } from "@/components/ministre/AnomalyMonitor";
+import { KnowledgeBase } from "@/components/ministre/KnowledgeBase";
 
 export default function MinistreDashboard() {
   const [isIastedChatOpen, setIsIastedChatOpen] = useState(false);
@@ -124,9 +125,10 @@ export default function MinistreDashboard() {
           </div>
 
           <Tabs defaultValue="dashboard" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="dashboard">Tableau de Bord</TabsTrigger>
               <TabsTrigger value="monitoring">Surveillance iAsted</TabsTrigger>
+              <TabsTrigger value="knowledge">Base de Connaissances</TabsTrigger>
             </TabsList>
 
             <TabsContent value="dashboard" className="space-y-6 mt-6">
@@ -207,6 +209,10 @@ export default function MinistreDashboard() {
 
             <TabsContent value="monitoring" className="mt-6">
               <AnomalyMonitor />
+            </TabsContent>
+
+            <TabsContent value="knowledge" className="mt-6">
+              <KnowledgeBase />
             </TabsContent>
           </Tabs>
         </div>

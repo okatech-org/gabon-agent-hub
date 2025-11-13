@@ -120,6 +120,28 @@ serve(async (req) => {
       content: m.content
     })) || [];
 
+    // Récupérer la base de connaissances personnalisée du Ministre
+    const { data: knowledgeBase } = await supabase
+      .from('iasted_knowledge_base' as any)
+      .select('title, description, content, category, tags')
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
+      .limit(20);
+
+    let knowledgeContext = '';
+    if (knowledgeBase && knowledgeBase.length > 0) {
+      knowledgeContext = '\n\n[CONNAISSANCES PERSONNALISÉES DU MINISTRE]\n\n';
+      knowledgeBase.forEach((entry: any) => {
+        knowledgeContext += `### ${entry.title} [${entry.category}]\n`;
+        if (entry.description) knowledgeContext += `${entry.description}\n`;
+        if (entry.content) knowledgeContext += `${entry.content}\n`;
+        if (entry.tags && entry.tags.length > 0) {
+          knowledgeContext += `Mots-clés: ${entry.tags.join(', ')}\n`;
+        }
+        knowledgeContext += '\n';
+      });
+    }
+
     // 4. Génération réponse avec sélection du modèle
     const SYSTEM_PROMPT = `Tu es **iAsted**, l'Assistant IA ministériel officiel du **Ministre de la Fonction Publique de la République Gabonaise**.
 
@@ -187,7 +209,9 @@ Le Ministre peut te solliciter pour :
 4. **Discrétion absolue** : Les données sont sensibles et confidentielles
 5. **Proactivité** : Anticipe les besoins et propose des analyses complémentaires
 
-Tu es un outil au service de l'Excellence pour moderniser et optimiser la gestion de la fonction publique gabonaise.`;
+Tu es un outil au service de l'Excellence pour moderniser et optimiser la gestion de la fonction publique gabonaise.
+
+${knowledgeContext}`;
 
     console.log(`Using AI model: ${aiModel}`);
     let responseText = '';
