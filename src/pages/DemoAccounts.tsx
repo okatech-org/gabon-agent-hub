@@ -12,6 +12,7 @@ interface DemoAccount {
   icon: any;
   email: string;
   color: string;
+  enabled: boolean;
 }
 
 const demoAccounts: DemoAccount[] = [
@@ -28,7 +29,8 @@ const demoAccounts: DemoAccount[] = [
     ],
     icon: Crown,
     email: "ministre.demo@fonctionpublique.ga",
-    color: "text-purple-600"
+    color: "text-purple-600",
+    enabled: true
   },
   {
     id: "secretaire_general",
@@ -43,7 +45,8 @@ const demoAccounts: DemoAccount[] = [
     ],
     icon: FileCheck,
     email: "sg.demo@fonctionpublique.ga",
-    color: "text-indigo-600"
+    color: "text-indigo-600",
+    enabled: true
   },
   {
     id: "directeur_cabinet",
@@ -58,7 +61,8 @@ const demoAccounts: DemoAccount[] = [
     ],
     icon: Briefcase,
     email: "cabinet.demo@fonctionpublique.ga",
-    color: "text-violet-600"
+    color: "text-violet-600",
+    enabled: true
   },
   {
     id: "admin",
@@ -73,7 +77,8 @@ const demoAccounts: DemoAccount[] = [
     ],
     icon: Shield,
     email: "admin.demo@fonctionpublique.ga",
-    color: "text-destructive"
+    color: "text-destructive",
+    enabled: false
   },
   {
     id: "drh",
@@ -88,7 +93,8 @@ const demoAccounts: DemoAccount[] = [
     ],
     icon: UserCog,
     email: "drh.demo@fonctionpublique.ga",
-    color: "text-secondary"
+    color: "text-secondary",
+    enabled: true
   },
   {
     id: "directeur_planification",
@@ -103,7 +109,8 @@ const demoAccounts: DemoAccount[] = [
     ],
     icon: TrendingUp,
     email: "planification.demo@fonctionpublique.ga",
-    color: "text-blue-600"
+    color: "text-blue-600",
+    enabled: false
   },
   {
     id: "tresorier",
@@ -118,7 +125,8 @@ const demoAccounts: DemoAccount[] = [
     ],
     icon: Landmark,
     email: "tresorier.demo@fonctionpublique.ga",
-    color: "text-amber-600"
+    color: "text-amber-600",
+    enabled: false
   },
   {
     id: "gestionnaire",
@@ -133,7 +141,8 @@ const demoAccounts: DemoAccount[] = [
     ],
     icon: Folder,
     email: "gestionnaire.demo@fonctionpublique.ga",
-    color: "text-info"
+    color: "text-info",
+    enabled: true
   },
   {
     id: "directeur",
@@ -148,7 +157,8 @@ const demoAccounts: DemoAccount[] = [
     ],
     icon: Building2,
     email: "directeur.demo@fonctionpublique.ga",
-    color: "text-accent"
+    color: "text-accent",
+    enabled: false
   },
   {
     id: "fonctionnaire",
@@ -163,7 +173,8 @@ const demoAccounts: DemoAccount[] = [
     ],
     icon: Users,
     email: "fonctionnaire.demo@fonctionpublique.ga",
-    color: "text-primary"
+    color: "text-primary",
+    enabled: true
   },
   {
     id: "candidat",
@@ -178,7 +189,8 @@ const demoAccounts: DemoAccount[] = [
     ],
     icon: GraduationCap,
     email: "candidat.demo@fonctionpublique.ga",
-    color: "text-success"
+    color: "text-success",
+    enabled: true
   }
 ];
 
@@ -268,9 +280,13 @@ export default function DemoAccounts() {
             return (
               <button
                 key={account.id}
-                onClick={() => handleDemoLogin(account)}
-                disabled={isLoading}
-                className="neu-card p-6 text-left hover:shadow-lg hover:-translate-y-1 transition-all duration-200 group disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={() => account.enabled && handleDemoLogin(account)}
+                disabled={isLoading || !account.enabled}
+                className={`neu-card p-6 text-left transition-all duration-200 group ${
+                  account.enabled 
+                    ? 'hover:shadow-lg hover:-translate-y-1 cursor-pointer' 
+                    : 'opacity-40 cursor-not-allowed grayscale'
+                } disabled:cursor-not-allowed`}
               >
                 <div className="flex items-start gap-3 mb-4">
                   <div className={`neu-raised w-14 h-14 flex items-center justify-center flex-shrink-0 ${account.color} group-hover:scale-110 transition-transform`}>
@@ -310,10 +326,21 @@ export default function DemoAccounts() {
                     {account.email}
                   </p>
                   <div className="flex items-center gap-2 pt-2">
-                    <CheckCircle2 className="w-4 h-4 text-success flex-shrink-0" />
-                    <p className="text-sm text-success font-medium">
-                      Connexion en un clic
-                    </p>
+                    {account.enabled ? (
+                      <>
+                        <CheckCircle2 className="w-4 h-4 text-success flex-shrink-0" />
+                        <p className="text-sm text-success font-medium">
+                          Connexion en un clic
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <div className="w-4 h-4 rounded-full bg-muted flex-shrink-0" />
+                        <p className="text-sm text-muted-foreground font-medium">
+                          Prochainement disponible
+                        </p>
+                      </>
+                    )}
                   </div>
                 </div>
               </button>
