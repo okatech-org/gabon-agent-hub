@@ -1,13 +1,10 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { 
   Loader2, Send, BarChart3, FileText, Users, 
-  DollarSign, ClipboardList, FileCheck, Bell, 
+  DollarSign, FileCheck, Bell, 
   GraduationCap, History, AlertTriangle
 } from "lucide-react";
 
@@ -164,8 +161,7 @@ export function IastedChat() {
 
   return (
     <div className="flex flex-col h-[600px]">
-      {/* Actions rapides par catégorie */}
-      <div className="space-y-4 mb-4">
+      <div className="space-y-4 mb-6">
         {['ÉCONOMIE & FINANCES', 'ACTIONS MINISTÉRIELLES', 'ACTIONS & GESTION', 'VUE GLOBALE'].map((category) => {
           const categoryActions = quickActions.filter(a => a.category === category);
           if (categoryActions.length === 0) return null;
@@ -177,17 +173,15 @@ export function IastedChat() {
               </h4>
               <div className="flex gap-2 flex-wrap">
                 {categoryActions.map((action) => (
-                  <Button
+                  <button
                     key={action.label}
-                    variant="outline"
-                    size="sm"
                     onClick={() => sendMessage(action.prompt, action.action)}
                     disabled={isLoading}
-                    className="gap-2 neu-button"
+                    className="neu-button text-sm px-3 py-2 flex items-center gap-2"
                   >
                     <action.icon className="h-4 w-4" />
                     {action.label}
-                  </Button>
+                  </button>
                 ))}
               </div>
             </div>
@@ -195,8 +189,7 @@ export function IastedChat() {
         })}
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto space-y-4 mb-4 p-4 border rounded-lg bg-muted/30">
+      <div className="neu-inset flex-1 overflow-y-auto space-y-4 mb-4 p-4 rounded-xl">
         {messages.length === 0 && (
           <div className="text-center text-muted-foreground py-8">
             <p className="text-lg font-medium mb-2">Bonjour Excellence,</p>
@@ -209,45 +202,46 @@ export function IastedChat() {
             key={index}
             className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
-            <Card
-              className={`max-w-[80%] p-4 ${
+            <div
+              className={`max-w-[80%] p-4 rounded-xl ${
                 message.role === 'user'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-card'
+                  ? 'neu-raised bg-primary text-primary-foreground'
+                  : 'neu-card'
               }`}
             >
               <div className="flex items-start gap-2 mb-2">
-                <Badge variant={message.role === 'user' ? 'secondary' : 'default'}>
+                <span className={`neu-raised text-xs px-2 py-1 rounded-full font-medium ${
+                  message.role === 'user' ? 'bg-primary-foreground text-primary' : 'bg-primary text-primary-foreground'
+                }`}>
                   {message.role === 'user' ? 'Vous' : 'iAsted'}
-                </Badge>
-                <span className="text-xs text-muted-foreground">
+                </span>
+                <span className="text-xs opacity-70">
                   {new Date(message.timestamp).toLocaleTimeString('fr-FR', {
                     hour: '2-digit',
                     minute: '2-digit',
                   })}
                 </span>
               </div>
-              <div className="whitespace-pre-wrap">{message.content}</div>
-            </Card>
+              <div className="whitespace-pre-wrap text-sm">{message.content}</div>
+            </div>
           </div>
         ))}
 
         {isLoading && (
           <div className="flex justify-start">
-            <Card className="max-w-[80%] p-4 bg-card">
+            <div className="neu-card max-w-[80%] p-4">
               <div className="flex items-center gap-2">
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin text-primary" />
                 <span className="text-sm text-muted-foreground">
                   iAsted analyse votre demande...
                 </span>
               </div>
-            </Card>
+            </div>
           </div>
         )}
       </div>
 
-      {/* Input */}
-      <div className="flex gap-2">
+      <div className="flex gap-3">
         <Textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
@@ -258,21 +252,20 @@ export function IastedChat() {
             }
           }}
           placeholder="Posez votre question à iAsted... (Shift+Enter pour nouvelle ligne)"
-          className="min-h-[60px]"
+          className="neu-inset min-h-[60px] resize-none"
           disabled={isLoading}
         />
-        <Button
+        <button
           onClick={() => sendMessage(input)}
           disabled={isLoading || !input.trim()}
-          size="icon"
-          className="h-[60px] w-[60px]"
+          className="neu-button neu-button-admin h-[60px] w-[60px] flex items-center justify-center flex-shrink-0"
         >
           {isLoading ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <Loader2 className="h-5 w-5 animate-spin" />
           ) : (
-            <Send className="h-4 w-4" />
+            <Send className="h-5 w-5" />
           )}
-        </Button>
+        </button>
       </div>
     </div>
   );

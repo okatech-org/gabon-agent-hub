@@ -5,13 +5,11 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 export function MinistreLayout() {
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-background p-3 gap-3">
+      <div className="flex min-h-screen w-full">
         <MinistreSidebar />
-        <div className="flex-1 flex flex-col">
-          <main className="flex-1 overflow-auto">
-            <Outlet />
-          </main>
-        </div>
+        <main className="flex-1 overflow-y-auto">
+          <Outlet />
+        </main>
       </div>
     </SidebarProvider>
   );

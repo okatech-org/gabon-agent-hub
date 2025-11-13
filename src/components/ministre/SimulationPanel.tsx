@@ -1,13 +1,10 @@
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Loader2, PlayCircle, TrendingDown, TrendingUp, AlertCircle } from "lucide-react";
+import { Loader2, PlayCircle, TrendingUp } from "lucide-react";
 
 export function SimulationPanel() {
   const [isSimulating, setIsSimulating] = useState(false);
@@ -93,14 +90,14 @@ Propose une stratégie de déploiement progressive.`;
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Simulateur de Scénarios</CardTitle>
-          <CardDescription>
+      <div className="neu-card p-5 md:p-6">
+        <div className="mb-6">
+          <h3 className="text-xl font-semibold mb-2">Simulateur de Scénarios</h3>
+          <p className="text-sm text-muted-foreground">
             Modélisez l'impact de réformes et décisions stratégiques sur la fonction publique
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
+          </p>
+        </div>
+        <div className="space-y-6">
           <div className="space-y-2">
             <Label>Type de simulation</Label>
             <Select value={simulationType} onValueChange={setSimulationType}>
@@ -153,58 +150,58 @@ Propose une stratégie de déploiement progressive.`;
             </p>
           </div>
 
-          <Button 
+          <button 
             onClick={runSimulation} 
             disabled={isSimulating}
-            className="w-full"
-            size="lg"
+            className="neu-button neu-button-admin w-full flex items-center justify-center gap-2"
           >
             {isSimulating ? (
               <>
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                <Loader2 className="h-5 w-5 animate-spin" />
                 Simulation en cours...
               </>
             ) : (
               <>
-                <PlayCircle className="mr-2 h-5 w-5" />
+                <PlayCircle className="h-5 w-5" />
                 Lancer la simulation
               </>
             )}
-          </Button>
-        </CardContent>
-      </Card>
+          </button>
+        </div>
+      </div>
 
       {results && (
-        <Card className="border-primary/20">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+        <div className="neu-card p-5 md:p-6">
+          <div className="mb-4">
+            <h3 className="flex items-center gap-2 text-xl font-semibold mb-2">
               <TrendingUp className="h-5 w-5 text-primary" />
               Résultats de simulation
-            </CardTitle>
-            <CardDescription>
+            </h3>
+            <p className="text-sm text-muted-foreground">
               {simulationType === 'gel_recrutement' && `Gel des recrutements catégorie ${results.categorie} sur ${results.duree} ans`}
               {simulationType === 'departs_retraite' && `Départs à la retraite sur ${results.duree} ans`}
               {simulationType === 'reforme_statut' && `Réforme du statut général sur ${results.duree} ans`}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+            </p>
+          </div>
+          
+          <div className="neu-inset rounded-lg p-5 mb-6">
             <div className="prose prose-sm max-w-none dark:prose-invert">
-              <div className="whitespace-pre-wrap">{results.analyse}</div>
+              <div className="whitespace-pre-wrap text-sm">{results.analyse}</div>
             </div>
+          </div>
 
-            <div className="flex gap-2 mt-6 pt-6 border-t">
-              <Button variant="outline" size="sm">
-                Exporter en PDF
-              </Button>
-              <Button variant="outline" size="sm">
-                Partager avec le Cabinet
-              </Button>
-              <Button variant="outline" size="sm">
-                Archiver
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+          <div className="flex flex-wrap gap-2">
+            <button className="neu-button text-sm px-4 py-2">
+              Exporter en PDF
+            </button>
+            <button className="neu-button text-sm px-4 py-2">
+              Partager avec le Cabinet
+            </button>
+            <button className="neu-button text-sm px-4 py-2">
+              Archiver
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
