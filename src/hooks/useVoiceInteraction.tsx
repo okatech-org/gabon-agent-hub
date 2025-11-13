@@ -112,12 +112,29 @@ export const useVoiceInteraction = () => {
     initSession();
   }, [user]);
 
-  // Charger les préférences vocales de l'utilisateur
+  // Charger les préférences vocales et la voix iAsted
   useEffect(() => {
     const loadVoicePreferences = async () => {
       if (!user) return;
 
       try {
+        // Charger d'abord la voix iAsted depuis ElevenLabs
+        const { data: voicesData, error: voicesError } = await supabase.functions.invoke('list-voices');
+        
+        if (!voicesError && voicesData?.voices) {
+          const iastedVoice = voicesData.voices.find(
+            (voice: any) => voice.name.toLowerCase() === 'iasted'
+          );
+          
+          if (iastedVoice) {
+            console.log('✅ Voix iAsted chargée:', iastedVoice.voice_id);
+            setSelectedVoiceId(iastedVoice.voice_id);
+          } else {
+            console.warn('⚠️ Voix "iAsted" non trouvée dans ElevenLabs');
+          }
+        }
+
+        // Puis charger les préférences utilisateur
         const { data, error } = await supabase
           .from('user_preferences' as any)
           .select('voice_silence_duration, voice_silence_threshold, voice_continuous_mode, voice_focus_mode')
