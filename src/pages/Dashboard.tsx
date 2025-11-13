@@ -61,42 +61,48 @@ export default function Dashboard() {
       value: stats.totalAgents,
       description: `${stats.agentsActifs} actifs`,
       icon: Users,
-      color: "text-primary",
+      iconColor: "text-blue-500",
+      iconBg: "bg-blue-50",
     },
     {
       title: "Structures",
       value: stats.totalStructures,
       description: "Ministères, directions, services",
       icon: Building2,
-      color: "text-secondary",
+      iconColor: "text-green-500",
+      iconBg: "bg-green-50",
     },
     {
       title: "Postes Vacants",
       value: stats.postesVacants,
       description: "À pourvoir",
       icon: Briefcase,
-      color: "text-warning",
+      iconColor: "text-purple-500",
+      iconBg: "bg-purple-50",
     },
     {
       title: "Concours Ouverts",
       value: stats.concursOuverts,
       description: "En cours de recrutement",
       icon: TrendingUp,
-      color: "text-info",
+      iconColor: "text-orange-500",
+      iconBg: "bg-orange-50",
     },
     {
       title: "Agents Recensés",
       value: stats.agentsRecenses,
       description: "Données biométriques validées",
       icon: UserCheck,
-      color: "text-success",
+      iconColor: "text-primary",
+      iconBg: "bg-primary/10",
     },
     {
       title: "Alertes",
       value: 0,
       description: "Anomalies à traiter",
       icon: AlertCircle,
-      color: "text-destructive",
+      iconColor: "text-red-500",
+      iconBg: "bg-red-50",
     },
   ];
 
@@ -129,34 +135,36 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold">Tableau de bord</h1>
-        <p className="text-muted-foreground">
-          Vue d'ensemble de la Fonction Publique Gabonaise
-        </p>
+        <h1 className="text-3xl font-bold text-foreground">Tableau de bord</h1>
+        <p className="text-muted-foreground mt-1">Vue d'ensemble de la Fonction Publique Gabonaise</p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {statCards.map((stat) => {
           const Icon = stat.icon;
           return (
-            <Card key={stat.title} className="hover:shadow-lg transition-shadow">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
-                <Icon className={`h-5 w-5 ${stat.color}`} />
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">{stat.value.toLocaleString()}</div>
-                <p className="text-xs text-muted-foreground mt-1">{stat.description}</p>
+            <Card key={stat.title} className="transition-all duration-200 hover:shadow-lg">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-3 flex-1">
+                    <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
+                    <p className="text-3xl font-bold text-foreground">{stat.value.toLocaleString()}</p>
+                    <p className="text-xs text-muted-foreground">{stat.description}</p>
+                  </div>
+                  <div className={`rounded-full p-3 ${stat.iconBg}`}>
+                    <Icon className={`h-6 w-6 ${stat.iconColor}`} />
+                  </div>
+                </div>
               </CardContent>
             </Card>
           );
         })}
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card className="transition-all duration-200 hover:shadow-lg">
           <CardHeader>
             <CardTitle>Activités Récentes</CardTitle>
             <CardDescription>Dernières opérations enregistrées</CardDescription>
@@ -168,7 +176,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="transition-all duration-200 hover:shadow-lg">
           <CardHeader>
             <CardTitle>Actions Rapides</CardTitle>
             <CardDescription>Raccourcis vers les opérations courantes</CardDescription>

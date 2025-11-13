@@ -8,15 +8,15 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Gabon government colors - Professional blue/green palette */
-    --background: 0 0% 100%;
-    --foreground: 215 25% 15%;
+    /* Light modern design with soft shadows - inspired by clean dashboard UIs */
+    --background: 210 20% 96%;
+    --foreground: 222 47% 11%;
 
     --card: 0 0% 100%;
-    --card-foreground: 215 25% 15%;
+    --card-foreground: 222 47% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 15%;
+    --popover-foreground: 222 47% 11%;
 
     /* Gabon flag colors inspired - Blue and Green */
     --primary: 142 69% 26%; /* Gabon green */
@@ -25,11 +25,11 @@ All colors MUST be HSL.
     --secondary: 214 84% 56%; /* Gabon blue */
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 210 40% 96.1%;
+    --muted: 210 20% 92%;
     --muted-foreground: 215 16% 47%;
 
     --accent: 47 96% 53%; /* Gabon yellow accent */
-    --accent-foreground: 215 25% 15%;
+    --accent-foreground: 222 47% 11%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
@@ -47,7 +47,14 @@ All colors MUST be HSL.
     --input: 214 32% 91%;
     --ring: 142 69% 26%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
+    
+    /* Soft shadows for modern look */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.03);
+    --shadow: 0 2px 8px 0 rgb(0 0 0 / 0.06);
+    --shadow-md: 0 4px 12px 0 rgb(0 0 0 / 0.08);
+    --shadow-lg: 0 8px 24px 0 rgb(0 0 0 / 0.10);
+    --shadow-xl: 0 12px 32px 0 rgb(0 0 0 / 0.12);
 
     --sidebar-background: 215 25% 15%;
     --sidebar-foreground: 0 0% 95%;

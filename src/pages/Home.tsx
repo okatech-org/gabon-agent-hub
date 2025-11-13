@@ -7,7 +7,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header Navigation */}
-      <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+      <header className="border-b bg-card shadow-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Shield className="h-8 w-8 text-primary" />
@@ -28,7 +28,7 @@ export default function Home() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-primary/5 via-secondary/5 to-accent/5 py-20 lg:py-32">
+      <section className="relative bg-background py-20 lg:py-32">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center space-y-8">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4">
@@ -94,7 +94,7 @@ export default function Home() {
               </p>
 
               <div className="grid md:grid-cols-2 gap-6 my-8">
-                <Card className="border-l-4 border-l-primary">
+                <Card className="border-l-4 border-l-primary shadow-lg">
                   <CardHeader>
                     <CardTitle className="text-lg">Nos principes fondamentaux</CardTitle>
                   </CardHeader>
@@ -118,7 +118,7 @@ export default function Home() {
                   </CardContent>
                 </Card>
 
-                <Card className="border-l-4 border-l-secondary">
+                <Card className="border-l-4 border-l-secondary shadow-lg">
                   <CardHeader>
                     <CardTitle className="text-lg">Notre engagement</CardTitle>
                   </CardHeader>
@@ -136,7 +136,7 @@ export default function Home() {
       </section>
 
       {/* Le Ministère de la Fonction Publique */}
-      <section className="py-16 lg:py-24 bg-muted/30">
+      <section className="py-16 lg:py-24 bg-muted/50">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto space-y-8">
             <div className="text-center space-y-4">
@@ -149,7 +149,7 @@ export default function Home() {
             </div>
 
             <div className="space-y-6">
-              <Card>
+              <Card className="shadow-lg">
                 <CardHeader>
                   <CardTitle>Notre mission</CardTitle>
                 </CardHeader>
@@ -233,7 +233,7 @@ export default function Home() {
               </div>
 
               <div className="space-y-4">
-                <Card className="hover:shadow-lg transition-shadow">
+                <Card className="shadow-md hover:shadow-xl transition-all">
                   <CardHeader>
                     <div className="flex items-start gap-4">
                       <div className="rounded-lg bg-primary/10 p-3">
@@ -249,7 +249,7 @@ export default function Home() {
                   </CardHeader>
                 </Card>
 
-                <Card className="hover:shadow-lg transition-shadow">
+                <Card className="shadow-md hover:shadow-xl transition-all">
                   <CardHeader>
                     <div className="flex items-start gap-4">
                       <div className="rounded-lg bg-secondary/10 p-3">
@@ -265,7 +265,7 @@ export default function Home() {
                   </CardHeader>
                 </Card>
 
-                <Card className="hover:shadow-lg transition-shadow">
+                <Card className="shadow-md hover:shadow-xl transition-all">
                   <CardHeader>
                     <div className="flex items-start gap-4">
                       <div className="rounded-lg bg-accent/10 p-3">
@@ -281,7 +281,7 @@ export default function Home() {
                   </CardHeader>
                 </Card>
 
-                <Card className="hover:shadow-lg transition-shadow">
+                <Card className="shadow-md hover:shadow-xl transition-all">
                   <CardHeader>
                     <div className="flex items-start gap-4">
                       <div className="rounded-lg bg-primary/10 p-3">
@@ -303,12 +303,12 @@ export default function Home() {
       </section>
 
       {/* Je suis citoyen / candidat */}
-      <section className="py-16 lg:py-24 bg-gradient-to-br from-secondary/5 to-accent/5">
+      <section className="py-16 lg:py-24 bg-muted/50">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
               <div className="order-2 lg:order-1 space-y-4">
-                <Card className="hover:shadow-lg transition-shadow">
+                <Card className="shadow-md hover:shadow-xl transition-all">
                   <CardHeader>
                     <div className="flex items-start gap-4">
                       <div className="rounded-lg bg-secondary/10 p-3">
