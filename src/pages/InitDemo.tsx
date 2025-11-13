@@ -52,31 +52,31 @@ export default function InitDemo() {
             <ul className="space-y-2 text-sm">
               <li className="flex items-start gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-purple-600 mt-2" />
-                <span><strong>Ministre</strong> - ministre.demo@fonctionpublique.ga</span>
+                <span><strong>Ministre</strong> - ministre.demo@admin.ga</span>
               </li>
               <li className="flex items-start gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-indigo-600 mt-2" />
-                <span><strong>Secrétaire Général</strong> - sg.demo@fonctionpublique.ga</span>
+                <span><strong>Secrétaire Général</strong> - sg.demo@admin.ga</span>
               </li>
               <li className="flex items-start gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-violet-600 mt-2" />
-                <span><strong>Directeur de Cabinet</strong> - cabinet.demo@fonctionpublique.ga</span>
+                <span><strong>Directeur de Cabinet</strong> - cabinet.demo@admin.ga</span>
               </li>
               <li className="flex items-start gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-secondary mt-2" />
-                <span><strong>DRH</strong> - drh.demo@fonctionpublique.ga</span>
+                <span><strong>DRH</strong> - drh.demo@admin.ga</span>
               </li>
               <li className="flex items-start gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-info mt-2" />
-                <span><strong>Gestionnaire RH</strong> - gestionnaire.demo@fonctionpublique.ga</span>
+                <span><strong>Gestionnaire RH</strong> - gestionnaire.demo@admin.ga</span>
               </li>
               <li className="flex items-start gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2" />
-                <span><strong>Agent Fonctionnaire</strong> - fonctionnaire.demo@fonctionpublique.ga</span>
+                <span><strong>Agent Fonctionnaire</strong> - fonctionnaire.demo@admin.ga</span>
               </li>
               <li className="flex items-start gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-success mt-2" />
-                <span><strong>Candidat aux Concours</strong> - candidat.demo@fonctionpublique.ga</span>
+                <span><strong>Candidat aux Concours</strong> - candidat.demo@admin.ga</span>
               </li>
             </ul>
             <p className="text-xs text-muted-foreground italic mt-3">
