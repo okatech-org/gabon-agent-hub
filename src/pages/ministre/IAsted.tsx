@@ -11,6 +11,12 @@ interface VoiceSettings {
   silenceDuration: number;
   silenceThreshold: number;
   continuousMode: boolean;
+  // Paramètres avancés
+  thinkingTime: 'auto' | 'fast' | 'balanced' | 'thorough';
+  responseMode: 'auto' | 'concise' | 'detailed' | 'conversational';
+  aiModel: 'gemini' | 'gpt' | 'claude';
+  formalityLevel: 'formal' | 'balanced' | 'casual';
+  proactivity: 'low' | 'medium' | 'high';
 }
 
 interface Message {
@@ -26,6 +32,12 @@ export default function IAsted() {
     silenceDuration: 900,
     silenceThreshold: 10,
     continuousMode: false,
+    // Paramètres avancés par défaut
+    thinkingTime: 'auto',
+    responseMode: 'auto',
+    aiModel: 'gemini',
+    formalityLevel: 'formal',
+    proactivity: 'medium',
   });
 
   const [messages, setMessages] = useState<Message[]>([]);
@@ -67,10 +79,16 @@ export default function IAsted() {
 
       if (data && !error) {
         setVoiceSettings(prev => ({
+          ...prev,
           voiceId: (data as any).voice_id || prev.voiceId,
-          silenceDuration: (data as any).voice_silence_duration || 900,
-          silenceThreshold: (data as any).voice_silence_threshold || 10,
-          continuousMode: (data as any).voice_continuous_mode || false,
+          silenceDuration: (data as any).voice_silence_duration || prev.silenceDuration,
+          silenceThreshold: (data as any).voice_silence_threshold || prev.silenceThreshold,
+          continuousMode: (data as any).voice_continuous_mode || prev.continuousMode,
+          thinkingTime: (data as any).thinking_time || prev.thinkingTime,
+          responseMode: (data as any).response_mode || prev.responseMode,
+          aiModel: (data as any).ai_model || prev.aiModel,
+          formalityLevel: (data as any).formality_level || prev.formalityLevel,
+          proactivity: (data as any).proactivity || prev.proactivity,
         }));
       }
     };
@@ -91,6 +109,11 @@ export default function IAsted() {
           voice_silence_duration: voiceSettings.silenceDuration,
           voice_silence_threshold: voiceSettings.silenceThreshold,
           voice_continuous_mode: voiceSettings.continuousMode,
+          thinking_time: voiceSettings.thinkingTime,
+          response_mode: voiceSettings.responseMode,
+          ai_model: voiceSettings.aiModel,
+          formality_level: voiceSettings.formalityLevel,
+          proactivity: voiceSettings.proactivity,
         }, {
           onConflict: 'user_id'
         });
@@ -351,6 +374,185 @@ export default function IAsted() {
                         </p>
                       </div>
                     </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Intelligence Parameters Section */}
+              <div className="neu-card p-6">
+                <h3 className="text-xl font-bold mb-2">Paramètres d'Intelligence</h3>
+                <p className="text-sm text-muted-foreground mb-6">
+                  Configurez le comportement et la profondeur d'analyse d'iAsted
+                </p>
+                
+                <div className="space-y-6">
+                  {/* AI Model Selection */}
+                  <div>
+                    <label className="text-sm font-medium mb-3 block">
+                      Modèle d'Intelligence Artificielle
+                    </label>
+                    <div className="grid grid-cols-3 gap-3">
+                      {[
+                        { value: 'gemini', label: 'Gemini', desc: 'Équilibré et rapide' },
+                        { value: 'gpt', label: 'GPT', desc: 'Très précis' },
+                        { value: 'claude', label: 'Claude', desc: 'Analytique' }
+                      ].map(model => (
+                        <button
+                          key={model.value}
+                          onClick={() => setVoiceSettings(prev => ({ ...prev, aiModel: model.value as any }))}
+                          className={`
+                            neu-card p-4 text-center transition-all hover:scale-105
+                            ${voiceSettings.aiModel === model.value ? 'ring-2 ring-primary bg-primary/10' : ''}
+                          `}
+                        >
+                          <div className="font-semibold text-sm mb-1">{model.label}</div>
+                          <div className="text-xs text-muted-foreground">{model.desc}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Thinking Time */}
+                  <div>
+                    <label className="text-sm font-medium mb-3 block">
+                      Temps de Réflexion
+                    </label>
+                    <div className="grid grid-cols-4 gap-2">
+                      {[
+                        { value: 'auto', label: 'Auto', icon: '🤖' },
+                        { value: 'fast', label: 'Rapide', icon: '⚡' },
+                        { value: 'balanced', label: 'Équilibré', icon: '⚖️' },
+                        { value: 'thorough', label: 'Approfondi', icon: '🔍' }
+                      ].map(mode => (
+                        <button
+                          key={mode.value}
+                          onClick={() => setVoiceSettings(prev => ({ ...prev, thinkingTime: mode.value as any }))}
+                          className={`
+                            neu-card p-3 text-center transition-all hover:scale-105
+                            ${voiceSettings.thinkingTime === mode.value ? 'ring-2 ring-primary bg-primary/10' : ''}
+                          `}
+                        >
+                          <div className="text-2xl mb-1">{mode.icon}</div>
+                          <div className="text-xs font-medium">{mode.label}</div>
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      {voiceSettings.thinkingTime === 'auto' && '⚡ Adaptation automatique selon la complexité'}
+                      {voiceSettings.thinkingTime === 'fast' && '⚡ Réponses immédiates, idéal pour questions simples'}
+                      {voiceSettings.thinkingTime === 'balanced' && '⚖️ Compromis entre vitesse et qualité'}
+                      {voiceSettings.thinkingTime === 'thorough' && '🔍 Analyse approfondie, meilleure pour décisions complexes'}
+                    </p>
+                  </div>
+
+                  {/* Response Mode */}
+                  <div>
+                    <label className="text-sm font-medium mb-3 block">
+                      Style de Réponse
+                    </label>
+                    <div className="grid grid-cols-4 gap-2">
+                      {[
+                        { value: 'auto', label: 'Auto', icon: '🎯' },
+                        { value: 'concise', label: 'Concis', icon: '📝' },
+                        { value: 'detailed', label: 'Détaillé', icon: '📚' },
+                        { value: 'conversational', label: 'Conversationnel', icon: '💬' }
+                      ].map(mode => (
+                        <button
+                          key={mode.value}
+                          onClick={() => setVoiceSettings(prev => ({ ...prev, responseMode: mode.value as any }))}
+                          className={`
+                            neu-card p-3 text-center transition-all hover:scale-105
+                            ${voiceSettings.responseMode === mode.value ? 'ring-2 ring-primary bg-primary/10' : ''}
+                          `}
+                        >
+                          <div className="text-2xl mb-1">{mode.icon}</div>
+                          <div className="text-xs font-medium">{mode.label}</div>
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      {voiceSettings.responseMode === 'auto' && '🎯 Adapté au contexte et à la complexité'}
+                      {voiceSettings.responseMode === 'concise' && '📝 Réponses courtes et directes'}
+                      {voiceSettings.responseMode === 'detailed' && '📚 Explications complètes avec contexte'}
+                      {voiceSettings.responseMode === 'conversational' && '💬 Style naturel et accessible'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Behavior Parameters Section */}
+              <div className="neu-card p-6">
+                <h3 className="text-xl font-bold mb-2">Paramètres de Comportement</h3>
+                <p className="text-sm text-muted-foreground mb-6">
+                  Ajustez la personnalité et le style d'interaction d'iAsted
+                </p>
+                
+                <div className="space-y-6">
+                  {/* Formality Level */}
+                  <div>
+                    <label className="text-sm font-medium mb-3 block">
+                      Niveau de Formalité
+                    </label>
+                    <div className="grid grid-cols-3 gap-3">
+                      {[
+                        { value: 'formal', label: 'Formel', desc: 'Protocole ministériel strict', icon: '🎩' },
+                        { value: 'balanced', label: 'Équilibré', desc: 'Professionnel et accessible', icon: '🤝' },
+                        { value: 'casual', label: 'Décontracté', desc: 'Naturel et direct', icon: '😊' }
+                      ].map(level => (
+                        <button
+                          key={level.value}
+                          onClick={() => setVoiceSettings(prev => ({ ...prev, formalityLevel: level.value as any }))}
+                          className={`
+                            neu-card p-4 transition-all hover:scale-105
+                            ${voiceSettings.formalityLevel === level.value ? 'ring-2 ring-primary bg-primary/10' : ''}
+                          `}
+                        >
+                          <div className="text-3xl mb-2 text-center">{level.icon}</div>
+                          <div className="font-semibold text-sm mb-1">{level.label}</div>
+                          <div className="text-xs text-muted-foreground">{level.desc}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Proactivity Level */}
+                  <div>
+                    <label className="text-sm font-medium mb-3 block flex items-center justify-between">
+                      <span>Niveau de Proactivité</span>
+                      <span className="text-primary font-bold capitalize">{voiceSettings.proactivity}</span>
+                    </label>
+                    <div className="space-y-3">
+                      <input
+                        type="range"
+                        min="0"
+                        max="2"
+                        step="1"
+                        value={['low', 'medium', 'high'].indexOf(voiceSettings.proactivity)}
+                        onChange={(e) => {
+                          const levels = ['low', 'medium', 'high'];
+                          setVoiceSettings(prev => ({ ...prev, proactivity: levels[parseInt(e.target.value)] as any }));
+                        }}
+                        className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
+                      />
+                      <div className="flex justify-between text-xs">
+                        <span className={voiceSettings.proactivity === 'low' ? 'text-primary font-semibold' : 'text-muted-foreground'}>
+                          🔕 Faible - Répond uniquement aux questions
+                        </span>
+                        <span className={voiceSettings.proactivity === 'medium' ? 'text-primary font-semibold' : 'text-muted-foreground'}>
+                          🔔 Moyen - Suggestions occasionnelles
+                        </span>
+                        <span className={voiceSettings.proactivity === 'high' ? 'text-primary font-semibold' : 'text-muted-foreground'}>
+                          🔊 Élevé - Propose activement des analyses
+                        </span>
+                      </div>
+                    </div>
+                    <div className="neu-inset p-3 mt-3 rounded-lg">
+                      <p className="text-xs text-muted-foreground">
+                        {voiceSettings.proactivity === 'low' && '🔕 iAsted se concentre sur vos demandes sans proposer d\'informations supplémentaires'}
+                        {voiceSettings.proactivity === 'medium' && '🔔 iAsted peut suggérer des actions ou analyses pertinentes de temps en temps'}
+                        {voiceSettings.proactivity === 'high' && '🔊 iAsted propose activement des insights, alertes et recommandations'}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
