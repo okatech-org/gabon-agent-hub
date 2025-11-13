@@ -12,6 +12,9 @@ verify_jwt = true
 [functions.list-voices]
 verify_jwt = true
 
+[functions.generate-greeting-audio]
+verify_jwt = true
+
 [functions.log-analytics]
 verify_jwt = true
 

@@ -56,6 +56,10 @@ serve(async (req) => {
 
     // 1. Transcription audio si audio fourni (OpenAI Whisper)
     if (audioBase64 && !textMessage) {
+      if (!OPENAI_API_KEY) {
+        throw new Error('OPENAI_API_KEY not configured for transcription');
+      }
+
       console.log('Starting transcription...');
       const audioBuffer = Uint8Array.from(atob(audioBase64), c => c.charCodeAt(0));
       const audioBlob = new Blob([audioBuffer], { type: 'audio/webm' });
@@ -124,6 +128,10 @@ Tu t'adresses au Ministre par « Excellence ». Sois concis, professionnel et or
     let responseText = '';
 
     if (aiModel === 'gpt' || aiModel === 'openai') {
+      if (!OPENAI_API_KEY) {
+        throw new Error('OPENAI_API_KEY not configured');
+      }
+
       // OpenAI GPT-5-mini
       const aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
@@ -148,6 +156,10 @@ Tu t'adresses au Ministre par « Excellence ». Sois concis, professionnel et or
       const aiData = await aiResponse.json();
       responseText = aiData.choices[0].message.content;
     } else if (aiModel === 'claude') {
+      if (!LOVABLE_API_KEY) {
+        throw new Error('LOVABLE_API_KEY not configured');
+      }
+
       // Claude via Lovable AI
       const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
         method: 'POST',
@@ -172,6 +184,10 @@ Tu t'adresses au Ministre par « Excellence ». Sois concis, professionnel et or
       const aiData = await aiResponse.json();
       responseText = aiData.choices[0].message.content;
     } else {
+      if (!LOVABLE_API_KEY) {
+        throw new Error('LOVABLE_API_KEY not configured');
+      }
+
       // Default: Gemini via Lovable AI
       const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
         method: 'POST',
