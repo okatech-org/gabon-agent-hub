@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { 
@@ -7,13 +6,14 @@ import {
   FileCheck, 
   Building2,
   UserCheck,
-  MessageSquare,
   Shield,
 } from "lucide-react";
-import { IastedChat } from "@/components/ministre/IastedChat";
+import { IAstedButton } from "@/components/ministre/IAstedButton";
+import { IAstedInterface } from "@/components/ministre/IAstedInterface";
 
 export default function MinistreDashboard() {
   const [isIastedOpen, setIsIastedOpen] = useState(false);
+  const [showIastedInterface, setShowIastedInterface] = useState(false);
 
   // Statistiques globales des agents
   const { data: statsAgents } = useQuery({
@@ -79,45 +79,24 @@ export default function MinistreDashboard() {
   });
 
   return (
-    <div className="min-h-screen w-full p-4 md:p-6">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-4">
-        <div className="neu-card p-5 md:p-6">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div>
-              <h1 className="mb-1 text-2xl font-bold md:text-3xl">Espace Ministre</h1>
-              <p className="text-sm text-muted-foreground md:text-base">
-                Ministère de la Fonction Publique - République Gabonaise
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <Button
-                onClick={() => setIsIastedOpen(!isIastedOpen)}
-                className="neu-button neu-button-admin gap-2 whitespace-nowrap"
-              >
-                <MessageSquare className="h-4 w-4" />
-                {isIastedOpen ? "Fermer" : "Parler avec"} iAsted
-              </Button>
-              <div className="neu-raised flex h-14 w-14 items-center justify-center md:h-16 md:w-16">
-                <Shield className="h-7 w-7 text-primary md:h-8 md:w-8" />
+    <>
+      <div className="w-full p-4 md:p-6">
+        <div className="mx-auto flex w-full max-w-7xl flex-col gap-4">
+          <div className="neu-card p-5 md:p-6">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div>
+                <h1 className="mb-1 text-2xl font-bold md:text-3xl">Espace Ministre</h1>
+                <p className="text-sm text-muted-foreground md:text-base">
+                  Ministère de la Fonction Publique - République Gabonaise
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="neu-raised flex h-14 w-14 items-center justify-center md:h-16 md:w-16">
+                  <Shield className="h-7 w-7 text-primary md:h-8 md:w-8" />
+                </div>
               </div>
             </div>
           </div>
-        </div>
-
-        {isIastedOpen && (
-          <div className="neu-card p-5 md:p-6">
-            <div className="mb-4">
-              <h3 className="flex items-center gap-2 text-lg font-semibold md:text-xl">
-                <MessageSquare className="h-5 w-5 text-primary" />
-                iAsted - Assistant IA du Ministre
-              </h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Posez vos questions sur la fonction publique, demandez des analyses ou des synthèses
-              </p>
-            </div>
-            <IastedChat />
-          </div>
-        )}
 
         <div className="space-y-6">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -193,8 +172,22 @@ export default function MinistreDashboard() {
               </div>
             </div>
           </div>
+          </div>
         </div>
       </div>
-    </div>
+      
+      {/* iAsted Button */}
+      <IAstedButton 
+        onClick={() => setShowIastedInterface(!showIastedInterface)}
+        size="lg"
+        isInterfaceOpen={showIastedInterface}
+      />
+      
+      {/* iAsted Interface */}
+      <IAstedInterface 
+        isOpen={showIastedInterface}
+        onClose={() => setShowIastedInterface(false)}
+      />
+    </>
   );
 }
