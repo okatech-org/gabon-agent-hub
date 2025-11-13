@@ -23,6 +23,7 @@ import AgentForm from "./pages/rh/AgentForm";
 import MinistreDashboard from "./pages/ministre/MinistreDashboard";
 import IAsted from "./pages/ministre/IAsted";
 import Documents from "./pages/ministre/Documents";
+import Reglementations from "./pages/ministre/Reglementations";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -73,6 +74,7 @@ const App = () => (
               <Route path="/ministre/dashboard" element={<MinistreDashboard />} />
               <Route path="/ministre/iasted" element={<IAsted />} />
               <Route path="/ministre/documents" element={<Documents />} />
+              <Route path="/ministre/reglementations" element={<Reglementations />} />
             </Route>
             
             <Route
