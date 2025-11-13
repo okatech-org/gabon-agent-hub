@@ -29,7 +29,7 @@ const menuItems = [
   {
     title: "iAsted - Assistant IA",
     icon: Bot,
-    href: "/ministre/dashboard",
+    href: "/ministre/iasted",
   },
 ];
 
