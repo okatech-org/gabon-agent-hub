@@ -287,25 +287,38 @@ export default function IAsted() {
 
           {/* Settings Tab */}
           <TabsContent value="settings" className="mt-6">
-            <div className="grid gap-6 md:grid-cols-2">
+            <div className="space-y-6">
+              {/* Voice Section */}
               <div className="neu-card p-6">
-                <h3 className="text-lg font-semibold mb-4">Voix ElevenLabs</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Sélectionnez une voix naturelle et expressive pour iAsted
-                </p>
+                <div className="mb-6">
+                  <h3 className="text-2xl font-bold mb-2 flex items-center gap-2">
+                    <Sparkles className="w-6 h-6 text-primary" />
+                    Voix iAsted
+                  </h3>
+                  <p className="text-muted-foreground">
+                    La voix officielle d'iAsted depuis votre compte ElevenLabs. 
+                    Cette voix unique a été spécialement créée pour l'assistant ministériel.
+                  </p>
+                </div>
+                
                 <VoiceSelector
                   selectedVoiceId={voiceSettings.voiceId}
                   onVoiceSelect={(voiceId) => setVoiceSettings(prev => ({ ...prev, voiceId }))}
                 />
               </div>
 
+              {/* Listening Parameters Section */}
               <div className="neu-card p-6">
-                <h3 className="text-lg font-semibold mb-4">Paramètres d'Écoute</h3>
-                <div className="space-y-4">
-
+                <h3 className="text-xl font-bold mb-2">Paramètres d'Écoute</h3>
+                <p className="text-sm text-muted-foreground mb-6">
+                  Ajustez les paramètres de détection de silence pour optimiser la reconnaissance vocale
+                </p>
+                
+                <div className="space-y-6">
                   <div>
-                    <label className="text-sm font-medium mb-2 block">
-                      Durée de silence (ms)
+                    <label className="text-sm font-medium mb-3 block flex items-center justify-between">
+                      <span>Durée de silence avant validation</span>
+                      <span className="text-primary font-bold">{voiceSettings.silenceDuration}ms</span>
                     </label>
                     <input
                       type="range"
@@ -314,46 +327,49 @@ export default function IAsted() {
                       step="100"
                       value={voiceSettings.silenceDuration}
                       onChange={(e) => setVoiceSettings(prev => ({ ...prev, silenceDuration: parseInt(e.target.value) }))}
-                      className="w-full"
+                      className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
                     />
-                    <div className="text-xs text-muted-foreground mt-1">
-                      {voiceSettings.silenceDuration}ms
+                    <div className="flex justify-between text-xs text-muted-foreground mt-2">
+                      <span>Rapide (500ms)</span>
+                      <span>Normal (900ms)</span>
+                      <span>Lent (3s)</span>
                     </div>
                   </div>
 
-                  <div>
-                    <label className="flex items-center gap-2 cursor-pointer">
+                  <div className="neu-inset p-4 rounded-lg">
+                    <label className="flex items-start gap-3 cursor-pointer">
                       <input
                         type="checkbox"
                         checked={voiceSettings.continuousMode}
                         onChange={(e) => setVoiceSettings(prev => ({ ...prev, continuousMode: e.target.checked }))}
-                        className="neu-inset"
+                        className="mt-1 w-4 h-4 accent-primary"
                       />
-                      <span className="text-sm font-medium">Mode Continu</span>
+                      <div className="flex-1">
+                        <span className="text-sm font-semibold block mb-1">Mode Continu Automatique</span>
+                        <p className="text-xs text-muted-foreground">
+                          iAsted enchaîne automatiquement les questions-réponses sans intervention manuelle
+                        </p>
+                      </div>
                     </label>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Enchaînement automatique des questions
-                    </p>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <div className="grid gap-6 md:grid-cols-2 mt-6">
+              {/* Keyboard Shortcuts Section */}
               <div className="neu-card p-6">
-                <h3 className="text-lg font-semibold mb-4">Raccourcis Clavier</h3>
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Activer/Désactiver</span>
-                    <code className="neu-inset px-2 py-1 rounded">Espace</code>
+                <h3 className="text-xl font-bold mb-4">Raccourcis Clavier</h3>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between py-2 border-b border-border/50">
+                    <span className="text-sm">Démarrer/Arrêter l'écoute</span>
+                    <kbd className="px-3 py-1 text-sm font-mono bg-muted rounded">Espace</kbd>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Annuler</span>
-                    <code className="neu-inset px-2 py-1 rounded">Échap</code>
+                  <div className="flex items-center justify-between py-2 border-b border-border/50">
+                    <span className="text-sm">Pause/Reprendre (Mode Continu)</span>
+                    <kbd className="px-3 py-1 text-sm font-mono bg-muted rounded">P</kbd>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Nouvelle question</span>
-                    <code className="neu-inset px-2 py-1 rounded">R</code>
+                  <div className="flex items-center justify-between py-2">
+                    <span className="text-sm">Arrêter iAsted</span>
+                    <kbd className="px-3 py-1 text-sm font-mono bg-muted rounded">Échap</kbd>
                   </div>
                 </div>
               </div>

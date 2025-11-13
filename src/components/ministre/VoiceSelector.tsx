@@ -44,7 +44,20 @@ export function VoiceSelector({ selectedVoiceId, onVoiceSelect }: VoiceSelectorP
       if (error) throw error;
       
       if (data?.voices) {
-        setVoices(data.voices);
+        // Ne garder que la voix "iAsted"
+        const iastedVoice = data.voices.filter((voice: Voice) => 
+          voice.name.toLowerCase() === 'iasted'
+        );
+        
+        if (iastedVoice.length === 0) {
+          toast.error('Voix "iAsted" non trouvée dans votre compte ElevenLabs');
+        } else {
+          setVoices(iastedVoice);
+          // Sélectionner automatiquement la voix iAsted si elle n'est pas déjà sélectionnée
+          if (iastedVoice[0] && selectedVoiceId !== iastedVoice[0].voice_id) {
+            onVoiceSelect(iastedVoice[0].voice_id);
+          }
+        }
       }
     } catch (error) {
       console.error('Error loading voices:', error);
@@ -130,10 +143,6 @@ export function VoiceSelector({ selectedVoiceId, onVoiceSelect }: VoiceSelectorP
     return descriptors.length > 0 ? descriptors.join(', ') : 'Voix neutre';
   };
 
-  const isIastedVoice = (voice: Voice) => {
-    return voice.name.toLowerCase() === 'iasted';
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -142,104 +151,91 @@ export function VoiceSelector({ selectedVoiceId, onVoiceSelect }: VoiceSelectorP
     );
   }
 
+  if (voices.length === 0) {
+    return (
+      <div className="neu-card p-6 text-center">
+        <Sparkles className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+        <h3 className="font-semibold text-lg mb-2">Voix iAsted introuvable</h3>
+        <p className="text-sm text-muted-foreground">
+          Assurez-vous d'avoir créé une voix nommée "iAsted" dans votre compte ElevenLabs
+        </p>
+      </div>
+    );
+  }
+
+  const voice = voices[0]; // Une seule voix : iAsted
+  const isPlaying = playingVoice === voice.voice_id;
+
   return (
     <div className="space-y-4">
       {/* Info Banner */}
       <div className="neu-card p-4 bg-primary/5 border-l-4 border-primary">
         <p className="text-sm text-foreground">
           <Sparkles className="w-4 h-4 inline mr-2 text-primary" />
-          Cliquez sur une voix pour la sélectionner, puis sur le bouton de lecture pour tester
+          Voix officielle d'iAsted configurée et active
         </p>
       </div>
 
-      <ScrollArea className="h-[500px] pr-4">
-        <div className="grid gap-4">
-          {voices.map((voice) => {
-            const isSelected = selectedVoiceId === voice.voice_id;
-            const isPlaying = playingVoice === voice.voice_id;
-            const isIasted = isIastedVoice(voice);
+      {/* Single Voice Card */}
+      <div className="neu-card p-6 border-2 border-primary/30 bg-primary/5">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1 space-y-3">
+            {/* Voice Name & Badge */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <h4 className="font-bold text-xl">{voice.name}</h4>
+              <Badge variant="default" className="bg-primary text-primary-foreground">
+                <Sparkles className="w-3 h-3 mr-1" />
+                Voix Officielle
+              </Badge>
+              <Badge variant="secondary" className="bg-green-500/10 text-green-700 dark:text-green-400">
+                <Check className="w-3 h-3 mr-1" />
+                Active
+              </Badge>
+            </div>
 
-            return (
-              <div
-                key={voice.voice_id}
-                className={`
-                  neu-card p-5 cursor-pointer transition-all group
-                  ${isSelected ? 'ring-2 ring-primary bg-primary/10' : 'hover:bg-accent/5'}
-                  ${isIasted ? 'border-2 border-primary/30' : ''}
-                `}
-                onClick={() => onVoiceSelect(voice.voice_id)}
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 space-y-2">
-                    {/* Voice Name & Status */}
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h4 className="font-semibold text-base">{voice.name}</h4>
-                      
-                      {isIasted && (
-                        <Badge variant="default" className="bg-primary text-primary-foreground">
-                          <Sparkles className="w-3 h-3 mr-1" />
-                          Voix iAsted
-                        </Badge>
-                      )}
-                      
-                      {isSelected && (
-                        <Badge variant="secondary" className="bg-green-500/10 text-green-700 dark:text-green-400">
-                          <Check className="w-3 h-3 mr-1" />
-                          Sélectionnée
-                        </Badge>
-                      )}
-                    </div>
+            {/* Voice Description */}
+            <p className="text-sm text-muted-foreground">
+              {getVoiceDescription(voice)}
+            </p>
 
-                    {/* Voice Description */}
-                    <p className="text-sm text-muted-foreground">
-                      {getVoiceDescription(voice)}
-                    </p>
+            {/* Voice Characteristics */}
+            <div className="flex items-center gap-2 flex-wrap">
+              {voice.category && (
+                <Badge variant="outline" className="text-xs">
+                  {voice.category}
+                </Badge>
+              )}
+              {voice.labels && Object.entries(voice.labels).map(([key, value]) => (
+                <Badge key={key} variant="outline" className="text-xs">
+                  {value}
+                </Badge>
+              ))}
+            </div>
+          </div>
 
-                    {/* Voice Category & Labels */}
-                    <div className="flex items-center gap-2 flex-wrap">
-                      {voice.category && (
-                        <Badge variant="outline" className="text-xs">
-                          {voice.category}
-                        </Badge>
-                      )}
-                      {voice.labels && Object.entries(voice.labels).slice(0, 3).map(([key, value]) => (
-                        <Badge key={key} variant="outline" className="text-xs">
-                          {value}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Play Button */}
-                  <Button
-                    size="lg"
-                    variant={isPlaying ? 'default' : 'outline'}
-                    className={`
-                      shrink-0 transition-all
-                      ${isPlaying ? 'animate-pulse' : 'group-hover:scale-110'}
-                    `}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      playPreview(voice);
-                    }}
-                  >
-                    {isPlaying ? (
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                    ) : (
-                      <Volume2 className="w-5 h-5" />
-                    )}
-                  </Button>
-                </div>
-              </div>
-            );
-          })}
+          {/* Play Button */}
+          <Button
+            size="lg"
+            variant={isPlaying ? 'default' : 'outline'}
+            className={`
+              shrink-0 w-16 h-16 transition-all
+              ${isPlaying ? 'animate-pulse' : 'hover:scale-110'}
+            `}
+            onClick={() => playPreview(voice)}
+          >
+            {isPlaying ? (
+              <Loader2 className="w-6 h-6 animate-spin" />
+            ) : (
+              <Volume2 className="w-6 h-6" />
+            )}
+          </Button>
         </div>
-      </ScrollArea>
+      </div>
 
-      {/* Stats */}
+      {/* Info Footer */}
       <div className="neu-card p-3 text-center">
         <p className="text-xs text-muted-foreground">
-          {voices.length} voix disponibles • {voices.filter(isIastedVoice).length} voix iAsted trouvée(s)
+          Cliquez sur <Volume2 className="w-3 h-3 inline" /> pour écouter un aperçu de la voix iAsted
         </p>
       </div>
     </div>
