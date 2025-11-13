@@ -1,4 +1,4 @@
-import { Building2, Users, FileText, TrendingUp, Calendar, BookOpen } from "lucide-react";
+import { Building2, Users, FileText, TrendingUp, Calendar, BookOpen, CheckCircle2, Shield, Database, UserCheck, AlertCircle, LineChart } from "lucide-react";
 import heroImage from "@/assets/hero-fonction-publique.jpg";
 import servicePublicImage from "@/assets/service-public.jpg";
 import ministereImage from "@/assets/ministere.jpg";
@@ -316,32 +316,65 @@ export default function Home() {
                 administration. Avec ADMIN.GA, la Fonction Publique passe au
                 numérique pour mieux servir les agents et les citoyens.
               </p>
-              <div className="grid md:grid-cols-2 gap-4 text-sm md:text-base text-muted-foreground">
-                <ul className="list-disc list-inside space-y-1">
-                  <li>
-                    Digitalisation des procédures : moins de papier, moins de
-                    déplacements.
-                  </li>
-                  <li>
-                    Dématérialisation des archives : dossiers sécurisés et faciles à
-                    retrouver.
-                  </li>
-                  <li>Identifiant unique de l'agent public.</li>
-                </ul>
-                <ul className="list-disc list-inside space-y-1">
-                  <li>
-                    Recensement biométrique des agents pour fiabiliser les
-                    effectifs.
-                  </li>
-                  <li>
-                    Lutte contre les agents fictifs et optimisation de la masse
-                    salariale.
-                  </li>
-                  <li>
-                    Plus de traçabilité, plus de transparence, plus de qualité de
-                    service.
-                  </li>
-                </ul>
+              <div className="grid md:grid-cols-2 gap-4 text-sm md:text-base">
+                <div className="space-y-3">
+                  <div className="flex gap-3 items-start">
+                    <div className="neu-raised w-10 h-10 flex items-center justify-center flex-shrink-0">
+                      <CheckCircle2 className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <h5 className="font-semibold text-foreground mb-1">Digitalisation des procédures</h5>
+                      <p className="text-muted-foreground text-sm">Moins de papier, moins de déplacements</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-3 items-start">
+                    <div className="neu-raised w-10 h-10 flex items-center justify-center flex-shrink-0">
+                      <Database className="w-5 h-5 text-accent" />
+                    </div>
+                    <div>
+                      <h5 className="font-semibold text-foreground mb-1">Dématérialisation des archives</h5>
+                      <p className="text-muted-foreground text-sm">Dossiers sécurisés et faciles à retrouver</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-3 items-start">
+                    <div className="neu-raised w-10 h-10 flex items-center justify-center flex-shrink-0">
+                      <Shield className="w-5 h-5 text-success" />
+                    </div>
+                    <div>
+                      <h5 className="font-semibold text-foreground mb-1">Identifiant unique</h5>
+                      <p className="text-muted-foreground text-sm">Chaque agent public dispose d'un identifiant unique</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex gap-3 items-start">
+                    <div className="neu-raised w-10 h-10 flex items-center justify-center flex-shrink-0">
+                      <UserCheck className="w-5 h-5 text-info" />
+                    </div>
+                    <div>
+                      <h5 className="font-semibold text-foreground mb-1">Recensement biométrique</h5>
+                      <p className="text-muted-foreground text-sm">Fiabilisation complète des effectifs</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-3 items-start">
+                    <div className="neu-raised w-10 h-10 flex items-center justify-center flex-shrink-0">
+                      <AlertCircle className="w-5 h-5 text-warning" />
+                    </div>
+                    <div>
+                      <h5 className="font-semibold text-foreground mb-1">Lutte contre la fraude</h5>
+                      <p className="text-muted-foreground text-sm">Élimination des agents fictifs et optimisation de la masse salariale</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-3 items-start">
+                    <div className="neu-raised w-10 h-10 flex items-center justify-center flex-shrink-0">
+                      <LineChart className="w-5 h-5 text-secondary" />
+                    </div>
+                    <div>
+                      <h5 className="font-semibold text-foreground mb-1">Transparence renforcée</h5>
+                      <p className="text-muted-foreground text-sm">Plus de traçabilité et de qualité de service</p>
+                    </div>
+                  </div>
+                </div>
               </div>
               <p className="text-sm md:text-base italic text-muted-foreground mt-4">
                 « Une fonction publique plus efficace, plus proche, plus moderne. »
