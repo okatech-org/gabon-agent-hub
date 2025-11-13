@@ -44,7 +44,7 @@ serve(async (req) => {
       throw new Error('sessionId and userId are required');
     }
 
-    const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY') || Deno.env.get('API_GP');
+    const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
     const ELEVENLABS_API_KEY = Deno.env.get('ELEVENLABS_API_KEY');
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;

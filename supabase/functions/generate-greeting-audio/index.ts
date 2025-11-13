@@ -18,7 +18,7 @@ serve(async (req) => {
     }
 
     const ELEVENLABS_API_KEY = Deno.env.get('ELEVENLABS_API_KEY');
-    const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY') || Deno.env.get('API_GP');
+    const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
 
     let audioContent: string;
 
