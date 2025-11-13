@@ -17,8 +17,11 @@ serve(async (req) => {
       throw new Error('Text is required');
     }
 
-    if (!voiceId) {
-      throw new Error('voiceId is required - must use iAsted voice from ElevenLabs');
+    // Allow a default voice id from env when not provided by client
+    const defaultVoiceId = Deno.env.get('ELEVENLABS_VOICE_ID');
+    const effectiveVoiceId = voiceId || defaultVoiceId;
+    if (!effectiveVoiceId) {
+      throw new Error('voiceId missing and ELEVENLABS_VOICE_ID not configured');
     }
 
     const ELEVENLABS_API_KEY = Deno.env.get('ELEVENLABS_API_KEY');
@@ -28,8 +31,8 @@ serve(async (req) => {
     }
 
     // Utiliser uniquement ElevenLabs avec la voix iAsted
-    console.log('Using ElevenLabs TTS with voice:', voiceId);
-    const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+    console.log('Using ElevenLabs TTS with voice:', effectiveVoiceId);
+    const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${effectiveVoiceId}`, {
       method: 'POST',
       headers: {
         'Accept': 'audio/mpeg',

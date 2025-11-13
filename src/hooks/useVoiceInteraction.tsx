@@ -325,7 +325,21 @@ export const useVoiceInteraction = () => {
     try {
       setLiveTranscript(''); // Reset transcript
       
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Safely access getUserMedia with fallbacks
+      const legacyGetUserMedia = (navigator as any).getUserMedia || (navigator as any).webkitGetUserMedia || (navigator as any).mozGetUserMedia;
+      const getUserMedia =
+        navigator.mediaDevices?.getUserMedia
+          ? (constraints: MediaStreamConstraints) => navigator.mediaDevices.getUserMedia(constraints)
+          : legacyGetUserMedia
+            ? (constraints: MediaStreamConstraints) =>
+                new Promise<MediaStream>((resolve, reject) => legacyGetUserMedia.call(navigator, constraints, resolve, reject))
+            : null;
+
+      if (!getUserMedia) {
+        throw new Error('getUserMedia not supported. Use a modern browser over HTTPS or localhost.');
+      }
+
+      const stream = await getUserMedia({ audio: true });
       // Keep a stable reference for stopping/cleanup
       streamRef.current = stream;
       
@@ -613,8 +627,8 @@ export const useVoiceInteraction = () => {
           setMessages(prev => [...prev, userMessage, farewellMessage]);
 
           // Generate farewell audio
-          const { data: farewellAudio } = await supabase.functions.invoke('generate-greeting-audio', {
-            body: { text: farewellMessage.content }
+        const { data: farewellAudio } = await supabase.functions.invoke('generate-greeting-audio', {
+            body: { text: farewellMessage.content, voiceId: selectedVoiceId }
           });
 
           if (farewellAudio?.audioContent) {
@@ -749,7 +763,7 @@ export const useVoiceInteraction = () => {
 
       // Generate audio for debrief
       const { data: greetingData, error: greetingError } = await supabase.functions.invoke('generate-greeting-audio', {
-        body: { text: debriefData.debrief }
+        body: { text: debriefData.debrief, voiceId: selectedVoiceId }
       });
 
       if (!greetingError && greetingData.audioContent) {
@@ -799,7 +813,7 @@ export const useVoiceInteraction = () => {
 
         // Generate audio for fallback message
         const { data: audioData } = await supabase.functions.invoke('generate-greeting-audio', {
-          body: { text: chatData.message || "Le briefing du jour n'est pas encore disponible." }
+          body: { text: chatData.message || "Le briefing du jour n'est pas encore disponible.", voiceId: selectedVoiceId }
         });
 
         if (audioData?.audioContent) {
