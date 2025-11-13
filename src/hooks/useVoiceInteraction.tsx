@@ -637,16 +637,19 @@ export const useVoiceInteraction = () => {
         setMessages(prev => [...prev, userMessage, assistantMessage]);
 
         // Log analytics
-        await supabase.functions.invoke('log-analytics', {
-          body: {
-            sessionId,
-            event_type: 'turn_complete',
-            data: {
-              ...chatData.latencies,
-              totalDuration: Date.now() - startTime
+        if (user?.id) {
+          await supabase.functions.invoke('log-analytics', {
+            body: {
+              userId: user.id,
+              sessionId,
+              eventType: 'turn_complete',
+              eventData: {
+                ...chatData.latencies,
+                totalDuration: Date.now() - startTime
+              }
             }
-          }
-        });
+          });
+        }
 
         // Play audio response with auto-restart based on follow-up question
         if (audioContent) {
