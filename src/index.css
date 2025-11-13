@@ -157,6 +157,11 @@ All colors MUST be HSL.
     border-radius: 9999px;
   }
 
+  .hover\:neu-raised:hover {
+    background: hsl(var(--background));
+    box-shadow: 6px 6px 12px hsl(var(--neu-dark)), -6px -6px 12px hsl(var(--neu-light));
+  }
+
   .neu-button {
     background: hsl(var(--background));
     box-shadow: var(--shadow-neu-button);

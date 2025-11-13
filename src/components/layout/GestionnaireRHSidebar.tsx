@@ -11,20 +11,10 @@ import {
 } from "lucide-react";
 import {
   Sidebar as SidebarUI,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarHeader,
-  SidebarFooter,
   useSidebar,
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
 
 const menuItems = [
   {
@@ -73,98 +63,93 @@ export function GestionnaireRHSidebar() {
   };
 
   return (
-    <SidebarUI className="border-r border-sidebar-border bg-sidebar">
-      <SidebarHeader className="border-b border-sidebar-border p-4">
-        <Link to="/rh/dashboard" className="flex items-center space-x-3">
-          <div className="neu-raised h-10 w-10 flex items-center justify-center flex-shrink-0">
-            <Shield className="h-5 w-5 text-primary" />
-          </div>
+    <SidebarUI className="border-none bg-transparent">
+      <div className="p-3">
+        <div className="neu-card p-4 mb-4">
+          <Link to="/rh/dashboard" className="flex items-center space-x-3">
+            <div className="neu-raised h-10 w-10 flex items-center justify-center flex-shrink-0">
+              <Shield className="h-5 w-5 text-primary" />
+            </div>
+            {!collapsed && (
+              <div>
+                <h2 className="text-base font-bold text-foreground">ADMIN.GA</h2>
+                <p className="text-xs text-muted-foreground">Gestionnaire RH</p>
+              </div>
+            )}
+          </Link>
+        </div>
+
+        <div className="neu-card p-4 mb-4">
           {!collapsed && (
-            <div>
-              <h2 className="text-base font-bold text-sidebar-foreground">ADMIN.GA</h2>
-              <p className="text-xs text-sidebar-foreground/70">Gestionnaire RH</p>
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-2">
+              Menu Principal
+            </h3>
+          )}
+          <div className="space-y-1">
+            {menuItems.map((item) => (
+              <Link 
+                key={item.href}
+                to={item.href}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all",
+                  location.pathname === item.href 
+                    ? "neu-inset text-primary font-medium" 
+                    : "hover:neu-raised text-foreground"
+                )}
+              >
+                <item.icon className="h-4 w-4 flex-shrink-0" />
+                {!collapsed && <span className="text-sm">{item.title}</span>}
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        <div className="neu-card p-4 mb-4">
+          {!collapsed && (
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-2">
+              Système
+            </h3>
+          )}
+          <div className="space-y-1">
+            {adminItems.map((item) => (
+              <Link 
+                key={item.href}
+                to={item.href}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all",
+                  location.pathname === item.href 
+                    ? "neu-inset text-primary font-medium" 
+                    : "hover:neu-raised text-foreground"
+                )}
+              >
+                <item.icon className="h-4 w-4 flex-shrink-0" />
+                {!collapsed && <span className="text-sm">{item.title}</span>}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="p-3">
+        <div className="neu-card p-4">
+          {!collapsed && user?.email && (
+            <div className="mb-3">
+              <p className="text-xs text-muted-foreground">Connecté en tant que</p>
+              <p className="text-xs text-foreground font-medium truncate">{user.email}</p>
             </div>
           )}
-        </Link>
-      </SidebarHeader>
-
-      <SidebarContent className="px-2 py-4">
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-sidebar-foreground/70 text-xs uppercase tracking-wider px-3 mb-2">
-            Menu Principal
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu className="space-y-1">
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={location.pathname === item.href}
-                    className={cn(
-                      "rounded-lg transition-all hover:bg-sidebar-accent",
-                      location.pathname === item.href &&
-                        "bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary"
-                    )}
-                  >
-                    <Link to={item.href} className="flex items-center gap-3 px-3 py-2">
-                      <item.icon className="h-4 w-4 flex-shrink-0" />
-                      {!collapsed && <span className="text-sm">{item.title}</span>}
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup className="mt-6">
-          <SidebarGroupLabel className="text-sidebar-foreground/70 text-xs uppercase tracking-wider px-3 mb-2">
-            Système
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu className="space-y-1">
-              {adminItems.map((item) => (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={location.pathname === item.href}
-                    className={cn(
-                      "rounded-lg transition-all hover:bg-sidebar-accent",
-                      location.pathname === item.href &&
-                        "bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary"
-                    )}
-                  >
-                    <Link to={item.href} className="flex items-center gap-3 px-3 py-2">
-                      <item.icon className="h-4 w-4 flex-shrink-0" />
-                      {!collapsed && <span className="text-sm">{item.title}</span>}
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
-
-      <SidebarFooter className="border-t border-sidebar-border p-4">
-        {!collapsed && user?.email && (
-          <div className="mb-3 px-3">
-            <p className="text-xs text-sidebar-foreground/50">Connecté en tant que</p>
-            <p className="text-xs text-sidebar-foreground font-medium truncate">{user.email}</p>
-          </div>
-        )}
-        <Button
-          variant="ghost"
-          onClick={handleSignOut}
-          className={cn(
-            "w-full justify-start gap-3 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-            collapsed && "justify-center"
-          )}
-        >
-          <LogOut className="h-4 w-4 flex-shrink-0" />
-          {!collapsed && <span className="text-sm">Déconnexion</span>}
-        </Button>
-      </SidebarFooter>
+          <button
+            onClick={handleSignOut}
+            className={cn(
+              "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all hover:neu-raised text-foreground",
+              collapsed && "justify-center"
+            )}
+          >
+            <LogOut className="h-4 w-4 flex-shrink-0" />
+            {!collapsed && <span className="text-sm">Déconnexion</span>}
+          </button>
+        </div>
+      </div>
     </SidebarUI>
   );
 }
