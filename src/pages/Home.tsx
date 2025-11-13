@@ -1,4 +1,10 @@
 import { Building2, Users, FileText, TrendingUp, Calendar, BookOpen } from "lucide-react";
+import heroImage from "@/assets/hero-fonction-publique.jpg";
+import servicePublicImage from "@/assets/service-public.jpg";
+import ministereImage from "@/assets/ministere.jpg";
+import fonctionnaireImage from "@/assets/fonctionnaire-espace.jpg";
+import candidatsImage from "@/assets/candidats-concours.jpg";
+import digitalisationImage from "@/assets/digitalisation.jpg";
 
 export default function Home() {
   return (
@@ -32,8 +38,8 @@ export default function Home() {
 
         {/* HERO */}
         <section className="neu-card px-5 py-6 md:px-8 md:py-8 space-y-6">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-            <div className="space-y-3 md:max-w-xl">
+          <div className="grid lg:grid-cols-2 gap-8 items-center">
+            <div className="space-y-3">
               <p className="text-xs md:text-sm uppercase tracking-wide text-muted-foreground">
                 Portail digital officiel
               </p>
@@ -60,8 +66,17 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Stats rapides */}
-            <div className="grid grid-cols-2 gap-3 md:gap-4 md:w-72">
+            <div className="neu-card-sm overflow-hidden">
+              <img 
+                src={heroImage} 
+                alt="Fonctionnaires gabonais travaillant ensemble"
+                className="w-full h-full object-cover rounded-2xl"
+              />
+            </div>
+          </div>
+          
+          {/* Stats rapides */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mt-6">
               <StatCard
                 label="Agents recensés"
                 value="92 000+"
@@ -91,94 +106,117 @@ export default function Home() {
                 color="text-info"
               />
             </div>
-          </div>
         </section>
 
         {/* À propos de la Fonction Publique */}
         <section className="neu-card px-5 py-6 md:px-8 md:py-7 space-y-4">
-          <h3 className="text-lg md:text-xl font-semibold">
-            Comprendre la Fonction Publique gabonaise
-          </h3>
-          <p className="text-sm md:text-base text-muted-foreground">
-            La Fonction Publique regroupe l'ensemble des femmes et des hommes
-            qui travaillent pour l'État et les établissements publics. Chaque
-            jour, ils assurent la continuité des services essentiels :
-            éducation, santé, sécurité, justice, finances publiques, gestion du
-            territoire, et bien plus encore.
-          </p>
-          <div className="grid md:grid-cols-2 gap-4 text-sm md:text-base text-muted-foreground">
-            <div className="space-y-2">
-              <h4 className="font-semibold text-foreground">
-                Un rôle central dans l'État
-              </h4>
-              <p>
-                La Fonction Publique est le bras opérationnel de l'État. Elle
-                met en œuvre les politiques publiques décidées par les
-                autorités, et veille à ce que chaque citoyenne et chaque citoyen
-                bénéficie de services de qualité, partout sur le territoire.
+          <div className="grid lg:grid-cols-5 gap-8 items-center">
+            <div className="lg:col-span-3 space-y-4">
+              <h3 className="text-lg md:text-xl font-semibold">
+                Comprendre la Fonction Publique gabonaise
+              </h3>
+              <p className="text-sm md:text-base text-muted-foreground">
+                La Fonction Publique regroupe l'ensemble des femmes et des hommes
+                qui travaillent pour l'État et les établissements publics. Chaque
+                jour, ils assurent la continuité des services essentiels :
+                éducation, santé, sécurité, justice, finances publiques, gestion du
+                territoire, et bien plus encore.
               </p>
+              <div className="grid gap-4 text-sm md:text-base text-muted-foreground">
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-foreground">
+                    Un rôle central dans l'État
+                  </h4>
+                  <p>
+                    La Fonction Publique est le bras opérationnel de l'État. Elle
+                    met en œuvre les politiques publiques décidées par les
+                    autorités, et veille à ce que chaque citoyenne et chaque citoyen
+                    bénéficie de services de qualité, partout sur le territoire.
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-foreground">
+                    Nos valeurs de service public
+                  </h4>
+                  <ul className="list-disc list-inside space-y-1">
+                    <li>Neutralité – servir tous les citoyens, sans distinction.</li>
+                    <li>
+                      Intégrité – agir avec honnêteté, transparence et loyauté.
+                    </li>
+                    <li>Efficacité – rechercher des solutions rapides et fiables.</li>
+                    <li>Proximité – rester à l'écoute des besoins du terrain.</li>
+                  </ul>
+                </div>
+              </div>
             </div>
-            <div className="space-y-2">
-              <h4 className="font-semibold text-foreground">
-                Nos valeurs de service public
-              </h4>
-              <ul className="list-disc list-inside space-y-1">
-                <li>Neutralité – servir tous les citoyens, sans distinction.</li>
-                <li>
-                  Intégrité – agir avec honnêteté, transparence et loyauté.
-                </li>
-                <li>Efficacité – rechercher des solutions rapides et fiables.</li>
-                <li>Proximité – rester à l'écoute des besoins du terrain.</li>
-              </ul>
+            
+            <div className="lg:col-span-2 neu-card-sm overflow-hidden">
+              <img 
+                src={servicePublicImage} 
+                alt="Agents publics gabonais au service des citoyens"
+                className="w-full h-full object-cover rounded-2xl"
+              />
             </div>
           </div>
         </section>
 
         {/* Ministère de la Fonction Publique */}
         <section className="neu-card px-5 py-6 md:px-8 md:py-7 space-y-4">
-          <h3 className="text-lg md:text-xl font-semibold">
-            Le Ministère de la Fonction Publique
-          </h3>
-          <p className="text-sm md:text-base text-muted-foreground">
-            Le Ministère de la Fonction Publique conçoit, met en œuvre et
-            suit la politique de l'État en matière de gestion des ressources
-            humaines publiques. Il accompagne les ministères et institutions
-            dans l'organisation de leurs services et dans la gestion de leurs
-            agents.
-          </p>
-          <div className="grid md:grid-cols-2 gap-4 text-sm md:text-base text-muted-foreground">
-            <div>
-              <h4 className="font-semibold text-foreground mb-1">
-                Missions principales
-              </h4>
-              <ul className="list-disc list-inside space-y-1">
-                <li>
-                  Gérer la carrière des agents publics : recrutement,
-                  titularisation, avancement, mobilité, retraite.
-                </li>
-                <li>
-                  Organiser l'administration : structures, postes, effectifs et
-                  compétences.
-                </li>
-                <li>
-                  Conduire la réforme et la modernisation de la Fonction
-                  Publique.
-                </li>
-                <li>
-                  Digitaliser l'action publique avec des outils comme ADMIN.GA.
-                </li>
-              </ul>
+          <div className="grid lg:grid-cols-5 gap-8 items-center">
+            <div className="lg:col-span-2 neu-card-sm overflow-hidden order-2 lg:order-1">
+              <img 
+                src={ministereImage} 
+                alt="Réunion au Ministère de la Fonction Publique du Gabon"
+                className="w-full h-full object-cover rounded-2xl"
+              />
             </div>
-            <div className="neu-inset p-4 md:p-5 text-sm md:text-base rounded-xl">
-              <h4 className="font-semibold text-foreground mb-2">
-                La Fonction Publique au cœur de la Nouvelle République
-              </h4>
-              <p className="text-muted-foreground">
-                Assainissement des fichiers, recensement biométrique des agents,
-                lutte contre les agents fictifs, transparence dans les
-                nominations et les concours : le ministère s'engage pour une
-                administration exemplaire et responsable.
+
+            <div className="lg:col-span-3 space-y-4 order-1 lg:order-2">
+              <h3 className="text-lg md:text-xl font-semibold">
+                Le Ministère de la Fonction Publique
+              </h3>
+              <p className="text-sm md:text-base text-muted-foreground">
+                Le Ministère de la Fonction Publique conçoit, met en œuvre et
+                suit la politique de l'État en matière de gestion des ressources
+                humaines publiques. Il accompagne les ministères et institutions
+                dans l'organisation de leurs services et dans la gestion de leurs
+                agents.
               </p>
+              <div className="grid gap-4 text-sm md:text-base text-muted-foreground">
+                <div>
+                  <h4 className="font-semibold text-foreground mb-1">
+                    Missions principales
+                  </h4>
+                  <ul className="list-disc list-inside space-y-1">
+                    <li>
+                      Gérer la carrière des agents publics : recrutement,
+                      titularisation, avancement, mobilité, retraite.
+                    </li>
+                    <li>
+                      Organiser l'administration : structures, postes, effectifs et
+                      compétences.
+                    </li>
+                    <li>
+                      Conduire la réforme et la modernisation de la Fonction
+                      Publique.
+                    </li>
+                    <li>
+                      Digitaliser l'action publique avec des outils comme ADMIN.GA.
+                    </li>
+                  </ul>
+                </div>
+                <div className="neu-inset p-4 md:p-5 text-sm md:text-base rounded-xl">
+                  <h4 className="font-semibold text-foreground mb-2">
+                    La Fonction Publique au cœur de la Nouvelle République
+                  </h4>
+                  <p className="text-muted-foreground">
+                    Assainissement des fichiers, recensement biométrique des agents,
+                    lutte contre les agents fictifs, transparence dans les
+                    nominations et les concours : le ministère s'engage pour une
+                    administration exemplaire et responsable.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -187,6 +225,13 @@ export default function Home() {
         <section className="grid md:grid-cols-2 gap-6 md:gap-8">
           {/* Fonctionnaire */}
           <div className="neu-card px-5 py-6 md:px-7 md:py-7 space-y-4">
+            <div className="neu-card-sm overflow-hidden mb-4">
+              <img 
+                src={fonctionnaireImage} 
+                alt="Fonctionnaire gabonaise accédant à son espace personnel"
+                className="w-full h-48 object-cover rounded-2xl"
+              />
+            </div>
             <h3 className="text-lg md:text-xl font-semibold">
               Je suis fonctionnaire
             </h3>
@@ -223,6 +268,13 @@ export default function Home() {
 
           {/* Citoyen / candidat */}
           <div className="neu-card px-5 py-6 md:px-7 md:py-7 space-y-4">
+            <div className="neu-card-sm overflow-hidden mb-4">
+              <img 
+                src={candidatsImage} 
+                alt="Jeunes gabonais consultant les opportunités de concours"
+                className="w-full h-48 object-cover rounded-2xl"
+              />
+            </div>
             <h3 className="text-lg md:text-xl font-semibold">
               Je suis citoyen / candidat aux concours
             </h3>
@@ -254,44 +306,56 @@ export default function Home() {
 
         {/* Modernisation & digitalisation */}
         <section className="neu-card px-5 py-6 md:px-8 md:py-7 space-y-4">
-          <h3 className="text-lg md:text-xl font-semibold">
-            Modernisation & Digitalisation de l'administration
-          </h3>
-          <p className="text-sm md:text-base text-muted-foreground">
-            La République Gabonaise a engagé une transformation profonde de son
-            administration. Avec ADMIN.GA, la Fonction Publique passe au
-            numérique pour mieux servir les agents et les citoyens.
-          </p>
-          <div className="grid md:grid-cols-2 gap-4 text-sm md:text-base text-muted-foreground">
-            <ul className="list-disc list-inside space-y-1">
-              <li>
-                Digitalisation des procédures : moins de papier, moins de
-                déplacements.
-              </li>
-              <li>
-                Dématérialisation des archives : dossiers sécurisés et faciles à
-                retrouver.
-              </li>
-              <li>Identifiant unique de l'agent public.</li>
-            </ul>
-            <ul className="list-disc list-inside space-y-1">
-              <li>
-                Recensement biométrique des agents pour fiabiliser les
-                effectifs.
-              </li>
-              <li>
-                Lutte contre les agents fictifs et optimisation de la masse
-                salariale.
-              </li>
-              <li>
-                Plus de traçabilité, plus de transparence, plus de qualité de
-                service.
-              </li>
-            </ul>
+          <div className="grid lg:grid-cols-5 gap-8 items-center">
+            <div className="lg:col-span-3 space-y-4">
+              <h3 className="text-lg md:text-xl font-semibold">
+                Modernisation & Digitalisation de l'administration
+              </h3>
+              <p className="text-sm md:text-base text-muted-foreground">
+                La République Gabonaise a engagé une transformation profonde de son
+                administration. Avec ADMIN.GA, la Fonction Publique passe au
+                numérique pour mieux servir les agents et les citoyens.
+              </p>
+              <div className="grid md:grid-cols-2 gap-4 text-sm md:text-base text-muted-foreground">
+                <ul className="list-disc list-inside space-y-1">
+                  <li>
+                    Digitalisation des procédures : moins de papier, moins de
+                    déplacements.
+                  </li>
+                  <li>
+                    Dématérialisation des archives : dossiers sécurisés et faciles à
+                    retrouver.
+                  </li>
+                  <li>Identifiant unique de l'agent public.</li>
+                </ul>
+                <ul className="list-disc list-inside space-y-1">
+                  <li>
+                    Recensement biométrique des agents pour fiabiliser les
+                    effectifs.
+                  </li>
+                  <li>
+                    Lutte contre les agents fictifs et optimisation de la masse
+                    salariale.
+                  </li>
+                  <li>
+                    Plus de traçabilité, plus de transparence, plus de qualité de
+                    service.
+                  </li>
+                </ul>
+              </div>
+              <p className="text-sm md:text-base italic text-muted-foreground mt-4">
+                « Une fonction publique plus efficace, plus proche, plus moderne. »
+              </p>
+            </div>
+
+            <div className="lg:col-span-2 neu-card-sm overflow-hidden">
+              <img 
+                src={digitalisationImage} 
+                alt="Professionnels IT gabonais travaillant sur la digitalisation"
+                className="w-full h-full object-cover rounded-2xl"
+              />
+            </div>
           </div>
-          <p className="text-sm md:text-base italic text-muted-foreground mt-4">
-            « Une fonction publique plus efficace, plus proche, plus moderne. »
-          </p>
         </section>
 
         {/* Actualités & Ressources */}
