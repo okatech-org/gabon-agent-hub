@@ -63,8 +63,8 @@ export function GestionnaireRHSidebar() {
   };
 
   return (
-    <SidebarUI className="border-none bg-transparent">
-      <div className="p-3 space-y-4">
+    <SidebarUI className="border-none bg-background">
+      <div className="space-y-4">
         {/* Header */}
         <div className="neu-card p-4">
           <Link to="/rh/dashboard" className="flex items-center space-x-3">
