@@ -25,6 +25,28 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    // Récupérer la base de connaissances personnalisée
+    const { data: knowledgeBase } = await supabase
+      .from('iasted_knowledge_base')
+      .select('title, description, content, category, tags')
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
+      .limit(20);
+
+    let knowledgeContext = '';
+    if (knowledgeBase && knowledgeBase.length > 0) {
+      knowledgeContext = '\n\n[CONNAISSANCES PERSONNALISÉES DU MINISTRE]\n\n';
+      knowledgeBase.forEach(entry => {
+        knowledgeContext += `### ${entry.title} [${entry.category}]\n`;
+        if (entry.description) knowledgeContext += `${entry.description}\n`;
+        if (entry.content) knowledgeContext += `${entry.content}\n`;
+        if (entry.tags && entry.tags.length > 0) {
+          knowledgeContext += `Mots-clés: ${entry.tags.join(', ')}\n`;
+        }
+        knowledgeContext += '\n';
+      });
+    }
+
     // Récupérer les données contextuelles selon l'action
     let contextData = '';
     
@@ -306,6 +328,8 @@ Pour une demande du Ministre, tu suis ce canevas :
 [DONNÉES CONTEXTUELLES DISPONIBLES]
 
 ${contextData}
+
+${knowledgeContext}
 
 [DOMAINE FONCTION PUBLIQUE]
 
