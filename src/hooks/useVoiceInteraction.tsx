@@ -657,8 +657,37 @@ export const useVoiceInteraction = () => {
           const shouldAutoRestart = chatData.hasFollowUpQuestion || continuousMode;
           await playAudioResponse(audioContent, shouldAutoRestart);
         } else {
-          console.log('ℹ️ No audio to play, returning to idle');
-          setVoiceState('idle');
+          console.warn('⚠️ No audio content received, using text-to-speech fallback');
+          
+          // Fallback: Use Web Speech API to read the text
+          if (responseText && 'speechSynthesis' in window) {
+            setVoiceState('speaking');
+            const utterance = new SpeechSynthesisUtterance(responseText);
+            utterance.lang = 'fr-FR';
+            utterance.rate = 0.95;
+            utterance.pitch = 1.0;
+            
+            utterance.onend = () => {
+              console.log('✅ Speech synthesis complete');
+              if (continuousMode) {
+                setTimeout(() => {
+                  startListening();
+                }, 500);
+              } else {
+                setVoiceState('idle');
+              }
+            };
+            
+            utterance.onerror = (event) => {
+              console.error('❌ Speech synthesis error:', event);
+              setVoiceState('idle');
+            };
+            
+            window.speechSynthesis.speak(utterance);
+          } else {
+            console.log('ℹ️ No audio and no speech synthesis available, returning to idle');
+            setVoiceState('idle');
+          }
         }
       };
 
