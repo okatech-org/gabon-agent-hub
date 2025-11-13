@@ -209,7 +209,10 @@ export const useVoiceInteraction = () => {
       
       // Generate audio for greeting (simple TTS without AI conversation)
       const { data: greetingData, error: greetingError } = await supabase.functions.invoke('generate-greeting-audio', {
-        body: { text: greetingMessage }
+        body: { 
+          text: greetingMessage,
+          voiceId: selectedVoiceId // Utiliser la voix iAsted
+        }
       });
 
       if (greetingError || !greetingData.audioContent) {
@@ -549,7 +552,7 @@ export const useVoiceInteraction = () => {
             sessionId,
             userId: user.id,
             audioBase64: base64Data,
-            voiceId: selectedVoiceId || 'alloy',
+            voiceId: selectedVoiceId, // Toujours utiliser la voix iAsted (pas de fallback)
             langHint: 'fr',
             generateAudio: true
           }
