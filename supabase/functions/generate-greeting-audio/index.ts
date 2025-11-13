@@ -17,12 +17,11 @@ serve(async (req) => {
       throw new Error('Text is required');
     }
 
-    // Allow a default voice id from env when not provided by client
-    const defaultVoiceId = Deno.env.get('ELEVENLABS_VOICE_ID');
+    // Use provided voiceId, or fallback to env, or use default Aria voice
+    const defaultVoiceId = Deno.env.get('ELEVENLABS_VOICE_ID') || '9BWtsMINqrJLrRacOk9x'; // Aria as ultimate fallback
     const effectiveVoiceId = voiceId || defaultVoiceId;
-    if (!effectiveVoiceId) {
-      throw new Error('voiceId missing and ELEVENLABS_VOICE_ID not configured');
-    }
+    
+    console.log('Using voice ID:', effectiveVoiceId);
 
     const ELEVENLABS_API_KEY = Deno.env.get('ELEVENLABS_API_KEY');
     
@@ -55,7 +54,18 @@ serve(async (req) => {
     }
 
     const arrayBuffer = await response.arrayBuffer();
-    const audioContent = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+    
+    // Convert ArrayBuffer to base64 in chunks to avoid stack overflow
+    const uint8Array = new Uint8Array(arrayBuffer);
+    const chunkSize = 8192; // Process in 8KB chunks
+    let binaryString = '';
+    
+    for (let i = 0; i < uint8Array.length; i += chunkSize) {
+      const chunk = uint8Array.slice(i, Math.min(i + chunkSize, uint8Array.length));
+      binaryString += String.fromCharCode(...Array.from(chunk));
+    }
+    
+    const audioContent = btoa(binaryString);
 
     return new Response(
       JSON.stringify({ audioContent }),
