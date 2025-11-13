@@ -30,11 +30,35 @@ export default function IAsted() {
 
   const [messages, setMessages] = useState<Message[]>([]);
 
-  // Load user preferences
+  // Load user preferences and default iAsted voice
   useEffect(() => {
     if (!user) return;
 
     const loadPreferences = async () => {
+      // Charger d'abord la voix iAsted depuis ElevenLabs
+      try {
+        const { data: voicesData, error: voicesError } = await supabase.functions.invoke('list-voices');
+        
+        if (!voicesError && voicesData?.voices) {
+          const iastedVoice = voicesData.voices.find(
+            (voice: any) => voice.name.toLowerCase() === 'iasted'
+          );
+          
+          if (iastedVoice) {
+            console.log('✅ Voix iAsted trouvée:', iastedVoice.voice_id);
+            setVoiceSettings(prev => ({
+              ...prev,
+              voiceId: iastedVoice.voice_id
+            }));
+          } else {
+            console.warn('⚠️ Voix "iAsted" non trouvée dans votre compte ElevenLabs');
+          }
+        }
+      } catch (error) {
+        console.error('❌ Erreur lors du chargement des voix:', error);
+      }
+
+      // Puis charger les préférences utilisateur
       const { data, error } = await supabase
         .from('user_preferences' as any)
         .select('*')
@@ -42,12 +66,12 @@ export default function IAsted() {
         .single();
 
       if (data && !error) {
-        setVoiceSettings({
-          voiceId: (data as any).voice_id || '9BWtsMINqrJLrRacOk9x',
+        setVoiceSettings(prev => ({
+          voiceId: (data as any).voice_id || prev.voiceId,
           silenceDuration: (data as any).voice_silence_duration || 900,
           silenceThreshold: (data as any).voice_silence_threshold || 10,
           continuousMode: (data as any).voice_continuous_mode || false,
-        });
+        }));
       }
     };
 
