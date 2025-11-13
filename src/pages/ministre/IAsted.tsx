@@ -1,7 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MessageSquare, History, Settings, Mic } from "lucide-react";
 import { useVoiceInteraction } from "@/hooks/useVoiceInteraction";
+import { VoiceSelector } from "@/components/ministre/VoiceSelector";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 interface VoiceSettings {
   voiceId: string;
@@ -17,14 +20,60 @@ interface Message {
 }
 
 export default function IAsted() {
+  const { user } = useAuth();
   const [voiceSettings, setVoiceSettings] = useState<VoiceSettings>({
-    voiceId: 'alloy',
+    voiceId: '9BWtsMINqrJLrRacOk9x', // Aria by default (ElevenLabs)
     silenceDuration: 900,
     silenceThreshold: 10,
     continuousMode: false,
   });
 
   const [messages, setMessages] = useState<Message[]>([]);
+
+  // Load user preferences
+  useEffect(() => {
+    if (!user) return;
+
+    const loadPreferences = async () => {
+      const { data, error } = await supabase
+        .from('user_preferences' as any)
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      if (data && !error) {
+        setVoiceSettings({
+          voiceId: (data as any).voice_id || '9BWtsMINqrJLrRacOk9x',
+          silenceDuration: (data as any).voice_silence_duration || 900,
+          silenceThreshold: (data as any).voice_silence_threshold || 10,
+          continuousMode: (data as any).voice_continuous_mode || false,
+        });
+      }
+    };
+
+    loadPreferences();
+  }, [user]);
+
+  // Save preferences when they change
+  useEffect(() => {
+    if (!user) return;
+
+    const savePreferences = async () => {
+      await supabase
+        .from('user_preferences' as any)
+        .upsert({
+          user_id: user.id,
+          voice_id: voiceSettings.voiceId,
+          voice_silence_duration: voiceSettings.silenceDuration,
+          voice_silence_threshold: voiceSettings.silenceThreshold,
+          voice_continuous_mode: voiceSettings.continuousMode,
+        }, {
+          onConflict: 'user_id'
+        });
+    };
+
+    savePreferences();
+  }, [voiceSettings, user]);
 
   const {
     voiceState,
@@ -216,25 +265,19 @@ export default function IAsted() {
           <TabsContent value="settings" className="mt-6">
             <div className="grid gap-6 md:grid-cols-2">
               <div className="neu-card p-6">
-                <h3 className="text-lg font-semibold mb-4">Paramètres Vocaux</h3>
+                <h3 className="text-lg font-semibold mb-4">Voix ElevenLabs</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Sélectionnez une voix naturelle et expressive pour iAsted
+                </p>
+                <VoiceSelector
+                  selectedVoiceId={voiceSettings.voiceId}
+                  onVoiceSelect={(voiceId) => setVoiceSettings(prev => ({ ...prev, voiceId }))}
+                />
+              </div>
+
+              <div className="neu-card p-6">
+                <h3 className="text-lg font-semibold mb-4">Paramètres d'Écoute</h3>
                 <div className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">
-                      Voix
-                    </label>
-                    <select 
-                      className="w-full neu-inset p-2 rounded-lg"
-                      value={voiceSettings.voiceId}
-                      onChange={(e) => setVoiceSettings(prev => ({ ...prev, voiceId: e.target.value }))}
-                    >
-                      <option value="alloy">Alloy</option>
-                      <option value="echo">Echo</option>
-                      <option value="fable">Fable</option>
-                      <option value="onyx">Onyx</option>
-                      <option value="nova">Nova</option>
-                      <option value="shimmer">Shimmer</option>
-                    </select>
-                  </div>
 
                   <div>
                     <label className="text-sm font-medium mb-2 block">
@@ -270,7 +313,9 @@ export default function IAsted() {
                   </div>
                 </div>
               </div>
+            </div>
 
+            <div className="grid gap-6 md:grid-cols-2 mt-6">
               <div className="neu-card p-6">
                 <h3 className="text-lg font-semibold mb-4">Raccourcis Clavier</h3>
                 <div className="space-y-3 text-sm">

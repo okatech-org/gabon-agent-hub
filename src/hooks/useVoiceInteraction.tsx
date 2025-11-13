@@ -85,7 +85,7 @@ export const useVoiceInteraction = () => {
       try {
         // Créer une nouvelle session
         const { data: sessionData, error: sessionError } = await supabase
-          .from('conversation_sessions')
+          .from('conversation_sessions' as any)
           .insert({
             user_id: user.id,
             settings: {
@@ -102,8 +102,8 @@ export const useVoiceInteraction = () => {
           return;
         }
 
-        setSessionId(sessionData.id);
-        console.log('Session created:', sessionData.id);
+        setSessionId((sessionData as any).id);
+        console.log('Session created:', (sessionData as any).id);
       } catch (error) {
         console.error('Error initializing session:', error);
       }
@@ -119,7 +119,7 @@ export const useVoiceInteraction = () => {
 
       try {
         const { data, error } = await supabase
-          .from('user_preferences')
+          .from('user_preferences' as any)
           .select('voice_silence_duration, voice_silence_threshold, voice_continuous_mode, voice_focus_mode')
           .eq('user_id', user.id)
           .single();
@@ -130,21 +130,21 @@ export const useVoiceInteraction = () => {
         }
 
         if (data) {
-          setSilenceDuration(data.voice_silence_duration || 1500);
-          setSilenceThreshold(data.voice_silence_threshold || 10);
-          const newContinuousMode = data.voice_continuous_mode || false;
+          setSilenceDuration((data as any).voice_silence_duration || 1500);
+          setSilenceThreshold((data as any).voice_silence_threshold || 10);
+          const newContinuousMode = (data as any).voice_continuous_mode || false;
           setContinuousMode(newContinuousMode);
           
           // Update session with focus mode if active
-          if (sessionId && data.voice_focus_mode) {
+          if (sessionId && (data as any).voice_focus_mode) {
             const currentSettings = {
               silenceDuration,
               silenceThreshold,
               continuousMode,
-              focus_mode: data.voice_focus_mode
+              focus_mode: (data as any).voice_focus_mode
             };
             await supabase
-              .from('conversation_sessions')
+              .from('conversation_sessions' as any)
               .update({ settings: currentSettings })
               .eq('id', sessionId);
           }
