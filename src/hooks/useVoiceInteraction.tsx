@@ -24,7 +24,8 @@ export const useVoiceInteraction = () => {
   const [continuousModePaused, setContinuousModePaused] = useState<boolean>(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<VoiceInteractionMessage[]>([]);
-  const [selectedVoiceId, setSelectedVoiceId] = useState<string | null>(null);
+  const [selectedVoiceId, setSelectedVoiceId] = useState<string | null>('9BWtsMINqrJLrRacOk9x'); // Aria par défaut
+  const [isVoiceLoading, setIsVoiceLoading] = useState<boolean>(true);
   const [silenceDetected, setSilenceDetected] = useState<boolean>(false);
   const [silenceTimeRemaining, setSilenceTimeRemaining] = useState<number>(0);
   const [liveTranscript, setLiveTranscript] = useState<string>('');
@@ -112,12 +113,34 @@ export const useVoiceInteraction = () => {
     initSession();
   }, [user]);
 
-  // Charger les préférences vocales de l'utilisateur
+  // Charger les préférences vocales et la voix iAsted
   useEffect(() => {
     const loadVoicePreferences = async () => {
-      if (!user) return;
+      if (!user) {
+        setIsVoiceLoading(false);
+        return;
+      }
 
       try {
+        setIsVoiceLoading(true);
+        
+        // Charger d'abord la voix iAsted depuis ElevenLabs
+        const { data: voicesData, error: voicesError } = await supabase.functions.invoke('list-voices');
+        
+        if (!voicesError && voicesData?.voices) {
+          const iastedVoice = voicesData.voices.find(
+            (voice: any) => voice.name.toLowerCase() === 'iasted'
+          );
+          
+          if (iastedVoice) {
+            console.log('✅ Voix iAsted chargée:', iastedVoice.voice_id);
+            setSelectedVoiceId(iastedVoice.voice_id);
+          } else {
+            console.warn('⚠️ Voix "iAsted" non trouvée, utilisation de Aria par défaut');
+          }
+        }
+
+        // Puis charger les préférences utilisateur
         const { data, error } = await supabase
           .from('user_preferences' as any)
           .select('voice_silence_duration, voice_silence_threshold, voice_continuous_mode, voice_focus_mode')
@@ -155,6 +178,8 @@ export const useVoiceInteraction = () => {
         }
       } catch (error) {
         console.error('Error loading voice preferences:', error);
+      } finally {
+        setIsVoiceLoading(false);
       }
     };
 
@@ -916,6 +941,13 @@ export const useVoiceInteraction = () => {
   };
 
   const handleInteraction = async () => {
+    // Attendre que la voix soit chargée
+    if (isVoiceLoading) {
+      console.log('⏳ Chargement de la voix en cours...');
+      unifiedToast.info('Chargement de la voix...');
+      return;
+    }
+
     if (voiceState === 'idle') {
       // Afficher le toast la première fois que le mode continu est utilisé
       if (continuousMode && !continuousModeToastShownRef.current) {
@@ -1022,5 +1054,6 @@ export const useVoiceInteraction = () => {
     silenceTimeRemaining,
     silenceDuration,
     liveTranscript,
+    isVoiceLoading,
   };
 };

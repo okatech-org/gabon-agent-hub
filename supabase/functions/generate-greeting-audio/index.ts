@@ -17,12 +17,11 @@ serve(async (req) => {
       throw new Error('Text is required');
     }
 
-    // Allow a default voice id from env when not provided by client
-    const defaultVoiceId = Deno.env.get('ELEVENLABS_VOICE_ID');
+    // Use provided voiceId, or fallback to env, or use default Aria voice
+    const defaultVoiceId = Deno.env.get('ELEVENLABS_VOICE_ID') || '9BWtsMINqrJLrRacOk9x'; // Aria as ultimate fallback
     const effectiveVoiceId = voiceId || defaultVoiceId;
-    if (!effectiveVoiceId) {
-      throw new Error('voiceId missing and ELEVENLABS_VOICE_ID not configured');
-    }
+    
+    console.log('Using voice ID:', effectiveVoiceId);
 
     const ELEVENLABS_API_KEY = Deno.env.get('ELEVENLABS_API_KEY');
     
