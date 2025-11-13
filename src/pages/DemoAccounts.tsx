@@ -2,6 +2,7 @@ import { Shield, Users, UserCog, Briefcase, GraduationCap, Building2, ArrowLeft,
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
+import { toast } from "sonner";
 
 interface DemoAccount {
   id: string;
@@ -28,7 +29,7 @@ const demoAccounts: DemoAccount[] = [
       "Tableaux de bord exécutifs"
     ],
     icon: Crown,
-    email: "ministre.demo@fonctionpublique.ga",
+    email: "ministre.demo@admin.ga",
     color: "text-purple-600",
     enabled: true
   },
@@ -44,7 +45,7 @@ const demoAccounts: DemoAccount[] = [
       "Suivi des directives ministérielles"
     ],
     icon: FileCheck,
-    email: "sg.demo@fonctionpublique.ga",
+    email: "sg.demo@admin.ga",
     color: "text-indigo-600",
     enabled: true
   },
@@ -60,7 +61,7 @@ const demoAccounts: DemoAccount[] = [
       "Interface politique et administrative"
     ],
     icon: Briefcase,
-    email: "cabinet.demo@fonctionpublique.ga",
+    email: "cabinet.demo@admin.ga",
     color: "text-violet-600",
     enabled: true
   },
@@ -76,7 +77,7 @@ const demoAccounts: DemoAccount[] = [
       "Supervision et audit"
     ],
     icon: Shield,
-    email: "admin.demo@fonctionpublique.ga",
+    email: "admin.demo@admin.ga",
     color: "text-destructive",
     enabled: false
   },
@@ -92,7 +93,7 @@ const demoAccounts: DemoAccount[] = [
       "Tableaux de bord RH"
     ],
     icon: UserCog,
-    email: "drh.demo@fonctionpublique.ga",
+    email: "drh.demo@admin.ga",
     color: "text-secondary",
     enabled: true
   },
@@ -108,7 +109,7 @@ const demoAccounts: DemoAccount[] = [
       "Pilotage des projets structurants"
     ],
     icon: TrendingUp,
-    email: "planification.demo@fonctionpublique.ga",
+    email: "planification.demo@admin.ga",
     color: "text-blue-600",
     enabled: false
   },
@@ -124,7 +125,7 @@ const demoAccounts: DemoAccount[] = [
       "Rapports financiers au Trésor"
     ],
     icon: Landmark,
-    email: "tresorier.demo@fonctionpublique.ga",
+    email: "tresorier.demo@admin.ga",
     color: "text-amber-600",
     enabled: false
   },
@@ -140,7 +141,7 @@ const demoAccounts: DemoAccount[] = [
       "Suivi des mutations et affectations"
     ],
     icon: Folder,
-    email: "gestionnaire.demo@fonctionpublique.ga",
+    email: "gestionnaire.demo@admin.ga",
     color: "text-info",
     enabled: true
   },
@@ -156,7 +157,7 @@ const demoAccounts: DemoAccount[] = [
       "Demandes de recrutement"
     ],
     icon: Building2,
-    email: "directeur.demo@fonctionpublique.ga",
+    email: "directeur.demo@admin.ga",
     color: "text-accent",
     enabled: false
   },
@@ -172,7 +173,7 @@ const demoAccounts: DemoAccount[] = [
       "Suivi de carrière"
     ],
     icon: Users,
-    email: "fonctionnaire.demo@fonctionpublique.ga",
+    email: "fonctionnaire.demo@admin.ga",
     color: "text-primary",
     enabled: true
   },
@@ -188,7 +189,7 @@ const demoAccounts: DemoAccount[] = [
       "Consultation des résultats"
     ],
     icon: GraduationCap,
-    email: "candidat.demo@fonctionpublique.ga",
+    email: "candidat.demo@admin.ga",
     color: "text-success",
     enabled: true
   }
@@ -204,9 +205,10 @@ export default function DemoAccounts() {
     try {
       // Utiliser le même mot de passe pour tous les comptes démo
       await signIn(account.email, "Demo2024!");
-      navigate("/dashboard");
-    } catch (error) {
+      // La redirection est gérée automatiquement par le AuthContext selon le rôle
+    } catch (error: any) {
       console.error("Demo login error:", error);
+      toast.error(error.message || "Erreur de connexion");
     } finally {
       setIsLoading(false);
     }
