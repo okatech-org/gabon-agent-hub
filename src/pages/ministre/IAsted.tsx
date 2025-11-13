@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MessageSquare, History, Settings, Mic } from "lucide-react";
+import { MessageSquare, History, Settings, Mic, Sparkles } from "lucide-react";
 import { useVoiceInteraction } from "@/hooks/useVoiceInteraction";
 import { VoiceSelector } from "@/components/ministre/VoiceSelector";
 import { supabase } from "@/integrations/supabase/client";
