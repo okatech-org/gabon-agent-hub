@@ -1,4 +1,4 @@
-import { Shield, Users, UserCog, Briefcase, GraduationCap, Building2, ArrowLeft, CheckCircle2 } from "lucide-react";
+import { Shield, Users, UserCog, Briefcase, GraduationCap, Building2, ArrowLeft, CheckCircle2, Crown, Landmark, TrendingUp, Folder, FileCheck } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
@@ -15,6 +15,51 @@ interface DemoAccount {
 }
 
 const demoAccounts: DemoAccount[] = [
+  {
+    id: "ministre",
+    nom: "Ministre de la Fonction Publique",
+    role: "ministre",
+    description: "Autorité politique suprême du ministère, définit les orientations stratégiques",
+    attributs: [
+      "Vision stratégique et orientations politiques",
+      "Validation des grandes réformes",
+      "Arbitrage des décisions majeures",
+      "Tableaux de bord exécutifs"
+    ],
+    icon: Crown,
+    email: "ministre.demo@fonctionpublique.ga",
+    color: "text-purple-600"
+  },
+  {
+    id: "secretaire_general",
+    nom: "Secrétaire Général du Ministère",
+    role: "secretaire_general",
+    description: "Coordination administrative et supervision de l'ensemble des services du ministère",
+    attributs: [
+      "Coordination des directions du ministère",
+      "Supervision administrative générale",
+      "Préparation des conseils ministériels",
+      "Suivi des directives ministérielles"
+    ],
+    icon: FileCheck,
+    email: "sg.demo@fonctionpublique.ga",
+    color: "text-indigo-600"
+  },
+  {
+    id: "directeur_cabinet",
+    nom: "Directeur de Cabinet",
+    role: "directeur_cabinet",
+    description: "Bras droit du Ministre, gère le cabinet politique et les relations institutionnelles",
+    attributs: [
+      "Coordination du cabinet ministériel",
+      "Relations avec les institutions",
+      "Préparation des dossiers ministériels",
+      "Interface politique et administrative"
+    ],
+    icon: Briefcase,
+    email: "cabinet.demo@fonctionpublique.ga",
+    color: "text-violet-600"
+  },
   {
     id: "admin",
     nom: "Administrateur Système",
@@ -46,6 +91,36 @@ const demoAccounts: DemoAccount[] = [
     color: "text-secondary"
   },
   {
+    id: "directeur_planification",
+    nom: "Directeur de la Planification",
+    role: "directeur_planification",
+    description: "Pilotage stratégique, planification des effectifs et projections budgétaires",
+    attributs: [
+      "Planification des ressources humaines",
+      "Projections et prévisionnels",
+      "Études et analyses statistiques",
+      "Pilotage des projets structurants"
+    ],
+    icon: TrendingUp,
+    email: "planification.demo@fonctionpublique.ga",
+    color: "text-blue-600"
+  },
+  {
+    id: "tresorier",
+    nom: "Trésorier - Trésor Public",
+    role: "tresorier",
+    description: "Gestion financière et contrôle des dépenses liées aux agents publics",
+    attributs: [
+      "Validation des états de paie",
+      "Contrôle des dépenses de personnel",
+      "Suivi de la masse salariale",
+      "Rapports financiers au Trésor"
+    ],
+    icon: Landmark,
+    email: "tresorier.demo@fonctionpublique.ga",
+    color: "text-amber-600"
+  },
+  {
     id: "gestionnaire",
     nom: "Gestionnaire RH",
     role: "gestionnaire",
@@ -56,7 +131,7 @@ const demoAccounts: DemoAccount[] = [
       "Génération des actes",
       "Suivi des mutations et affectations"
     ],
-    icon: Briefcase,
+    icon: Folder,
     email: "gestionnaire.demo@fonctionpublique.ga",
     color: "text-info"
   },
