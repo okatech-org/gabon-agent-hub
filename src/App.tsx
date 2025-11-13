@@ -24,6 +24,10 @@ import MinistreDashboard from "./pages/ministre/MinistreDashboard";
 import IAsted from "./pages/ministre/IAsted";
 import Documents from "./pages/ministre/Documents";
 import Reglementations from "./pages/ministre/Reglementations";
+import Notifications from "./pages/ministre/Notifications";
+import Formations from "./pages/ministre/Formations";
+import Historique from "./pages/ministre/Historique";
+import Alertes from "./pages/ministre/Alertes";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -75,6 +79,10 @@ const App = () => (
               <Route path="/ministre/iasted" element={<IAsted />} />
               <Route path="/ministre/documents" element={<Documents />} />
               <Route path="/ministre/reglementations" element={<Reglementations />} />
+              <Route path="/ministre/notifications" element={<Notifications />} />
+              <Route path="/ministre/formations" element={<Formations />} />
+              <Route path="/ministre/historique" element={<Historique />} />
+              <Route path="/ministre/alertes" element={<Alertes />} />
             </Route>
             
             <Route
