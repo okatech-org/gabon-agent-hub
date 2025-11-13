@@ -79,7 +79,7 @@ serve(async (req) => {
         }, {});
         contextData += `- Structures par type: ${JSON.stringify(parType)}\n`;
       }
-    } else if (action === 'actes' || action === 'redaction') {
+    } else if (action === 'actes' || action === 'redaction' || action === 'documents') {
       const { data: actes } = await supabase
         .from('actes_administratifs')
         .select('type_acte, statut, date_creation')
@@ -103,6 +103,100 @@ serve(async (req) => {
         const enAttente = actes.filter(a => a.statut === 'brouillon' || a.statut === 'en_validation');
         contextData += `- En attente de validation: ${enAttente.length}\n`;
       }
+
+      if (action === 'documents') {
+        contextData += `\nTypes de documents ministériels disponibles:
+- Arrêté Ministériel
+- Circulaire
+- Instruction
+- Note de Service
+- Décision
+- Rapport
+- Communiqué
+- Réponse Ministérielle
+- Projet de Loi
+- Projet d'Ordonnance
+- Projet de Décret\n`;
+      }
+    } else if (action === 'economie') {
+      const { data: agents } = await supabase
+        .from('agents')
+        .select('type_agent, categorie, grade, echelon');
+      
+      if (agents) {
+        contextData = `Données économiques et budgétaires:\n- Nombre total d'agents: ${agents.length}\n`;
+        const parCategorie = agents.reduce((acc: any, a) => {
+          if (a.categorie) acc[a.categorie] = (acc[a.categorie] || 0) + 1;
+          return acc;
+        }, {});
+        contextData += `- Répartition par catégorie: ${JSON.stringify(parCategorie)}\n`;
+        contextData += `\nNote: Analyse de masse salariale nécessite les grilles indiciaires et les salaires de base par grade/échelon.\n`;
+      }
+    } else if (action === 'formations') {
+      const { data: agents } = await supabase
+        .from('agents')
+        .select('grade, categorie, type_agent');
+      
+      if (agents) {
+        contextData = `Données sur le personnel (pour besoins en formation):\n- Agents total: ${agents.length}\n`;
+        const parGrade = agents.reduce((acc: any, a) => {
+          if (a.grade) acc[a.grade] = (acc[a.grade] || 0) + 1;
+          return acc;
+        }, {});
+        contextData += `- Répartition par grade: ${JSON.stringify(parGrade)}\n`;
+        contextData += `\nNote: Les données de formations continues ne sont pas encore centralisées dans le système.\n`;
+      }
+    } else if (action === 'historique') {
+      const { data: actes } = await supabase
+        .from('actes_administratifs')
+        .select('type_acte, date_creation, objet, statut')
+        .gte('date_creation', new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString())
+        .order('date_creation', { ascending: false })
+        .limit(50);
+      
+      if (actes) {
+        contextData = `Historique des 12 derniers mois:\n- Actes créés: ${actes.length}\n`;
+        const parType = actes.reduce((acc: any, a) => {
+          acc[a.type_acte] = (acc[a.type_acte] || 0) + 1;
+          return acc;
+        }, {});
+        contextData += `- Par type: ${JSON.stringify(parType)}\n`;
+      }
+    } else if (action === 'alertes' || action === 'notifications') {
+      const { data: anomalies } = await supabase
+        .from('anomalies_recensement')
+        .select('type_anomalie, est_regularise')
+        .order('created_at', { ascending: false })
+        .limit(100);
+      
+      const { data: actes } = await supabase
+        .from('actes_administratifs')
+        .select('statut')
+        .eq('statut', 'en_validation');
+      
+      contextData = `Alertes et notifications:\n`;
+      
+      if (anomalies) {
+        const nonRegularisees = anomalies.filter(a => !a.est_regularise);
+        contextData += `- Anomalies non régularisées: ${nonRegularisees.length}\n`;
+        const parType = anomalies.reduce((acc: any, a) => {
+          acc[a.type_anomalie] = (acc[a.type_anomalie] || 0) + 1;
+          return acc;
+        }, {});
+        contextData += `- Types d'anomalies: ${JSON.stringify(parType)}\n`;
+      }
+      
+      if (actes) {
+        contextData += `- Actes en attente de validation: ${actes.length}\n`;
+      }
+    } else if (action === 'reglementations') {
+      contextData = `Réglementations de la fonction publique gabonaise:
+- Loi portant Statut général de la Fonction publique
+- Décrets d'application du statut
+- Arrêtés ministériels en vigueur
+- Circulaires d'orientation
+
+Note: La base documentaire juridique complète n'est pas encore intégrée au système. Se référer aux textes officiels publiés au Journal Officiel.\n`;
     }
 
     // Préparer le prompt système selon le contexte
@@ -116,12 +210,52 @@ ${context || ''}
 
 CAPACITÉS ET RESPONSABILITÉS:
 1. **Analyse stratégique**: Fournir des insights sur les effectifs, tendances, risques et opportunités
-2. **Simulations**: Modéliser les impacts de réformes, gel de recrutements, départs à la retraite
-3. **Rédaction institutionnelle**: Produire notes, rapports, décrets avec ton formel et données chiffrées
-4. **Recommandations**: Proposer des options de décision basées sur l'analyse des données
-5. **Alertes**: Identifier les anomalies, risques et points critiques nécessitant attention
+2. **Économie & Finances**: Analyser la masse salariale, impacts budgétaires, optimisations
+3. **Actions ministérielles**: Générer documents officiels, suivre réglementations, gérer notifications
+4. **Formations**: Identifier besoins en formation continue et plans de développement
+5. **Historique & traçabilité**: Retracer les décisions et leurs impacts
+6. **Alertes & monitoring**: Détecter anomalies et situations nécessitant action urgente
+7. **Simulations**: Modéliser les impacts de réformes, gel de recrutements, départs à la retraite
+8. **Rédaction institutionnelle**: Produire notes, rapports, décrets avec ton formel et données chiffrées
 
 INSTRUCTIONS SPÉCIFIQUES SELON LE TYPE DE DEMANDE:
+
+Pour **Économie & Finances**:
+- Analyser la masse salariale globale et par catégorie
+- Évaluer l'impact budgétaire des décisions RH
+- Proposer des optimisations (gel recrutements, redéploiements)
+- Comparer avec les budgets alloués
+- Identifier les postes de coûts principaux
+
+Pour **Documents ministériels**:
+- Présenter les types de documents disponibles avec leurs usages
+- Expliquer les circuits de validation selon le type
+- Proposer des templates et structures adaptées
+- Guider sur le ton et formalisme requis pour chaque type
+
+Pour **Réglementations**:
+- Référencer les textes juridiques pertinents
+- Expliquer l'application des statuts et décrets
+- Identifier les réformes réglementaires en cours
+- Signaler les incompatibilités ou vides juridiques
+
+Pour **Formations**:
+- Identifier les besoins en formation par grade/corps
+- Proposer des plans de formation ciblés
+- Évaluer les impacts sur la performance des services
+- Recommander des parcours professionnalisant
+
+Pour **Historique**:
+- Retracer les décisions sur 12 mois
+- Analyser les tendances et évolutions
+- Identifier les patterns de décisions
+- Mesurer les impacts à moyen terme
+
+Pour **Alertes & Notifications**:
+- Lister les alertes critiques par ordre de priorité
+- Quantifier les risques (financiers, légaux, opérationnels)
+- Proposer des actions correctives immédiates
+- Définir des échéances d'intervention
 
 Pour les **analyses d'effectifs**:
 - Présenter les chiffres clés (total, répartitions)
@@ -171,7 +305,8 @@ PRINCIPES ÉTHIQUES:
 - Toujours citer tes sources de données
 - Signaler les limites de ton analyse
 - Ne jamais suggérer d'actions discriminatoires
-- Respecter la confidentialité des données personnelles`;
+- Respecter la confidentialité des données personnelles
+- Adopter une posture de conseil stratégique orientée solutions`;
 
     // Appel à l'API Lovable AI
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
