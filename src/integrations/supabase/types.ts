@@ -228,6 +228,41 @@ export type Database = {
           },
         ]
       }
+      analytics_voice_events: {
+        Row: {
+          created_at: string | null
+          event_data: Json | null
+          event_type: string
+          id: string
+          session_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          event_data?: Json | null
+          event_type: string
+          id?: string
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          event_data?: Json | null
+          event_type?: string
+          id?: string
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_voice_events_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "conversation_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       anomalies_recensement: {
         Row: {
           action_prise: string | null
@@ -468,6 +503,83 @@ export type Database = {
         }
         Relationships: []
       }
+      conversation_messages: {
+        Row: {
+          audio_base64: string | null
+          content: string
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          role: string
+          session_id: string | null
+        }
+        Insert: {
+          audio_base64?: string | null
+          content: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          role: string
+          session_id?: string | null
+        }
+        Update: {
+          audio_base64?: string | null
+          content?: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          role?: string
+          session_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversation_messages_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "conversation_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversation_sessions: {
+        Row: {
+          created_at: string | null
+          ended_at: string | null
+          id: string
+          language: string | null
+          memory_summary: string | null
+          memory_updated_at: string | null
+          settings: Json | null
+          title: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          ended_at?: string | null
+          id?: string
+          language?: string | null
+          memory_summary?: string | null
+          memory_updated_at?: string | null
+          settings?: Json | null
+          title?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          ended_at?: string | null
+          id?: string
+          language?: string | null
+          memory_summary?: string | null
+          memory_updated_at?: string | null
+          settings?: Json | null
+          title?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       evenements_carriere: {
         Row: {
           agent_id: string
@@ -517,6 +629,209 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      iasted_anomaly_alerts: {
+        Row: {
+          acknowledged: boolean | null
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          actual_value: number
+          alert_type: string
+          created_at: string | null
+          details: Json | null
+          id: string
+          message: string
+          metric_name: string
+          resolved_at: string | null
+          severity: string
+          threshold_value: number
+          user_id: string | null
+        }
+        Insert: {
+          acknowledged?: boolean | null
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          actual_value: number
+          alert_type: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          message: string
+          metric_name: string
+          resolved_at?: string | null
+          severity: string
+          threshold_value: number
+          user_id?: string | null
+        }
+        Update: {
+          acknowledged?: boolean | null
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          actual_value?: number
+          alert_type?: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          message?: string
+          metric_name?: string
+          resolved_at?: string | null
+          severity?: string
+          threshold_value?: number
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      iasted_knowledge_base: {
+        Row: {
+          category: string
+          content: string | null
+          created_at: string | null
+          description: string | null
+          file_name: string | null
+          file_size: number | null
+          file_url: string | null
+          id: string
+          is_active: boolean | null
+          tags: string[] | null
+          title: string
+          updated_at: string | null
+          user_id: string
+          version_number: number
+        }
+        Insert: {
+          category: string
+          content?: string | null
+          created_at?: string | null
+          description?: string | null
+          file_name?: string | null
+          file_size?: number | null
+          file_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string | null
+          user_id: string
+          version_number?: number
+        }
+        Update: {
+          category?: string
+          content?: string | null
+          created_at?: string | null
+          description?: string | null
+          file_name?: string | null
+          file_size?: number | null
+          file_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+          version_number?: number
+        }
+        Relationships: []
+      }
+      iasted_knowledge_versions: {
+        Row: {
+          category: string
+          change_summary: string | null
+          change_type: string
+          content: string | null
+          created_at: string | null
+          description: string | null
+          file_name: string | null
+          file_size: number | null
+          file_url: string | null
+          id: string
+          knowledge_id: string
+          tags: string[] | null
+          title: string
+          user_id: string
+          version_number: number
+        }
+        Insert: {
+          category: string
+          change_summary?: string | null
+          change_type: string
+          content?: string | null
+          created_at?: string | null
+          description?: string | null
+          file_name?: string | null
+          file_size?: number | null
+          file_url?: string | null
+          id?: string
+          knowledge_id: string
+          tags?: string[] | null
+          title: string
+          user_id: string
+          version_number: number
+        }
+        Update: {
+          category?: string
+          change_summary?: string | null
+          change_type?: string
+          content?: string | null
+          created_at?: string | null
+          description?: string | null
+          file_name?: string | null
+          file_size?: number | null
+          file_url?: string | null
+          id?: string
+          knowledge_id?: string
+          tags?: string[] | null
+          title?: string
+          user_id?: string
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "iasted_knowledge_versions_knowledge_id_fkey"
+            columns: ["knowledge_id"]
+            isOneToOne: false
+            referencedRelation: "iasted_knowledge_base"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      iasted_performance_stats: {
+        Row: {
+          avg_response_time: number | null
+          created_at: string | null
+          error_count: number | null
+          error_rate: number | null
+          id: string
+          p95_response_time: number | null
+          p99_response_time: number | null
+          success_count: number | null
+          time_bucket: string
+          total_requests: number | null
+        }
+        Insert: {
+          avg_response_time?: number | null
+          created_at?: string | null
+          error_count?: number | null
+          error_rate?: number | null
+          id?: string
+          p95_response_time?: number | null
+          p99_response_time?: number | null
+          success_count?: number | null
+          time_bucket: string
+          total_requests?: number | null
+        }
+        Update: {
+          avg_response_time?: number | null
+          created_at?: string | null
+          error_count?: number | null
+          error_rate?: number | null
+          id?: string
+          p95_response_time?: number | null
+          p99_response_time?: number | null
+          success_count?: number | null
+          time_bucket?: string
+          total_requests?: number | null
+        }
+        Relationships: []
       }
       indicateurs_reforme: {
         Row: {
@@ -877,6 +1192,66 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_preferences: {
+        Row: {
+          ai_model: string | null
+          created_at: string | null
+          formality_level: string | null
+          proactivity: string | null
+          response_mode: string | null
+          thinking_time: string | null
+          updated_at: string | null
+          user_id: string
+          vad_energy_threshold: number | null
+          vad_min_speech_duration: number | null
+          vad_post_speech_padding: number | null
+          vad_pre_speech_padding: number | null
+          voice_continuous_mode: boolean | null
+          voice_focus_mode: boolean | null
+          voice_id: string | null
+          voice_silence_duration: number | null
+          voice_silence_threshold: number | null
+        }
+        Insert: {
+          ai_model?: string | null
+          created_at?: string | null
+          formality_level?: string | null
+          proactivity?: string | null
+          response_mode?: string | null
+          thinking_time?: string | null
+          updated_at?: string | null
+          user_id: string
+          vad_energy_threshold?: number | null
+          vad_min_speech_duration?: number | null
+          vad_post_speech_padding?: number | null
+          vad_pre_speech_padding?: number | null
+          voice_continuous_mode?: boolean | null
+          voice_focus_mode?: boolean | null
+          voice_id?: string | null
+          voice_silence_duration?: number | null
+          voice_silence_threshold?: number | null
+        }
+        Update: {
+          ai_model?: string | null
+          created_at?: string | null
+          formality_level?: string | null
+          proactivity?: string | null
+          response_mode?: string | null
+          thinking_time?: string | null
+          updated_at?: string | null
+          user_id?: string
+          vad_energy_threshold?: number | null
+          vad_min_speech_duration?: number | null
+          vad_post_speech_padding?: number | null
+          vad_pre_speech_padding?: number | null
+          voice_continuous_mode?: boolean | null
+          voice_focus_mode?: boolean | null
+          voice_id?: string | null
+          voice_silence_duration?: number | null
+          voice_silence_threshold?: number | null
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {
