@@ -30,6 +30,7 @@ import DemandesRH from "./pages/rh/Demandes";
 import SettingsRH from "./pages/rh/Settings";
 import MinistreDashboard from "./pages/ministre/MinistreDashboard";
 import IAsted from "./pages/ministre/IAsted";
+import IAstedAdvanced from "./pages/ministre/IAstedAdvanced";
 import Documents from "./pages/ministre/Documents";
 import Reglementations from "./pages/ministre/Reglementations";
 import Notifications from "./pages/ministre/Notifications";
@@ -99,6 +100,7 @@ const App = () => (
             >
               <Route path="/ministre/dashboard" element={<MinistreDashboard />} />
               <Route path="/ministre/iasted" element={<IAsted />} />
+              <Route path="/ministre/iasted-advanced" element={<IAstedAdvanced />} />
               <Route path="/ministre/documents" element={<Documents />} />
               <Route path="/ministre/reglementations" element={<Reglementations />} />
               <Route path="/ministre/notifications" element={<Notifications />} />

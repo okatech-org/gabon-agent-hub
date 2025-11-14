@@ -1,7 +1,15 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { FileText, Download, Eye, FileCheck, Scale, Mail, ScrollText } from 'lucide-react';
+import { 
+  FileText, 
+  Download, 
+  Eye, 
+  FileCheck, 
+  Scale,
+  Mail,
+  ScrollText
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface GeneratedDocumentProps {
@@ -62,6 +70,7 @@ export function GeneratedDocument({
     if (fileType === 'pdf') {
       window.open(fileUrl, '_blank');
     } else {
+      // Pour les docx, télécharger
       handleDownload();
     }
   };
@@ -70,20 +79,26 @@ export function GeneratedDocument({
     <Card className="neu-card-sm overflow-hidden">
       <CardContent className="p-0">
         <div className="flex items-center gap-4 p-4">
-          <div
+          {/* Icône du type de document */}
+          <div 
             className={cn(
-              'flex-shrink-0 w-14 h-14 rounded-lg flex items-center justify-center',
-              'bg-gradient-to-br from-primary/20 to-secondary/20',
+              "flex-shrink-0 w-14 h-14 rounded-lg flex items-center justify-center",
+              "bg-gradient-to-br from-primary/20 to-secondary/20"
             )}
           >
             {getDocumentIcon()}
           </div>
 
+          {/* Informations */}
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2">
               <div className="flex-1 min-w-0">
-                <h4 className="font-semibold text-sm truncate">{getDocumentLabel()}</h4>
-                <p className="text-xs text-muted-foreground mt-1">{fileName}</p>
+                <h4 className="font-semibold text-sm truncate">
+                  {getDocumentLabel()}
+                </h4>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {fileName}
+                </p>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   {new Date(timestamp).toLocaleString('fr-FR', {
                     day: 'numeric',
@@ -95,6 +110,7 @@ export function GeneratedDocument({
                 </p>
               </div>
 
+              {/* Badge type fichier */}
               <div className="flex-shrink-0">
                 <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-primary/10 text-primary">
                   {fileType.toUpperCase()}
@@ -104,12 +120,23 @@ export function GeneratedDocument({
           </div>
         </div>
 
+        {/* Actions */}
         <div className="border-t border-border/50 bg-muted/30 px-4 py-3 flex gap-2">
-          <Button variant="outline" size="sm" onClick={handlePreview} className="flex-1 gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handlePreview}
+            className="flex-1 gap-2"
+          >
             <Eye className="w-4 h-4" />
             Visualiser
           </Button>
-          <Button variant="outline" size="sm" onClick={handleDownload} className="flex-1 gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleDownload}
+            className="flex-1 gap-2"
+          >
             <Download className="w-4 h-4" />
             Télécharger
           </Button>
@@ -119,21 +146,26 @@ export function GeneratedDocument({
   );
 }
 
+/**
+ * Composant pour afficher une liste de documents générés
+ */
 interface DocumentListProps {
   documents: GeneratedDocumentProps[];
   emptyMessage?: string;
 }
 
-export function DocumentList({
-  documents,
-  emptyMessage = 'Aucun document généré pour le moment',
+export function DocumentList({ 
+  documents, 
+  emptyMessage = "Aucun document généré pour le moment" 
 }: DocumentListProps) {
   if (documents.length === 0) {
     return (
       <div className="text-center py-12 neu-inset rounded-lg">
         <FileText className="w-16 h-16 mx-auto mb-4 text-muted-foreground/50" />
         <p className="text-muted-foreground">{emptyMessage}</p>
-        <p className="text-sm text-muted-foreground mt-2">Demandez à iAsted de créer un document</p>
+        <p className="text-sm text-muted-foreground mt-2">
+          Demandez à iAsted de créer un document pour vous
+        </p>
       </div>
     );
   }
@@ -147,11 +179,14 @@ export function DocumentList({
   );
 }
 
-export function InlineDocumentPreview({
-  fileUrl,
-  fileName,
+/**
+ * Composant inline pour afficher un document dans un message
+ */
+export function InlineDocumentPreview({ 
+  fileUrl, 
+  fileName, 
   fileType,
-  documentType,
+  documentType 
 }: Omit<GeneratedDocumentProps, 'timestamp'>) {
   const handleDownload = () => {
     const link = document.createElement('a');
@@ -194,7 +229,12 @@ export function InlineDocumentPreview({
           <Eye className="w-4 h-4 mr-1" />
           Voir
         </Button>
-        <Button variant="ghost" size="sm" onClick={handleDownload} className="h-8">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleDownload}
+          className="h-8"
+        >
           <Download className="w-4 h-4 mr-1" />
           Télécharger
         </Button>
@@ -202,5 +242,3 @@ export function InlineDocumentPreview({
     </div>
   );
 }
-
-

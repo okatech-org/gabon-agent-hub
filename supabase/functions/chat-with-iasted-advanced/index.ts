@@ -1,76 +1,80 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import Anthropic from "npm:@anthropic-ai/sdk@0.27.0";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import Anthropic from 'npm:@anthropic-ai/sdk@0.27.0';
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
-function detectResponseIntent(
-  transcript: string,
-  conversationHistory: any[],
-): {
-  type: "conversation" | "document" | "synthesis" | "detailed";
-  documentType?: "decree" | "letter" | "report" | "note";
-  responseMode?: "concise" | "detailed" | "adaptive";
+/**
+ * Détecte le type de réponse attendu (synthèse, détail, document)
+ */
+function detectResponseIntent(transcript: string, conversationHistory: any[]): {
+  type: 'conversation' | 'document' | 'synthesis' | 'detailed';
+  documentType?: 'decree' | 'letter' | 'report' | 'note';
+  responseMode?: 'concise' | 'detailed' | 'adaptive';
 } {
   const lower = transcript.toLowerCase().trim();
+  const fullContext = conversationHistory.map(m => m.content).join(' ') + ' ' + lower;
 
-  const documentKeywords = /(d[ée]cret|arr[êe]t[ée]|lettre|courrier|note|rapport|document)/i;
-  const documentVerbs =
-    /(cr[ée]e|g[ée]n[èé]re|[ée]cri|r[ée]dig|fai[ts]|produi|fourn|donne|prépar|peux[-\s]?tu|veux|souhait|besoin|demande|obtient|obtenir|propose)/i;
-
+  // Détection de génération de document
   if (
-    (documentVerbs.test(lower) && documentKeywords.test(lower)) ||
-    /je\s+veux\s+une\s+lettre/i.test(lower) ||
-    /je\s+veux\s+un\s+(?:rapport|d[ée]cret|document)/i.test(lower) ||
-    /fais\s+toi\s+une\s+(?:lettre|note|rapport)/i.test(lower) ||
-    /produis\s+un\s+document/i.test(lower)
+    /(?:cr[ée]e|g[ée]n[èé]re|[ée]cri[ts]|r[ée]dig|fai[ts]|produi[ts])\s+(?:moi|un|une|le|la)?\s*(?:d[ée]cret|arr[êe]t[ée]|lettre|courrier|note|rapport|r[ée]ponse)/i.test(lower) ||
+    /besoin\s+d(?:['']|e)\s*(?:un|une)\s*(?:d[ée]cret|lettre|document)/i.test(lower)
   ) {
-    let documentType: "decree" | "letter" | "report" | "note" = "letter";
-
+    // Identifier le type de document
+    let documentType: 'decree' | 'letter' | 'report' | 'note' = 'letter';
+    
     if (/d[ée]cret|arr[êe]t[ée]/i.test(lower)) {
-      documentType = "decree";
+      documentType = 'decree';
     } else if (/rapport|synth[èe]se|analyse/i.test(lower)) {
-      documentType = "report";
+      documentType = 'report';
     } else if (/note\s+de\s+service|note\s+interne/i.test(lower)) {
-      documentType = "note";
+      documentType = 'note';
     }
-
+    
     return {
-      type: "document",
+      type: 'document',
       documentType,
     };
   }
 
+  // Détection besoin de synthèse
   if (/r[ée]sum|synth[èe]se|en\s+bref|en\s+gros|rapidement|vite|en\s+quelques\s+mots/i.test(lower)) {
     return {
-      type: "synthesis",
-      responseMode: "concise",
+      type: 'synthesis',
+      responseMode: 'concise',
     };
   }
 
+  // Détection besoin de détails
   if (/d[ée]tail|pr[ée]cis|expliqu|comment|pourquoi|approfondi|complet|exhaustif/i.test(lower)) {
     return {
-      type: "detailed",
-      responseMode: "detailed",
+      type: 'detailed',
+      responseMode: 'detailed',
     };
   }
 
+  // Conversation standard
   return {
-    type: "conversation",
-    responseMode: "adaptive",
+    type: 'conversation',
+    responseMode: 'adaptive',
   };
 }
 
+/**
+ * Génère un document PDF via API Claude
+ */
 async function generateDocument(
   documentType: string,
   userRequest: string,
   context: string,
-  anthropicClient: Anthropic,
+  anthropicClient: Anthropic
 ): Promise<{ content: string; markdown: string }> {
+  
   const documentPrompts = {
     decree: `Tu es un rédacteur juridique expert en droit administratif gabonais. Génère un arrêté ministériel complet et conforme selon cette demande:
 
@@ -270,28 +274,28 @@ Le Ministre
 [NOM]
 
 Diffusion:
-- [Liste des services concernés]`,
+- [Liste des services concernés]`
   };
 
   const prompt = documentPrompts[documentType as keyof typeof documentPrompts] || documentPrompts.letter;
 
+  // Appel à Claude avec thinking pour génération réfléchie
   const response = await anthropicClient.messages.create({
-    model: "claude-sonnet-4-20250514",
+    model: 'claude-sonnet-4-20250514',
     max_tokens: 4000,
     thinking: {
-      type: "enabled",
+      type: 'enabled',
       budget_tokens: 3000,
     },
-    messages: [
-      {
-        role: "user",
-        content: prompt,
-      },
-    ],
+    messages: [{
+      role: 'user',
+      content: prompt,
+    }],
   });
 
-  const textBlocks = response.content.filter((block) => block.type === "text");
-  const documentContent = textBlocks.map((block) => block.text).join("\n\n");
+  // Extraire le contenu (sans les blocs thinking)
+  const textBlocks = response.content.filter(block => block.type === 'text');
+  const documentContent = textBlocks.map(block => block.text).join('\n\n');
 
   return {
     content: documentContent,
@@ -299,78 +303,9 @@ Diffusion:
   };
 }
 
-async function markdownToPDF(markdown: string, title: string): Promise<Uint8Array> {
-  const pdfContent = `%PDF-1.4
-1 0 obj
-<<
-/Type /Catalog
-/Pages 2 0 R
->>
-endobj
-2 0 obj
-<<
-/Type /Pages
-/Kids [3 0 R]
-/Count 1
->>
-endobj
-3 0 obj
-<<
-/Type /Page
-/Parent 2 0 R
-/Resources <<
-/Font <<
-/F1 4 0 R
->>
->>
-/MediaBox [0 0 612 792]
-/Contents 5 0 R
->>
-endobj
-4 0 obj
-<<
-/Type /Font
-/Subtype /Type1
-/BaseFont /Helvetica
->>
-endobj
-5 0 obj
-<<
-/Length ${markdown.length + 100}
->>
-stream
-BT
-/F1 12 Tf
-50 750 Td
-(${title}) Tj
-0 -20 Td
-(${markdown.replace(/\n/g, ") Tj 0 -15 Td (")}) Tj
-ET
-endstream
-endobj
-xref
-0 6
-0000000000 65535 f
-0000000009 00000 n
-0000000058 00000 n
-0000000115 00000 n
-0000000274 00000 n
-0000000361 00000 n
-trailer
-<<
-/Size 6
-/Root 1 0 R
->>
-startxref
-${500 + markdown.length}
-%%EOF`;
-
-  return new TextEncoder().encode(pdfContent);
-}
-
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders });
   }
 
   try {
@@ -380,40 +315,49 @@ serve(async (req) => {
       audioBase64,
       textMessage,
       voiceId,
-      aiModel = "claude",
+      aiModel = 'claude',
       generateAudio = true,
       streamAudio = false,
-      responseType = "adaptive",
+      responseType = 'adaptive',
     } = await req.json();
 
     if (!sessionId || !userId) {
-      throw new Error("sessionId and userId are required");
+      throw new Error('sessionId and userId are required');
     }
 
-    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY")!;
-    const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY")!;
-    const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY")!;
-    const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    // Initialiser les clients
+    const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY')!;
+    const ELEVENLABS_API_KEY = Deno.env.get('ELEVENLABS_API_KEY')!;
+    const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY')!;
+    const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
+    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+
+    if (!ANTHROPIC_API_KEY) {
+      throw new Error('ANTHROPIC_API_KEY not configured');
+    }
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     const anthropic = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
 
-    let transcript = textMessage || "";
+    let transcript = textMessage || '';
+    const startTime = Date.now();
 
+    // 1. TRANSCRIPTION (si audio fourni)
     if (audioBase64 && !textMessage) {
-      const audioBuffer = Uint8Array.from(atob(audioBase64), (c) => c.charCodeAt(0));
-      const audioBlob = new Blob([audioBuffer], { type: "audio/webm" });
-
+      console.log('🎤 Transcription Whisper...');
+      
+      const audioBuffer = Uint8Array.from(atob(audioBase64), c => c.charCodeAt(0));
+      const audioBlob = new Blob([audioBuffer], { type: 'audio/webm' });
+      
       const formData = new FormData();
-      formData.append("file", audioBlob, "audio.webm");
-      formData.append("model", "whisper-1");
-      formData.append("language", "fr");
-      formData.append("prompt", "Excellence, Ministre, Fonction Publique, Gabon, arrêté, décret");
+      formData.append('file', audioBlob, 'audio.webm');
+      formData.append('model', 'whisper-1');
+      formData.append('language', 'fr');
+      formData.append('prompt', 'Excellence, Ministre, Fonction Publique, Gabon, arrêté, décret');
 
-      const transcriptionResponse = await fetch("https://api.openai.com/v1/audio/transcriptions", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${OPENAI_API_KEY}` },
+      const transcriptionResponse = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${OPENAI_API_KEY}` },
         body: formData,
       });
 
@@ -423,102 +367,170 @@ serve(async (req) => {
 
       const { text } = await transcriptionResponse.json();
       transcript = text;
+      console.log('📝 Transcript:', transcript);
     }
 
-    await supabase.from("conversation_messages").insert({
+    // Sauvegarder message utilisateur
+    await supabase.from('conversation_messages').insert({
       session_id: sessionId,
-      role: "user",
+      user_id: userId,
+      role: 'user',
       content: transcript,
-      audio_base64: audioBase64,
+      audio_base64: audioBase64
     });
 
+    // 2. RÉCUPÉRER HISTORIQUE
     const { data: historyData } = await supabase
-      .from("conversation_messages")
-      .select("role, content")
-      .eq("session_id", sessionId)
-      .order("created_at", { ascending: true })
+      .from('conversation_messages')
+      .select('role, content')
+      .eq('session_id', sessionId)
+      .order('created_at', { ascending: true })
       .limit(30);
 
-    const conversationHistory =
-      historyData?.map((m) => ({
-        role: m.role === "assistant" ? "assistant" : "user",
-        content: m.content,
-      })) || [];
+    const conversationHistory = historyData?.map(m => ({
+      role: m.role === 'assistant' ? 'assistant' : 'user',
+      content: m.content
+    })) || [];
 
+    // 3. RÉCUPÉRER BASE DE CONNAISSANCES
     const { data: knowledgeBase } = await supabase
-      .from("iasted_knowledge_base")
-      .select("title, description, content, category, tags")
-      .eq("is_active", true)
-      .order("created_at", { ascending: false })
+      .from('iasted_knowledge_base')
+      .select('title, description, content, category, tags')
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
       .limit(15);
 
-    let knowledgeContext = "";
+    let knowledgeContext = '';
     if (knowledgeBase && knowledgeBase.length > 0) {
-      knowledgeContext = "\n\n📚 CONNAISSANCES PERSONNALISÉES:\n\n";
+      knowledgeContext = '\n\n📚 CONNAISSANCES PERSONNALISÉES:\n\n';
       knowledgeBase.forEach((entry: any) => {
         knowledgeContext += `## ${entry.title} [${entry.category}]\n`;
         if (entry.description) knowledgeContext += `${entry.description}\n`;
         if (entry.content) knowledgeContext += `${entry.content}\n`;
-        knowledgeContext += "\n";
+        knowledgeContext += '\n';
       });
     }
 
+    // 4. DÉTECTER TYPE DE RÉPONSE
     const intent = detectResponseIntent(transcript, conversationHistory);
+    console.log('🎯 Intent détecté:', intent);
 
-    let responseText = "";
-    let fileUrl = "";
-    let fileName = "";
-    let fileType: "pdf" | "docx" | undefined;
-    let documentType: "decree" | "letter" | "report" | "note" | undefined;
+    let responseText = '';
+    let fileUrl = '';
+    let fileName = '';
+    let fileType: 'pdf' | 'docx' | undefined;
+    let documentType: string | undefined;
 
-    if (intent.type === "document") {
-      const documentData = await generateDocument(intent.documentType!, transcript, knowledgeContext, anthropic);
-      const pdfBytes = await markdownToPDF(documentData.markdown, intent.documentType!);
+    // 5. GÉNÉRATION SELON INTENT
+    if (intent.type === 'document') {
+      // GÉNÉRATION DE DOCUMENT
+      console.log(`📄 Génération document type: ${intent.documentType}`);
 
-      const generatedFileName = `${intent.documentType}_${Date.now()}.pdf`;
-      const { error: uploadError } = await supabase.storage
-        .from("iasted-documents")
-        .upload(`generated/${generatedFileName}`, pdfBytes, {
-          contentType: "application/pdf",
-          upsert: true,
-        });
+      const documentData = await generateDocument(
+        intent.documentType!,
+        transcript,
+        knowledgeContext,
+        anthropic
+      );
 
-      if (uploadError) throw uploadError;
+      // Appel au générateur PDF via Supabase Function
+      const { data: pdfData, error: pdfError } = await supabase.functions.invoke('pdf-generator', {
+        body: {
+          markdown: documentData.markdown,
+          metadata: {
+            title: intent.documentType!,
+            type: intent.documentType!,
+            author: 'Ministère de la Fonction Publique',
+            date: new Date().toLocaleDateString('fr-FR'),
+          }
+        }
+      });
 
-      const { data: publicUrlData } = supabase.storage.from("iasted-documents").getPublicUrl(`generated/${generatedFileName}`);
+      if (pdfError) {
+        console.error('PDF generation error:', pdfError);
+        // Fallback: générer un fichier texte
+        const textBlob = new TextEncoder().encode(documentData.markdown);
+        fileName = `${intent.documentType}_${Date.now()}.txt`;
+        
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('iasted-documents')
+          .upload(`generated/${userId}/${fileName}`, textBlob, {
+            contentType: 'text/plain',
+            upsert: true,
+          });
 
-      fileUrl = publicUrlData.publicUrl;
-      fileName = generatedFileName;
-      fileType = "pdf";
+        if (uploadError) throw uploadError;
+
+        const { data: publicUrlData } = supabase.storage
+          .from('iasted-documents')
+          .getPublicUrl(`generated/${userId}/${fileName}`);
+
+        fileUrl = publicUrlData.publicUrl;
+        fileType = 'pdf'; // On garde pdf comme type même si c'est du texte
+      } else {
+        // Upload du PDF généré
+        fileName = `${intent.documentType}_${Date.now()}.pdf`;
+        
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('iasted-documents')
+          .upload(`generated/${userId}/${fileName}`, pdfData, {
+            contentType: 'application/pdf',
+            upsert: true,
+          });
+
+        if (uploadError) throw uploadError;
+
+        const { data: publicUrlData } = supabase.storage
+          .from('iasted-documents')
+          .getPublicUrl(`generated/${userId}/${fileName}`);
+
+        fileUrl = publicUrlData.publicUrl;
+        fileType = 'pdf';
+      }
+
       documentType = intent.documentType;
+      responseText = `Excellence, j'ai généré le document demandé. Vous pouvez le consulter et le télécharger.`;
 
-      responseText = "Excellence, j'ai généré le document demandé. Vous pouvez le consulter et le télécharger.";
+      // Enregistrer dans la table generated_documents
+      await supabase.from('generated_documents').insert({
+        user_id: userId,
+        session_id: sessionId,
+        document_type: intent.documentType,
+        file_url: fileUrl,
+        file_name: fileName,
+        file_type: 'pdf',
+        title: intent.documentType,
+        content_preview: documentData.content.substring(0, 500),
+        generation_time_ms: Date.now() - startTime,
+        ai_model_used: aiModel,
+      });
+
     } else {
+      // CONVERSATION STANDARD avec Claude
+      console.log('💬 Conversation standard avec Claude...');
+
       const systemPrompt = `Tu es **iAsted**, l'Assistant IA vocal du Ministre de la Fonction Publique gabonaise.
 
 🎯 PERSONNALITÉ & TON:
 - Tu parles comme un proche collaborateur du Ministre
 - Ton naturel, fluide, chaleureux mais professionnel
+- Tu tutoies pas, tu utilises "Excellence" avec respect mais sans lourdeur
 - Tu t'adaptes au rythme de la conversation
 
 🧠 MODE DE RÉPONSE (IMPORTANT):
-${intent.responseMode === "concise"
-        ? `
+${intent.responseMode === 'concise' ? `
 → MODE SYNTHÈSE ACTIVÉ
 - Réponses ultra-courtes (2-3 phrases max)
 - Va droit à l'essentiel
 - Chiffres clés uniquement
 - Pas de détails techniques
-`
-        : intent.responseMode === "detailed"
-          ? `
+` : intent.responseMode === 'detailed' ? `
 → MODE DÉTAILLÉ ACTIVÉ
 - Explications complètes et pédagogiques
 - Contexte et nuances
 - Exemples concrets
 - Chiffres et sources
-`
-          : `
+` : `
 → MODE ADAPTATIF
 - Équilibre entre clarté et précision
 - 3-5 phrases selon le sujet
@@ -528,6 +540,13 @@ ${intent.responseMode === "concise"
 📚 CONNAISSANCES:
 ${knowledgeContext}
 
+💡 CAPACITÉS:
+- Analyser effectifs et statistiques RH
+- Rédiger actes administratifs
+- Simuler impacts de décisions
+- Détecter anomalies
+- Créer documents officiels (décrets, lettres, rapports)
+
 🎤 STYLE VOCAL:
 - Phrases courtes et rythmées
 - Pas de jargon inutile
@@ -536,48 +555,59 @@ ${knowledgeContext}
 
 🔑 PRINCIPE: Tu PROPOSES, le Ministre DÉCIDE. Toujours citer tes sources.`;
 
+      // Appel Claude avec Extended Thinking
       const claudeResponse = await anthropic.messages.create({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: intent.responseMode === "concise" ? 300 : intent.responseMode === "detailed" ? 2000 : 800,
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: intent.responseMode === 'concise' ? 300 : intent.responseMode === 'detailed' ? 2000 : 800,
         thinking: {
-          type: "enabled",
-          budget_tokens: intent.responseMode === "detailed" ? 5000 : 2000,
+          type: 'enabled',
+          budget_tokens: intent.responseMode === 'detailed' ? 5000 : 2000,
         },
         messages: [
-          { role: "user", content: systemPrompt },
+          { role: 'user', content: systemPrompt },
           ...conversationHistory.slice(-10),
-          { role: "user", content: transcript },
+          { role: 'user', content: transcript }
         ],
       });
 
-      const textBlocks = claudeResponse.content.filter((block) => block.type === "text");
-      responseText = textBlocks.map((block) => block.text).join("\n\n");
+      // Extraire texte (sans thinking)
+      const textBlocks = claudeResponse.content.filter(block => block.type === 'text');
+      responseText = textBlocks.map(block => block.text).join('\n\n');
+      
+      console.log('✅ Réponse Claude générée');
     }
 
-    await supabase.from("conversation_messages").insert({
+    // Sauvegarder réponse assistant
+    await supabase.from('conversation_messages').insert({
       session_id: sessionId,
-      role: "assistant",
+      user_id: userId,
+      role: 'assistant',
       content: responseText,
       file_url: fileUrl || null,
+      file_name: fileName || null,
       file_type: fileType || null,
+      document_type: documentType || null,
     });
 
-    let audioContent = "";
-
+    // 6. GÉNÉRATION AUDIO (TTS ElevenLabs)
+    let audioContent = '';
+    
     if (generateAudio && responseText && !fileUrl) {
+      console.log('🔊 Génération TTS ElevenLabs...');
+      
       const ttsResponse = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "xi-api-key": ELEVENLABS_API_KEY,
-          "Content-Type": "application/json",
+          'xi-api-key': ELEVENLABS_API_KEY,
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           text: responseText,
-          model_id: "eleven_turbo_v2_5",
+          model_id: 'eleven_turbo_v2_5',
           voice_settings: {
             stability: 0.55,
-            similarity_boost: 0.8,
-            style: 0.3,
+            similarity_boost: 0.80,
+            style: 0.30,
             use_speaker_boost: true,
           },
           optimize_streaming_latency: streamAudio ? 3 : 0,
@@ -586,44 +616,46 @@ ${knowledgeContext}
 
       if (!ttsResponse.ok) {
         const errorText = await ttsResponse.text();
-        throw new Error(`ElevenLabs TTS failed: ${errorText}`);
+        console.error('ElevenLabs TTS error:', errorText);
+      } else {
+        const audioBlob = await ttsResponse.arrayBuffer();
+        const uint8Array = new Uint8Array(audioBlob);
+        
+        // Conversion base64 par chunks
+        const chunkSize = 8192;
+        let binaryString = '';
+        
+        for (let i = 0; i < uint8Array.length; i += chunkSize) {
+          const chunk = uint8Array.slice(i, Math.min(i + chunkSize, uint8Array.length));
+          binaryString += String.fromCharCode(...Array.from(chunk));
+        }
+        
+        audioContent = btoa(binaryString);
+        console.log(`✅ Audio généré: ${(audioBlob.byteLength / 1024).toFixed(2)} KB`);
       }
-
-      const audioBlob = await ttsResponse.arrayBuffer();
-      const uint8Array = new Uint8Array(audioBlob);
-      const chunkSize = 8192;
-      let binaryString = "";
-
-      for (let i = 0; i < uint8Array.length; i += chunkSize) {
-        const chunk = uint8Array.slice(i, Math.min(i + chunkSize, uint8Array.length));
-        binaryString += String.fromCharCode(...Array.from(chunk));
-      }
-
-      audioContent = btoa(binaryString);
     }
 
-    return new Response(
-      JSON.stringify({
-        transcript,
-        responseText,
-        audioContent,
-        fileUrl: fileUrl || undefined,
-        fileName: fileName || undefined,
-        fileType: fileType || undefined,
-        intent: intent.type,
-        documentType,
-      }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      },
-    );
+    // 7. RÉPONSE FINALE
+    return new Response(JSON.stringify({
+      transcript,
+      responseText,
+      audioContent,
+      fileUrl: fileUrl || undefined,
+      fileName: fileName || undefined,
+      fileType: fileType || undefined,
+      documentType: documentType || undefined,
+      intent: intent.type,
+      processingTime: Date.now() - startTime,
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    console.error('❌ Error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
   }
 });
-
-
