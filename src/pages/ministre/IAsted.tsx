@@ -76,59 +76,15 @@ export default function IAsted() {
     loadIAstedVoice();
   }, []);
 
+  // Pas de table user_preferences - supprimé pour éviter les erreurs
   useEffect(() => {
-    if (!user) return;
-
-    const loadPreferences = async () => {
-      const { data, error } = await supabase.from("user_preferences").select("*").eq("user_id", user.id).single();
-
-      if (data && !error) {
-        setVoiceSettings((prev) => ({
-          ...prev,
-          voiceId: data.voice_id || prev.voiceId,
-          silenceDuration: data.voice_silence_duration || prev.silenceDuration,
-          silenceThreshold: data.voice_silence_threshold || prev.silenceThreshold,
-          continuousMode: data.voice_continuous_mode || prev.continuousMode,
-          thinkingTime: data.thinking_time || prev.thinkingTime,
-          responseMode: data.response_mode || prev.responseMode,
-          aiModel: data.ai_model || prev.aiModel,
-          formalityLevel: data.formality_level || prev.formalityLevel,
-          proactivity: data.proactivity || prev.proactivity,
-        }));
-      }
-    };
-
-    loadPreferences();
+    // Les préférences sont maintenant gérées localement
   }, [user]);
 
+  // Pas de sauvegarde automatique dans user_preferences (table supprimée)
   useEffect(() => {
-    if (!user) return;
-
-    const savePreferences = async () => {
-      await supabase
-        .from("user_preferences")
-        .upsert(
-          {
-            user_id: user.id,
-            voice_id: voiceSettings.voiceId,
-            voice_silence_duration: voiceSettings.silenceDuration,
-            voice_silence_threshold: voiceSettings.silenceThreshold,
-            voice_continuous_mode: voiceSettings.continuousMode,
-            thinking_time: voiceSettings.thinkingTime,
-            response_mode: voiceSettings.responseMode,
-            ai_model: voiceSettings.aiModel,
-            formality_level: voiceSettings.formalityLevel,
-            proactivity: voiceSettings.proactivity,
-          },
-          {
-            onConflict: "user_id",
-          },
-        );
-    };
-
-    const debounce = setTimeout(savePreferences, 1000);
-    return () => clearTimeout(debounce);
-  }, [voiceSettings, user]);
+    // Les préférences restent en local pour le moment
+  }, [voiceSettings]);
 
   const generatedDocuments = messages
     .filter((m) => m.fileUrl)

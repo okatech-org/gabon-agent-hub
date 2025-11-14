@@ -53,7 +53,7 @@ export default function GestionnaireRHDashboard() {
         supabase.from("actes_administratifs").select("id", { count: "exact", head: true }).eq("statut", "brouillon"),
         supabase.from("actes_administratifs").select("id", { count: "exact", head: true }).eq("statut", "signe"),
         supabase.from("affectations").select("id", { count: "exact", head: true }).gte("date_debut", new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()),
-        supabase.from("actes_administratifs").select("id", { count: "exact", head: true }).eq("type_acte", "avancement").eq("statut", "en_attente"),
+        supabase.from("actes_administratifs").select("id", { count: "exact", head: true }).eq("type_acte", "avancement").eq("statut", "en_validation"),
         supabase.from("agents").select("id", { count: "exact", head: true }).eq("statut", "actif")
       ]);
 

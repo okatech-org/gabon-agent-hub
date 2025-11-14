@@ -153,7 +153,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           case "ministre":
             navigate("/ministre/dashboard");
             break;
-          case "drh":
           case "drh_ministre":
           case "gestionnaire":
             navigate("/rh/dashboard");
@@ -164,14 +163,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           case "secretaire_general":
           case "directeur_cabinet":
           case "drh_local":
-            navigate("/dashboard");
-            break;
-          case "agent":
+          case "auditeur":
+          case "admin":
             navigate("/dashboard");
             break;
           case "candidat":
-          case "auditeur":
-          case "admin":
             navigate("/dashboard");
             break;
           default:
