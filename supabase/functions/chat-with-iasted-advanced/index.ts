@@ -162,6 +162,20 @@ Le Ministre
 
 Libreville, le [DATE]
 
+${/vœux|f[êe]te|remerci|félicit|nouvel/i.test(userRequest) ? `
+[Pour messages de vœux, remerciements, félicitations]:
+
+Mes chers collaborateurs / Mesdames et Messieurs,
+
+[Corps du message en 3-4 paragraphes chaleureux et personnels:
+- Reconnaissance du travail accompli
+- Message principal (vœux, félicitations, remerciements)
+- Perspectives d'avenir positives]
+
+Le Ministre
+[SIGNATURE]
+[NOM DU MINISTRE]
+` : `
 N° _____ /MFPTPRE
 
 Monsieur/Madame [DESTINATAIRE]
@@ -180,12 +194,19 @@ Monsieur/Madame [CIVILITÉ],
 Veuillez agréer, Monsieur/Madame [CIVILITÉ], l'expression de ma considération distinguée.
 
 Le Ministre
-
 [SIGNATURE]
 [NOM DU MINISTRE]
 
 PJ: [Liste des pièces jointes si applicable]
-Copie pour information: [Liste]`,
+Copie pour information: [Liste]
+`}
+
+INSTRUCTIONS IMPORTANTES:
+- Date au format français: "Libreville, le [jour] [mois complet] [année]"
+- Ton adapté au destinataire et au contexte
+- Structure claire et professionnelle
+- Si c'est un message de vœux/félicitations: ton chaleureux mais digne
+- Si c'est une lettre administrative: ton formel et précis`,
 
     report: `Tu es analyste politique senior au cabinet du Ministre. Produis un rapport analytique selon cette demande:
 
