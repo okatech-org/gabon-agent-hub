@@ -8,12 +8,9 @@ import {
   UserCheck,
   Shield,
 } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { IAstedButton } from "@/components/ministre/IAstedButton";
 import { IastedChat } from "@/components/ministre/IastedChat";
 import { useVoiceInteraction } from "@/hooks/useVoiceInteraction";
-import { AnomalyMonitor } from "@/components/ministre/AnomalyMonitor";
-import { KnowledgeBase } from "@/components/ministre/KnowledgeBase";
 
 export default function MinistreDashboard() {
   const [isIastedChatOpen, setIsIastedChatOpen] = useState(false);
@@ -124,97 +121,81 @@ export default function MinistreDashboard() {
             </div>
           </div>
 
-          <Tabs defaultValue="dashboard" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="dashboard">Tableau de Bord</TabsTrigger>
-              <TabsTrigger value="monitoring">Surveillance iAsted</TabsTrigger>
-              <TabsTrigger value="knowledge">Base de Connaissances</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="dashboard" className="space-y-6 mt-6">
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <div className="neu-card p-5">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="neu-raised w-10 h-10 flex items-center justify-center">
-                      <Users className="h-5 w-5 text-primary" />
-                    </div>
+          <div className="space-y-6 mt-6">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              <div className="neu-card p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="neu-raised w-10 h-10 flex items-center justify-center">
+                    <Users className="h-5 w-5 text-primary" />
                   </div>
-                  <div className="text-3xl font-bold mb-1">{statsAgents?.total || 0}</div>
-                  <p className="text-sm font-medium text-foreground">Total Agents</p>
-                  <p className="text-xs text-muted-foreground">Fonction publique gabonaise</p>
                 </div>
+                <div className="text-3xl font-bold mb-1">{statsAgents?.total || 0}</div>
+                <p className="text-sm font-medium text-foreground">Total Agents</p>
+                <p className="text-xs text-muted-foreground">Fonction publique gabonaise</p>
+              </div>
 
-                <div className="neu-card p-5">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="neu-raised w-10 h-10 flex items-center justify-center">
-                      <Building2 className="h-5 w-5 text-secondary" />
-                    </div>
+              <div className="neu-card p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="neu-raised w-10 h-10 flex items-center justify-center">
+                    <Building2 className="h-5 w-5 text-secondary" />
                   </div>
-                  <div className="text-3xl font-bold mb-1">{statsStructures?.totalStructures || 0}</div>
-                  <p className="text-sm font-medium text-foreground">Structures</p>
-                  <p className="text-xs text-muted-foreground">Ministères et directions</p>
                 </div>
+                <div className="text-3xl font-bold mb-1">{statsStructures?.totalStructures || 0}</div>
+                <p className="text-sm font-medium text-foreground">Structures</p>
+                <p className="text-xs text-muted-foreground">Ministères et directions</p>
+              </div>
 
-                <div className="neu-card p-5">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="neu-raised w-10 h-10 flex items-center justify-center">
-                      <UserCheck className="h-5 w-5 text-info" />
-                    </div>
+              <div className="neu-card p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="neu-raised w-10 h-10 flex items-center justify-center">
+                    <UserCheck className="h-5 w-5 text-info" />
                   </div>
-                  <div className="text-3xl font-bold mb-1">{statsStructures?.postesVacants || 0}</div>
-                  <p className="text-sm font-medium text-foreground">Postes Vacants</p>
-                  <p className="text-xs text-muted-foreground">Sur {statsStructures?.totalPostes || 0} postes</p>
                 </div>
+                <div className="text-3xl font-bold mb-1">{statsStructures?.postesVacants || 0}</div>
+                <p className="text-sm font-medium text-foreground">Postes Vacants</p>
+                <p className="text-xs text-muted-foreground">Sur {statsStructures?.totalPostes || 0} postes</p>
+              </div>
 
-                <div className="neu-card p-5">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="neu-raised w-10 h-10 flex items-center justify-center">
-                      <FileCheck className="h-5 w-5 text-accent" />
-                    </div>
+              <div className="neu-card p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="neu-raised w-10 h-10 flex items-center justify-center">
+                    <FileCheck className="h-5 w-5 text-accent" />
                   </div>
-                  <div className="text-3xl font-bold mb-1">{actesEnAttente?.length || 0}</div>
-                  <p className="text-sm font-medium text-foreground">Actes en attente</p>
-                  <p className="text-xs text-muted-foreground">Nécessitent votre validation</p>
+                </div>
+                <div className="text-3xl font-bold mb-1">{actesEnAttente?.length || 0}</div>
+                <p className="text-sm font-medium text-foreground">Actes en attente</p>
+                <p className="text-xs text-muted-foreground">Nécessitent votre validation</p>
+              </div>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="neu-card p-6">
+                <h3 className="text-lg font-semibold mb-2">Répartition par Type d'Agent</h3>
+                <p className="text-sm text-muted-foreground mb-4">Catégories de personnels</p>
+                <div className="space-y-3">
+                  {statsAgents?.parType && Object.entries(statsAgents.parType).map(([type, count]: [string, any]) => (
+                    <div key={type} className="neu-inset p-3 rounded-lg flex items-center justify-between">
+                      <span className="text-sm capitalize font-medium">{type}</span>
+                      <span className="neu-raised px-3 py-1 text-sm font-bold">{count}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
 
-              <div className="grid gap-6 md:grid-cols-2">
-                <div className="neu-card p-6">
-                  <h3 className="text-lg font-semibold mb-2">Répartition par Type d'Agent</h3>
-                  <p className="text-sm text-muted-foreground mb-4">Catégories de personnels</p>
-                  <div className="space-y-3">
-                    {statsAgents?.parType && Object.entries(statsAgents.parType).map(([type, count]: [string, any]) => (
-                      <div key={type} className="neu-inset p-3 rounded-lg flex items-center justify-between">
-                        <span className="text-sm capitalize font-medium">{type}</span>
-                        <span className="neu-raised px-3 py-1 text-sm font-bold">{count}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="neu-card p-6">
-                  <h3 className="text-lg font-semibold mb-2">Équilibre Homme/Femme</h3>
-                  <p className="text-sm text-muted-foreground mb-4">Répartition par genre</p>
-                  <div className="space-y-3">
-                    {statsAgents?.parGenre && Object.entries(statsAgents.parGenre).map(([genre, count]: [string, any]) => (
-                      <div key={genre} className="neu-inset p-3 rounded-lg flex items-center justify-between">
-                        <span className="text-sm font-medium">{genre === 'M' ? 'Hommes' : genre === 'F' ? 'Femmes' : 'Non précisé'}</span>
-                        <span className="neu-raised px-3 py-1 text-sm font-bold">{count}</span>
-                      </div>
-                    ))}
-                  </div>
+              <div className="neu-card p-6">
+                <h3 className="text-lg font-semibold mb-2">Équilibre Homme/Femme</h3>
+                <p className="text-sm text-muted-foreground mb-4">Répartition par genre</p>
+                <div className="space-y-3">
+                  {statsAgents?.parGenre && Object.entries(statsAgents.parGenre).map(([genre, count]: [string, any]) => (
+                    <div key={genre} className="neu-inset p-3 rounded-lg flex items-center justify-between">
+                      <span className="text-sm font-medium">{genre === 'M' ? 'Hommes' : genre === 'F' ? 'Femmes' : 'Non précisé'}</span>
+                      <span className="neu-raised px-3 py-1 text-sm font-bold">{count}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
-            </TabsContent>
-
-            <TabsContent value="monitoring" className="mt-6">
-              <AnomalyMonitor />
-            </TabsContent>
-
-            <TabsContent value="knowledge" className="mt-6">
-              <KnowledgeBase />
-            </TabsContent>
-          </Tabs>
+            </div>
+          </div>
         </div>
       </div>
       
