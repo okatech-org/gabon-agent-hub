@@ -1,16 +1,20 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { Loader2, Send, X, Mic, MicOff } from "lucide-react";
+import { InlineDocumentPreview } from "@/components/ministre/GeneratedDocument";
 
 interface Message {
   role: 'user' | 'assistant';
   content: string;
   timestamp: string;
+  fileUrl?: string;
+  fileName?: string;
+  fileType?: 'pdf' | 'docx';
+  documentType?: 'decree' | 'letter' | 'report' | 'note';
 }
 
 interface IastedChatProps {
@@ -23,9 +27,9 @@ export function IastedChat({ isOpen, onClose }: IastedChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [aiModel, setAiModel] = useState<'gemini' | 'gpt' | 'claude'>('gemini');
   const [isRecording, setIsRecording] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+  const [voiceId, setVoiceId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const sessionIdRef = useRef<string>(`session-${Date.now()}`);
@@ -37,6 +41,37 @@ export function IastedChat({ isOpen, onClose }: IastedChatProps) {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const loadVoice = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('user_preferences')
+          .select('voice_id')
+          .eq('user_id', user.id)
+          .single();
+
+        if (!error && data?.voice_id) {
+          setVoiceId(data.voice_id);
+          return;
+        }
+
+        const { data: voicesData } = await supabase.functions.invoke('list-voices');
+        const iastedVoice = voicesData?.voices?.find(
+          (voice: any) => voice.name?.toLowerCase() === 'iasted'
+        );
+        if (iastedVoice) {
+          setVoiceId(iastedVoice.voice_id);
+        }
+      } catch (err) {
+        console.error('Erreur chargement voix iAsted:', err);
+      }
+    };
+
+    loadVoice();
+  }, [user]);
 
   const startRecording = async () => {
     try {
@@ -86,13 +121,16 @@ export function IastedChat({ isOpen, onClose }: IastedChatProps) {
       reader.onloadend = async () => {
         const base64Audio = (reader.result as string).split(',')[1];
 
-        const { data, error } = await supabase.functions.invoke('chat-with-iasted', {
+        const shouldGenerateAudio = Boolean(voiceId);
+        const { data, error } = await supabase.functions.invoke('chat-with-iasted-advanced', {
           body: {
             sessionId: sessionIdRef.current,
             userId: user.id,
             audioBase64: base64Audio,
-            aiModel,
-            generateAudio: true,
+            voiceId: voiceId || undefined,
+            generateAudio: shouldGenerateAudio,
+            streamAudio: false,
+            responseType: 'adaptive',
           }
         });
 
@@ -107,7 +145,11 @@ export function IastedChat({ isOpen, onClose }: IastedChatProps) {
         const assistantMessage: Message = {
           role: 'assistant',
           content: data.responseText,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
+          fileUrl: data.fileUrl,
+          fileName: data.fileName,
+          fileType: data.fileType,
+          documentType: data.documentType,
         };
 
         setMessages(prev => [...prev, userMessage, assistantMessage]);
@@ -148,13 +190,14 @@ export function IastedChat({ isOpen, onClose }: IastedChatProps) {
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('chat-with-iasted', {
+      const { data, error } = await supabase.functions.invoke('chat-with-iasted-advanced', {
         body: {
           sessionId: sessionIdRef.current,
           userId: user.id,
           textMessage: textToSend,
-          aiModel,
           generateAudio: false,
+          voiceId: voiceId || undefined,
+          responseType: 'adaptive',
         }
       });
 
@@ -163,7 +206,11 @@ export function IastedChat({ isOpen, onClose }: IastedChatProps) {
       const assistantMessage: Message = {
         role: 'assistant',
         content: data.responseText,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        fileUrl: data.fileUrl,
+        fileName: data.fileName,
+        fileType: data.fileType,
+        documentType: data.documentType,
       };
 
       setMessages(prev => [...prev, assistantMessage]);
@@ -193,21 +240,9 @@ export function IastedChat({ isOpen, onClose }: IastedChatProps) {
               <p className="text-xs text-muted-foreground">Assistant IA</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Select value={aiModel} onValueChange={(v: any) => setAiModel(v)}>
-              <SelectTrigger className="w-32 h-8 text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="gemini">Gemini</SelectItem>
-                <SelectItem value="gpt">GPT-5</SelectItem>
-                <SelectItem value="claude">Claude</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button variant="ghost" size="icon" onClick={onClose}>
-              <X className="w-4 h-4" />
-            </Button>
-          </div>
+          <Button variant="ghost" size="icon" onClick={onClose}>
+            <X className="w-4 h-4" />
+          </Button>
         </div>
 
         {/* Messages */}
@@ -235,6 +270,16 @@ export function IastedChat({ isOpen, onClose }: IastedChatProps) {
                   })}
                 </div>
                 <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                {msg.fileUrl && (
+                  <div className="mt-3">
+                    <InlineDocumentPreview
+                      fileUrl={msg.fileUrl}
+                      fileName={msg.fileName || 'document.pdf'}
+                      fileType={msg.fileType || 'pdf'}
+                      documentType={msg.documentType}
+                    />
+                  </div>
+                )}
               </div>
             ))
           )}

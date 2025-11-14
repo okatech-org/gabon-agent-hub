@@ -1,0 +1,629 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import Anthropic from "npm:@anthropic-ai/sdk@0.27.0";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+function detectResponseIntent(
+  transcript: string,
+  conversationHistory: any[],
+): {
+  type: "conversation" | "document" | "synthesis" | "detailed";
+  documentType?: "decree" | "letter" | "report" | "note";
+  responseMode?: "concise" | "detailed" | "adaptive";
+} {
+  const lower = transcript.toLowerCase().trim();
+
+  const documentKeywords = /(d[ée]cret|arr[êe]t[ée]|lettre|courrier|note|rapport|document)/i;
+  const documentVerbs =
+    /(cr[ée]e|g[ée]n[èé]re|[ée]cri|r[ée]dig|fai[ts]|produi|fourn|donne|prépar|peux[-\s]?tu|veux|souhait|besoin|demande|obtient|obtenir|propose)/i;
+
+  if (
+    (documentVerbs.test(lower) && documentKeywords.test(lower)) ||
+    /je\s+veux\s+une\s+lettre/i.test(lower) ||
+    /je\s+veux\s+un\s+(?:rapport|d[ée]cret|document)/i.test(lower) ||
+    /fais\s+toi\s+une\s+(?:lettre|note|rapport)/i.test(lower) ||
+    /produis\s+un\s+document/i.test(lower)
+  ) {
+    let documentType: "decree" | "letter" | "report" | "note" = "letter";
+
+    if (/d[ée]cret|arr[êe]t[ée]/i.test(lower)) {
+      documentType = "decree";
+    } else if (/rapport|synth[èe]se|analyse/i.test(lower)) {
+      documentType = "report";
+    } else if (/note\s+de\s+service|note\s+interne/i.test(lower)) {
+      documentType = "note";
+    }
+
+    return {
+      type: "document",
+      documentType,
+    };
+  }
+
+  if (/r[ée]sum|synth[èe]se|en\s+bref|en\s+gros|rapidement|vite|en\s+quelques\s+mots/i.test(lower)) {
+    return {
+      type: "synthesis",
+      responseMode: "concise",
+    };
+  }
+
+  if (/d[ée]tail|pr[ée]cis|expliqu|comment|pourquoi|approfondi|complet|exhaustif/i.test(lower)) {
+    return {
+      type: "detailed",
+      responseMode: "detailed",
+    };
+  }
+
+  return {
+    type: "conversation",
+    responseMode: "adaptive",
+  };
+}
+
+async function generateDocument(
+  documentType: string,
+  userRequest: string,
+  context: string,
+  anthropicClient: Anthropic,
+): Promise<{ content: string; markdown: string }> {
+  const documentPrompts = {
+    decree: `Tu es un rédacteur juridique expert en droit administratif gabonais. Génère un arrêté ministériel complet et conforme selon cette demande:
+
+${userRequest}
+
+CONTEXTE MINISTÉRIEL:
+${context}
+
+STRUCTURE OBLIGATOIRE D'UN ARRÊTÉ MINISTÉRIEL:
+
+RÉPUBLIQUE GABONAISE
+Unité – Travail – Justice
+_______________
+
+MINISTÈRE DE LA FONCTION PUBLIQUE
+_______________
+
+ARRÊTÉ N° _____ /MFPTPRE du [DATE]
+
+[OBJET DE L'ARRÊTÉ EN MAJUSCULES]
+
+LE MINISTRE DE LA FONCTION PUBLIQUE, DE LA TRANSFORMATION PUBLIQUE ET DE LA RÉFORME DE L'ÉTAT,
+
+VU [Liste des textes juridiques de référence];
+VU [Autres textes applicables];
+
+CONSIDÉRANT [Exposé des motifs];
+
+SUR PROPOSITION [Si applicable];
+
+ARRÊTE:
+
+Article 1er: [Disposition principale]
+Article 2: [Dispositions complémentaires]
+Article 3: [Entrée en vigueur]
+Article 4: [Notification et publication]
+
+Fait à Libreville, le [DATE]
+
+Le Ministre
+[SIGNATURE]
+[NOM ET TITRE]
+
+Pour Ampliation:
+- Président de la République
+- Premier Ministre
+- Contrôle d'État
+- Archives Nationales
+- Intéressé(e)
+
+IMPORTANT:
+- Utilise la numérotation réelle des articles
+- Respecte la hiérarchie des normes
+- Inclus les visas juridiques pertinents
+- Date conforme au format français
+- Formulation administrative stricte`,
+
+    letter: `Tu es le secrétaire particulier du Ministre de la Fonction Publique. Rédige une lettre officielle selon cette demande:
+
+${userRequest}
+
+CONTEXTE:
+${context}
+
+FORMAT D'UNE LETTRE MINISTÉRIELLE:
+
+RÉPUBLIQUE GABONAISE
+Unité – Travail – Justice
+
+MINISTÈRE DE LA FONCTION PUBLIQUE,
+DE LA TRANSFORMATION PUBLIQUE 
+ET DE LA RÉFORME DE L'ÉTAT
+_______________
+
+Le Ministre
+
+Libreville, le [DATE]
+
+N° _____ /MFPTPRE
+
+Monsieur/Madame [DESTINATAIRE]
+[FONCTION]
+[ADRESSE]
+
+Objet: [Objet précis de la lettre]
+
+Monsieur/Madame [CIVILITÉ],
+
+[Corps de la lettre en 3-4 paragraphes:
+- Introduction contextuelle
+- Développement avec arguments
+- Conclusion et demande d'action si nécessaire]
+
+Veuillez agréer, Monsieur/Madame [CIVILITÉ], l'expression de ma considération distinguée.
+
+Le Ministre
+
+[SIGNATURE]
+[NOM DU MINISTRE]
+
+PJ: [Liste des pièces jointes si applicable]
+Copie pour information: [Liste]`,
+
+    report: `Tu es analyste politique senior au cabinet du Ministre. Produis un rapport analytique selon cette demande:
+
+${userRequest}
+
+DONNÉES DISPONIBLES:
+${context}
+
+STRUCTURE D'UN RAPPORT MINISTÉRIEL:
+
+# RAPPORT [TITRE EN MAJUSCULES]
+
+**À l'attention de:** Excellence Monsieur le Ministre de la Fonction Publique  
+**Objet:** [Objet du rapport]  
+**Date:** [Date]  
+**Référence:** [Numéro de référence]
+
+---
+
+## I. CONTEXTE ET ENJEUX
+
+[Exposé de la situation, contexte politique/administratif, enjeux stratégiques]
+
+## II. CONSTATS ET ANALYSE
+
+### A. Situation actuelle
+[Données chiffrées, faits établis, tendances observées]
+
+### B. Forces et faiblesses
+[Analyse SWOT succincte]
+
+### C. Risques identifiés
+[Risques politiques, juridiques, opérationnels]
+
+## III. RECOMMANDATIONS
+
+### A. Mesures à court terme (0-3 mois)
+1. [Action prioritaire 1]
+2. [Action prioritaire 2]
+
+### B. Mesures à moyen terme (3-12 mois)
+1. [Action stratégique 1]
+2. [Action stratégique 2]
+
+### C. Ressources nécessaires
+- Budgétaires: [Estimation]
+- Humaines: [Effectifs]
+- Délais: [Timeline]
+
+## IV. POINTS D'ARBITRAGE MINISTÉRIEL
+
+[Questions nécessitant décision du Ministre avec options A/B/C]
+
+## V. CONCLUSION
+
+[Synthèse des recommandations principales]
+
+---
+
+**Rédacteur:** [Nom et fonction]  
+**Visa Direction:** [Si applicable]  
+**Niveau de confidentialité:** [Public/Restreint/Confidentiel]`,
+
+    note: `Tu es directeur de cabinet. Rédige une note de service selon cette demande:
+
+${userRequest}
+
+CONTEXTE:
+${context}
+
+FORMAT NOTE DE SERVICE:
+
+RÉPUBLIQUE GABONAISE
+Unité – Travail – Justice
+
+MINISTÈRE DE LA FONCTION PUBLIQUE
+_______________
+
+NOTE DE SERVICE N° _____ /MFPTPRE
+
+Libreville, le [DATE]
+
+De: Le Ministre de la Fonction Publique
+À: [Destinataires]
+
+Objet: [Objet précis]
+
+[Corps de la note en paragraphes courts et directs]
+
+Les dispositions de la présente note entrent en vigueur à compter de sa signature.
+
+Le Ministre
+
+[SIGNATURE]
+[NOM]
+
+Diffusion:
+- [Liste des services concernés]`,
+  };
+
+  const prompt = documentPrompts[documentType as keyof typeof documentPrompts] || documentPrompts.letter;
+
+  const response = await anthropicClient.messages.create({
+    model: "claude-sonnet-4-20250514",
+    max_tokens: 4000,
+    thinking: {
+      type: "enabled",
+      budget_tokens: 3000,
+    },
+    messages: [
+      {
+        role: "user",
+        content: prompt,
+      },
+    ],
+  });
+
+  const textBlocks = response.content.filter((block) => block.type === "text");
+  const documentContent = textBlocks.map((block) => block.text).join("\n\n");
+
+  return {
+    content: documentContent,
+    markdown: documentContent,
+  };
+}
+
+async function markdownToPDF(markdown: string, title: string): Promise<Uint8Array> {
+  const pdfContent = `%PDF-1.4
+1 0 obj
+<<
+/Type /Catalog
+/Pages 2 0 R
+>>
+endobj
+2 0 obj
+<<
+/Type /Pages
+/Kids [3 0 R]
+/Count 1
+>>
+endobj
+3 0 obj
+<<
+/Type /Page
+/Parent 2 0 R
+/Resources <<
+/Font <<
+/F1 4 0 R
+>>
+>>
+/MediaBox [0 0 612 792]
+/Contents 5 0 R
+>>
+endobj
+4 0 obj
+<<
+/Type /Font
+/Subtype /Type1
+/BaseFont /Helvetica
+>>
+endobj
+5 0 obj
+<<
+/Length ${markdown.length + 100}
+>>
+stream
+BT
+/F1 12 Tf
+50 750 Td
+(${title}) Tj
+0 -20 Td
+(${markdown.replace(/\n/g, ") Tj 0 -15 Td (")}) Tj
+ET
+endstream
+endobj
+xref
+0 6
+0000000000 65535 f
+0000000009 00000 n
+0000000058 00000 n
+0000000115 00000 n
+0000000274 00000 n
+0000000361 00000 n
+trailer
+<<
+/Size 6
+/Root 1 0 R
+>>
+startxref
+${500 + markdown.length}
+%%EOF`;
+
+  return new TextEncoder().encode(pdfContent);
+}
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
+  }
+
+  try {
+    const {
+      sessionId,
+      userId,
+      audioBase64,
+      textMessage,
+      voiceId,
+      aiModel = "claude",
+      generateAudio = true,
+      streamAudio = false,
+      responseType = "adaptive",
+    } = await req.json();
+
+    if (!sessionId || !userId) {
+      throw new Error("sessionId and userId are required");
+    }
+
+    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY")!;
+    const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY")!;
+    const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY")!;
+    const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+    const anthropic = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
+
+    let transcript = textMessage || "";
+
+    if (audioBase64 && !textMessage) {
+      const audioBuffer = Uint8Array.from(atob(audioBase64), (c) => c.charCodeAt(0));
+      const audioBlob = new Blob([audioBuffer], { type: "audio/webm" });
+
+      const formData = new FormData();
+      formData.append("file", audioBlob, "audio.webm");
+      formData.append("model", "whisper-1");
+      formData.append("language", "fr");
+      formData.append("prompt", "Excellence, Ministre, Fonction Publique, Gabon, arrêté, décret");
+
+      const transcriptionResponse = await fetch("https://api.openai.com/v1/audio/transcriptions", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${OPENAI_API_KEY}` },
+        body: formData,
+      });
+
+      if (!transcriptionResponse.ok) {
+        throw new Error(`Transcription failed: ${await transcriptionResponse.text()}`);
+      }
+
+      const { text } = await transcriptionResponse.json();
+      transcript = text;
+    }
+
+    await supabase.from("conversation_messages").insert({
+      session_id: sessionId,
+      role: "user",
+      content: transcript,
+      audio_base64: audioBase64,
+    });
+
+    const { data: historyData } = await supabase
+      .from("conversation_messages")
+      .select("role, content")
+      .eq("session_id", sessionId)
+      .order("created_at", { ascending: true })
+      .limit(30);
+
+    const conversationHistory =
+      historyData?.map((m) => ({
+        role: m.role === "assistant" ? "assistant" : "user",
+        content: m.content,
+      })) || [];
+
+    const { data: knowledgeBase } = await supabase
+      .from("iasted_knowledge_base")
+      .select("title, description, content, category, tags")
+      .eq("is_active", true)
+      .order("created_at", { ascending: false })
+      .limit(15);
+
+    let knowledgeContext = "";
+    if (knowledgeBase && knowledgeBase.length > 0) {
+      knowledgeContext = "\n\n📚 CONNAISSANCES PERSONNALISÉES:\n\n";
+      knowledgeBase.forEach((entry: any) => {
+        knowledgeContext += `## ${entry.title} [${entry.category}]\n`;
+        if (entry.description) knowledgeContext += `${entry.description}\n`;
+        if (entry.content) knowledgeContext += `${entry.content}\n`;
+        knowledgeContext += "\n";
+      });
+    }
+
+    const intent = detectResponseIntent(transcript, conversationHistory);
+
+    let responseText = "";
+    let fileUrl = "";
+    let fileName = "";
+    let fileType: "pdf" | "docx" | undefined;
+    let documentType: "decree" | "letter" | "report" | "note" | undefined;
+
+    if (intent.type === "document") {
+      const documentData = await generateDocument(intent.documentType!, transcript, knowledgeContext, anthropic);
+      const pdfBytes = await markdownToPDF(documentData.markdown, intent.documentType!);
+
+      const generatedFileName = `${intent.documentType}_${Date.now()}.pdf`;
+      const { error: uploadError } = await supabase.storage
+        .from("iasted-documents")
+        .upload(`generated/${generatedFileName}`, pdfBytes, {
+          contentType: "application/pdf",
+          upsert: true,
+        });
+
+      if (uploadError) throw uploadError;
+
+      const { data: publicUrlData } = supabase.storage.from("iasted-documents").getPublicUrl(`generated/${generatedFileName}`);
+
+      fileUrl = publicUrlData.publicUrl;
+      fileName = generatedFileName;
+      fileType = "pdf";
+      documentType = intent.documentType;
+
+      responseText = "Excellence, j'ai généré le document demandé. Vous pouvez le consulter et le télécharger.";
+    } else {
+      const systemPrompt = `Tu es **iAsted**, l'Assistant IA vocal du Ministre de la Fonction Publique gabonaise.
+
+🎯 PERSONNALITÉ & TON:
+- Tu parles comme un proche collaborateur du Ministre
+- Ton naturel, fluide, chaleureux mais professionnel
+- Tu t'adaptes au rythme de la conversation
+
+🧠 MODE DE RÉPONSE (IMPORTANT):
+${intent.responseMode === "concise"
+        ? `
+→ MODE SYNTHÈSE ACTIVÉ
+- Réponses ultra-courtes (2-3 phrases max)
+- Va droit à l'essentiel
+- Chiffres clés uniquement
+- Pas de détails techniques
+`
+        : intent.responseMode === "detailed"
+          ? `
+→ MODE DÉTAILLÉ ACTIVÉ
+- Explications complètes et pédagogiques
+- Contexte et nuances
+- Exemples concrets
+- Chiffres et sources
+`
+          : `
+→ MODE ADAPTATIF
+- Équilibre entre clarté et précision
+- 3-5 phrases selon le sujet
+- Détails si nécessaire pour la compréhension
+`}
+
+📚 CONNAISSANCES:
+${knowledgeContext}
+
+🎤 STYLE VOCAL:
+- Phrases courtes et rythmées
+- Pas de jargon inutile
+- Transition fluide entre idées
+- Pauses naturelles
+
+🔑 PRINCIPE: Tu PROPOSES, le Ministre DÉCIDE. Toujours citer tes sources.`;
+
+      const claudeResponse = await anthropic.messages.create({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: intent.responseMode === "concise" ? 300 : intent.responseMode === "detailed" ? 2000 : 800,
+        thinking: {
+          type: "enabled",
+          budget_tokens: intent.responseMode === "detailed" ? 5000 : 2000,
+        },
+        messages: [
+          { role: "user", content: systemPrompt },
+          ...conversationHistory.slice(-10),
+          { role: "user", content: transcript },
+        ],
+      });
+
+      const textBlocks = claudeResponse.content.filter((block) => block.type === "text");
+      responseText = textBlocks.map((block) => block.text).join("\n\n");
+    }
+
+    await supabase.from("conversation_messages").insert({
+      session_id: sessionId,
+      role: "assistant",
+      content: responseText,
+      file_url: fileUrl || null,
+      file_type: fileType || null,
+    });
+
+    let audioContent = "";
+
+    if (generateAudio && responseText && !fileUrl) {
+      const ttsResponse = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+        method: "POST",
+        headers: {
+          "xi-api-key": ELEVENLABS_API_KEY,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          text: responseText,
+          model_id: "eleven_turbo_v2_5",
+          voice_settings: {
+            stability: 0.55,
+            similarity_boost: 0.8,
+            style: 0.3,
+            use_speaker_boost: true,
+          },
+          optimize_streaming_latency: streamAudio ? 3 : 0,
+        }),
+      });
+
+      if (!ttsResponse.ok) {
+        const errorText = await ttsResponse.text();
+        throw new Error(`ElevenLabs TTS failed: ${errorText}`);
+      }
+
+      const audioBlob = await ttsResponse.arrayBuffer();
+      const uint8Array = new Uint8Array(audioBlob);
+      const chunkSize = 8192;
+      let binaryString = "";
+
+      for (let i = 0; i < uint8Array.length; i += chunkSize) {
+        const chunk = uint8Array.slice(i, Math.min(i + chunkSize, uint8Array.length));
+        binaryString += String.fromCharCode(...Array.from(chunk));
+      }
+
+      audioContent = btoa(binaryString);
+    }
+
+    return new Response(
+      JSON.stringify({
+        transcript,
+        responseText,
+        audioContent,
+        fileUrl: fileUrl || undefined,
+        fileName: fileName || undefined,
+        fileType: fileType || undefined,
+        intent: intent.type,
+        documentType,
+      }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
+    );
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    return new Response(JSON.stringify({ error: errorMessage }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+});
+
+

@@ -104,10 +104,10 @@ export function GestionnaireRHSidebar() {
 
   return (
     <SidebarUI className="border-none bg-transparent">
-      <div className="space-y-3">
+      <div className="flex h-full flex-col gap-3 p-3 md:p-4">
         {/* Header */}
         <div className="neu-card p-4">
-          <Link to="/rh/dashboard" className="flex items-center space-x-3">
+          <Link to="/rh/dashboard" className="flex items-center gap-3">
             <div className="neu-raised h-10 w-10 flex items-center justify-center flex-shrink-0">
               <Shield className="h-5 w-5 text-primary" />
             </div>
@@ -120,84 +120,88 @@ export function GestionnaireRHSidebar() {
           </Link>
         </div>
 
-        {/* Menu principal - Tout dans un seul bloc */}
-        <div className="neu-card p-4">
-          <div className="space-y-6">
-            {/* Menu Principal */}
-            <div>
-              {!collapsed && (
-                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-2">
-                  Gestion RH
-                </h3>
-              )}
-              <div className="space-y-1">
-                {menuItems.map((item) => (
-                  <Link 
-                    key={item.href}
-                    to={item.href}
-                    className={cn(
-                      "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all",
-                      location.pathname === item.href 
-                        ? "neu-inset text-primary font-medium" 
-                        : "hover:neu-raised text-foreground"
-                    )}
-                  >
-                    <item.icon className="h-4 w-4 flex-shrink-0" />
-                    {!collapsed && <span className="text-sm">{item.title}</span>}
-                  </Link>
-                ))}
-              </div>
-            </div>
+        {/* Menu principal - Scrollable */}
+        <div className="neu-card flex-1 overflow-hidden">
+          <div className="flex h-full flex-col">
+            <div className="flex-1 overflow-y-auto pr-1 md:pr-2">
+              <div className="space-y-6 px-4 py-4">
+                {/* Menu Principal */}
+                <div>
+                  {!collapsed && (
+                    <h3 className="mb-3 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Gestion RH
+                    </h3>
+                  )}
+                  <div className="space-y-1">
+                    {menuItems.map((item) => (
+                      <Link 
+                        key={item.href}
+                        to={item.href}
+                        className={cn(
+                          "flex items-center gap-3 rounded-lg px-3 py-2.5 transition-all",
+                          location.pathname === item.href 
+                            ? "neu-inset text-primary font-medium" 
+                            : "hover:neu-raised text-foreground"
+                        )}
+                      >
+                        <item.icon className="h-4 w-4 flex-shrink-0" />
+                        {!collapsed && <span className="text-sm">{item.title}</span>}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
 
-            {/* Outils */}
-            <div>
-              {!collapsed && (
-                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-2">
-                  Outils
-                </h3>
-              )}
-              <div className="space-y-1">
-                {toolsItems.map((item) => (
-                  <Link 
-                    key={item.href}
-                    to={item.href}
-                    className={cn(
-                      "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all",
-                      location.pathname === item.href 
-                        ? "neu-inset text-primary font-medium" 
-                        : "hover:neu-raised text-foreground"
-                    )}
-                  >
-                    <item.icon className="h-4 w-4 flex-shrink-0" />
-                    {!collapsed && <span className="text-sm">{item.title}</span>}
-                  </Link>
-                ))}
-              </div>
-            </div>
+                {/* Outils */}
+                <div>
+                  {!collapsed && (
+                    <h3 className="mb-3 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Outils
+                    </h3>
+                  )}
+                  <div className="space-y-1">
+                    {toolsItems.map((item) => (
+                      <Link 
+                        key={item.href}
+                        to={item.href}
+                        className={cn(
+                          "flex items-center gap-3 rounded-lg px-3 py-2.5 transition-all",
+                          location.pathname === item.href 
+                            ? "neu-inset text-primary font-medium" 
+                            : "hover:neu-raised text-foreground"
+                        )}
+                      >
+                        <item.icon className="h-4 w-4 flex-shrink-0" />
+                        {!collapsed && <span className="text-sm">{item.title}</span>}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
 
-            {/* Système */}
-            <div>
-              {!collapsed && (
-                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-2">
-                  Système
-                </h3>
-              )}
-              <div className="space-y-1">
-                {systemItems.map((item) => (
-                  <Link 
-                    key={item.href}
-                    to={item.href}
-                    className={cn(
-                      "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all",
-                      location.pathname === item.href 
-                        ? "neu-inset text-primary font-medium" 
-                        : "hover:neu-raised text-foreground"
-                    )}
-                  >
-                    <item.icon className="h-4 w-4 flex-shrink-0" />
-                    {!collapsed && <span className="text-sm">{item.title}</span>}
-                  </Link>
-                ))}
+                {/* Système */}
+                <div>
+                  {!collapsed && (
+                    <h3 className="mb-3 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Système
+                    </h3>
+                  )}
+                  <div className="space-y-1">
+                    {systemItems.map((item) => (
+                      <Link 
+                        key={item.href}
+                        to={item.href}
+                        className={cn(
+                          "flex items-center gap-3 rounded-lg px-3 py-2.5 transition-all",
+                          location.pathname === item.href 
+                            ? "neu-inset text-primary font-medium" 
+                            : "hover:neu-raised text-foreground"
+                        )}
+                      >
+                        <item.icon className="h-4 w-4 flex-shrink-0" />
+                        {!collapsed && <span className="text-sm">{item.title}</span>}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -208,13 +212,13 @@ export function GestionnaireRHSidebar() {
           {!collapsed && user?.email && (
             <div className="mb-3">
               <p className="text-xs text-muted-foreground">Connecté en tant que</p>
-              <p className="text-xs text-foreground font-medium truncate">{user.email}</p>
+              <p className="text-xs font-medium text-foreground truncate">{user.email}</p>
             </div>
           )}
           <button
             onClick={handleSignOut}
             className={cn(
-              "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all hover:neu-raised text-foreground",
+              "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-foreground transition-all hover:neu-raised",
               collapsed && "justify-center"
             )}
           >
