@@ -33,7 +33,7 @@ serve(async (req) => {
 
     console.log(`✅ PDF généré: ${(pdfBytes.length / 1024).toFixed(2)} KB`);
 
-    return new Response(pdfBytes, {
+    return new Response(new Uint8Array(pdfBytes), {
       headers: {
         ...corsHeaders,
         'Content-Type': 'application/pdf',

@@ -279,14 +279,10 @@ Diffusion:
 
   const prompt = documentPrompts[documentType as keyof typeof documentPrompts] || documentPrompts.letter;
 
-  // Appel à Claude avec thinking pour génération réfléchie
+  // Appel à Claude pour génération de document
   const response = await anthropicClient.messages.create({
     model: 'claude-sonnet-4-20250514',
     max_tokens: 4000,
-    thinking: {
-      type: 'enabled',
-      budget_tokens: 3000,
-    },
     messages: [{
       role: 'user',
       content: prompt,
@@ -328,12 +324,12 @@ serve(async (req) => {
     // Initialiser les clients
     const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY')!;
     const ELEVENLABS_API_KEY = Deno.env.get('ELEVENLABS_API_KEY')!;
-    const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY')!;
+    const ANTHROPIC_API_KEY = Deno.env.get('CLAUDE_API_KEY')!;
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
     if (!ANTHROPIC_API_KEY) {
-      throw new Error('ANTHROPIC_API_KEY not configured');
+      throw new Error('CLAUDE_API_KEY not configured');
     }
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
@@ -555,17 +551,18 @@ ${knowledgeContext}
 
 🔑 PRINCIPE: Tu PROPOSES, le Ministre DÉCIDE. Toujours citer tes sources.`;
 
-      // Appel Claude avec Extended Thinking
+      // Appel Claude  
+      const validMessages = conversationHistory
+        .slice(-10)
+        .filter(m => m.role === 'user' || m.role === 'assistant')
+        .map(m => ({ role: m.role as 'user' | 'assistant', content: m.content }));
+
       const claudeResponse = await anthropic.messages.create({
         model: 'claude-sonnet-4-20250514',
         max_tokens: intent.responseMode === 'concise' ? 300 : intent.responseMode === 'detailed' ? 2000 : 800,
-        thinking: {
-          type: 'enabled',
-          budget_tokens: intent.responseMode === 'detailed' ? 5000 : 2000,
-        },
         messages: [
           { role: 'user', content: systemPrompt },
-          ...conversationHistory.slice(-10),
+          ...validMessages,
           { role: 'user', content: transcript }
         ],
       });
