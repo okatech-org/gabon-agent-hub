@@ -20,10 +20,17 @@ function detectResponseIntent(transcript: string, conversationHistory: any[]): {
   const lower = transcript.toLowerCase().trim();
   const fullContext = conversationHistory.map(m => m.content).join(' ') + ' ' + lower;
 
+  // Détection explicite de demande PDF/document
+  const wantsPdf = /(?:en|au)\s+pdf|g[ée]n[èè]re\s+(?:un|le)\s+pdf|fichier\s+pdf|t[ée]l[ée]charg/i.test(lower);
+  const hasDocumentIntent = /(?:je\s+)?(?:veux|voudrais|souhaite|besoin\s+d[e'])\s+(?:un|une)\s+document/i.test(lower);
+  
   // Détection de génération de document
   if (
+    wantsPdf ||
+    hasDocumentIntent ||
     /(?:cr[ée]e|g[ée]n[èé]re|[ée]cri[ts]|r[ée]dig|fai[ts]|produi[ts])\s+(?:moi|un|une|le|la)?\s*(?:d[ée]cret|arr[êe]t[ée]|lettre|courrier|note|rapport|r[ée]ponse)/i.test(lower) ||
-    /besoin\s+d(?:['']|e)\s*(?:un|une)\s*(?:d[ée]cret|lettre|document)/i.test(lower)
+    /besoin\s+d(?:['']|e)\s*(?:un|une)\s*(?:d[ée]cret|lettre|document)/i.test(lower) ||
+    /(?:document|message|lettre|courrier)\s+(?:de|pour)\s+(?:vœux|f[êe]te|nouvel|remerci|félicit)/i.test(lower)
   ) {
     // Identifier le type de document
     let documentType: 'decree' | 'letter' | 'report' | 'note' = 'letter';
@@ -35,6 +42,8 @@ function detectResponseIntent(transcript: string, conversationHistory: any[]): {
     } else if (/note\s+de\s+service|note\s+interne/i.test(lower)) {
       documentType = 'note';
     }
+    // Message de vœux, félicitations, remerciements = lettre
+    // (documentType reste 'letter')
     
     return {
       type: 'document',
@@ -485,7 +494,16 @@ serve(async (req) => {
       }
 
       documentType = intent.documentType;
-      responseText = `Excellence, j'ai généré le document demandé. Vous pouvez le consulter et le télécharger.`;
+      
+      // Message personnalisé selon le type de document
+      const docLabels = {
+        decree: "l'arrêté ministériel",
+        letter: "la lettre officielle",
+        report: "le rapport analytique",
+        note: "la note de service"
+      };
+      
+      responseText = `Excellence, j'ai généré ${docLabels[intent.documentType!]} en format PDF. Vous pouvez le consulter, le télécharger et l'adapter selon vos besoins.`;
 
       // Enregistrer dans la table generated_documents
       await supabase.from('generated_documents').insert({
