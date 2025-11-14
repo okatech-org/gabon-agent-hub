@@ -47,17 +47,6 @@ export function IastedChat({ isOpen, onClose }: IastedChatProps) {
 
     const loadVoice = async () => {
       try {
-        const { data, error } = await supabase
-          .from('user_preferences')
-          .select('voice_id')
-          .eq('user_id', user.id)
-          .single();
-
-        if (!error && data?.voice_id) {
-          setVoiceId(data.voice_id);
-          return;
-        }
-
         const { data: voicesData } = await supabase.functions.invoke('list-voices');
         const iastedVoice = voicesData?.voices?.find(
           (voice: any) => voice.name?.toLowerCase() === 'iasted'

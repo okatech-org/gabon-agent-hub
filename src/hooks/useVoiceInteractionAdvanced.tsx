@@ -433,27 +433,20 @@ export const useVoiceInteractionAdvanced = (): UseVoiceInteractionReturn => {
   }, []);
 
   // Charger les préférences au montage
+  // Charger préférences utilisateur (simplifiées - pas de table user_preferences)
   useEffect(() => {
     const loadPreferences = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        const { data: prefs } = await supabase
-          .from('user_preferences')
-          .select('*')
-          .eq('user_id', user.id)
-          .single();
-
-        if (prefs) {
-          voiceIdRef.current = prefs.voice_id || '';
-          aiModelRef.current = prefs.ai_model || 'claude';
-          setContinuousMode(prefs.voice_continuous_mode || false);
-          
-          // Charger la config VAD personnalisée si disponible
-          if (prefs.vad_config) {
-            setVadConfig(prefs.vad_config);
-          }
+        // Charger voix par défaut iAsted
+        const { data: voicesData } = await supabase.functions.invoke('list-voices');
+        const iastedVoice = voicesData?.voices?.find(
+          (voice: any) => voice.name?.toLowerCase() === 'iasted'
+        );
+        if (iastedVoice) {
+          voiceIdRef.current = iastedVoice.voice_id;
         }
       } catch (error) {
         console.error('Erreur chargement préférences:', error);
