@@ -158,7 +158,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           case "gestionnaire":
             navigate("/rh/dashboard");
             break;
-          case "fonctionnaire":
           case "agent":
             navigate("/fonctionnaire/dashboard");
             break;
@@ -167,7 +166,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           case "drh_local":
             navigate("/dashboard");
             break;
+          case "agent":
+            navigate("/dashboard");
+            break;
           case "candidat":
+          case "auditeur":
+          case "admin":
             navigate("/dashboard");
             break;
           default:
@@ -224,13 +228,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signOut = async () => {
     try {
       const { error } = await supabase.auth.signOut();
-      if (error) throw error;
       
+      // Si la session n'existe plus, on considère que c'est ok
+      if (error && error.message !== "Session from session_id claim in JWT does not exist") {
+        throw error;
+      }
+    } catch (error: any) {
+      console.error("Erreur lors de la déconnexion:", error);
+    } finally {
+      // Toujours nettoyer l'état local et rediriger
+      setUser(null);
+      setSession(null);
       navigate('/auth/login');
       toast.success("Déconnexion réussie");
-    } catch (error: any) {
-      toast.error(error.message || "Erreur lors de la déconnexion");
-      throw error;
     }
   };
 
