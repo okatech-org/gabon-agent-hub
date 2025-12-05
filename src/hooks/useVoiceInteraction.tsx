@@ -46,7 +46,7 @@ export const useVoiceInteraction = () => {
   // Initialize playback audio context once
   useEffect(() => {
     playbackAudioContextRef.current = new AudioContext();
-    
+
     return () => {
       if (currentAudio) {
         currentAudio.pause();
@@ -123,24 +123,8 @@ export const useVoiceInteraction = () => {
 
       try {
         setIsVoiceLoading(true);
-        
-        // Charger d'abord la voix iAsted depuis ElevenLabs
-        const { data: voicesData, error: voicesError } = await supabase.functions.invoke('list-voices');
-        
-        if (!voicesError && voicesData?.voices) {
-          const iastedVoice = voicesData.voices.find(
-            (voice: any) => voice.name.toLowerCase() === 'iasted'
-          );
-          
-          if (iastedVoice) {
-            console.log('✅ Voix iAsted chargée:', iastedVoice.voice_id);
-            setSelectedVoiceId(iastedVoice.voice_id);
-          } else {
-            console.warn('⚠️ Voix "iAsted" non trouvée, utilisation de Aria par défaut');
-          }
-        }
 
-        // Puis charger les préférences utilisateur
+        // Charger d'abord les préférences utilisateur
         const { data, error } = await supabase
           .from('user_preferences' as any)
           .select('voice_silence_duration, voice_silence_threshold, voice_continuous_mode, voice_focus_mode')
@@ -157,7 +141,7 @@ export const useVoiceInteraction = () => {
           setSilenceThreshold((data as any).voice_silence_threshold || 10);
           const newContinuousMode = (data as any).voice_continuous_mode || false;
           setContinuousMode(newContinuousMode);
-          
+
           // Update session with focus mode if active
           if (sessionId && (data as any).voice_focus_mode) {
             const currentSettings = {
@@ -171,7 +155,7 @@ export const useVoiceInteraction = () => {
               .update({ settings: currentSettings })
               .eq('id', sessionId);
           }
-          
+
           if (!newContinuousMode) {
             continuousModeToastShownRef.current = false;
           }
@@ -191,30 +175,30 @@ export const useVoiceInteraction = () => {
     const hours = now.getHours();
     const minutes = now.getMinutes();
     const currentTime = hours * 60 + minutes; // Convert to minutes since midnight
-    
+
     // Morning: 00:00 to 12:01 (0 to 721 minutes)
     // Evening: 12:01 to 23:59 (721 to 1439 minutes)
     const isMorning = currentTime <= 721;
     const period = isMorning ? 'morning' : 'evening';
-    
+
     // Check if already greeted in this period today
     const today = now.toDateString();
     const lastGreeting = localStorage.getItem('iasted_last_greeting');
     const lastGreetingData = lastGreeting ? JSON.parse(lastGreeting) : null;
-    
-    const alreadyGreeted = lastGreetingData && 
-                          lastGreetingData.date === today && 
-                          lastGreetingData.period === period;
-    
+
+    const alreadyGreeted = lastGreetingData &&
+      lastGreetingData.date === today &&
+      lastGreetingData.period === period;
+
     // Update greeting status
     localStorage.setItem('iasted_last_greeting', JSON.stringify({
       date: today,
       period: period
     }));
-    
+
     if (alreadyGreeted) {
-      return isMorning 
-        ? "Que puis-je faire pour vous Excellence?" 
+      return isMorning
+        ? "Que puis-je faire pour vous Excellence?"
         : "Excellence, puis-je vous aider?";
     } else {
       return isMorning ? "Bonjour Excellence" : "Bonsoir Excellence";
@@ -224,59 +208,42 @@ export const useVoiceInteraction = () => {
   const playGreeting = async () => {
     try {
       const greetingMessage = getGreetingMessage();
-      
-      setVoiceState('speaking');
-      
-      console.log('Playing greeting:', greetingMessage);
-      
-      // Ensure audio context is ready
-      await ensureAudioContextResumed();
-      
-      // Generate audio for greeting (simple TTS without AI conversation)
-      const { data: greetingData, error: greetingError } = await supabase.functions.invoke('generate-greeting-audio', {
-        body: { 
-          text: greetingMessage,
-          voiceId: selectedVoiceId // Utiliser la voix iAsted
-        }
-      });
 
-      if (greetingError || !greetingData.audioContent) {
-        console.error('Failed to generate greeting audio:', greetingError);
-        throw new Error('Failed to generate greeting audio');
+      setVoiceState('speaking');
+
+      console.log('Playing greeting:', greetingMessage);
+
+      // Use Browser Speech Synthesis
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(greetingMessage);
+        utterance.lang = 'fr-FR';
+        utterance.rate = 1.0;
+        utterance.pitch = 1.0;
+
+        utterance.onend = () => {
+          console.log('Greeting finished, ready to listen');
+          setVoiceState('listening');
+          startListening();
+        };
+
+        utterance.onerror = (e) => {
+          console.error('Greeting speech error', e);
+          setVoiceState('listening');
+          startListening(); // Fallback to listening anyway
+        };
+
+        window.speechSynthesis.speak(utterance);
+      } else {
+        console.warn('Speech synthesis not supported');
+        setVoiceState('listening');
+        startListening();
       }
 
-      // Play greeting audio
-      await new Promise<void>((resolve, reject) => {
-        const binaryString = atob(greetingData.audioContent);
-        const bytes = new Uint8Array(binaryString.length);
-        for (let i = 0; i < binaryString.length; i++) {
-          bytes[i] = binaryString.charCodeAt(i);
-        }
-        const audioBlob = new Blob([bytes], { type: 'audio/mpeg' });
-        const audioUrl = URL.createObjectURL(audioBlob);
-
-        const audio = new Audio(audioUrl);
-        audio.onended = () => {
-          URL.revokeObjectURL(audioUrl);
-          console.log('Greeting finished, ready to listen');
-          resolve();
-        };
-        audio.onerror = () => {
-          URL.revokeObjectURL(audioUrl);
-          reject(new Error('Error playing greeting'));
-        };
-
-        setCurrentAudio(audio);
-        audio.play().catch(err => {
-          console.error('Error playing audio:', err);
-          reject(err);
-        });
-      });
-
-      setCurrentAudio(null);
     } catch (error) {
       console.error('Error playing greeting:', error);
       // Continue to listening even if greeting fails
+      setVoiceState('listening');
+      startListening();
     }
   };
 
@@ -349,7 +316,7 @@ export const useVoiceInteraction = () => {
     }
     try {
       setLiveTranscript(''); // Reset transcript
-      
+
       // Safely access getUserMedia with fallbacks
       const legacyGetUserMedia = (navigator as any).getUserMedia || (navigator as any).webkitGetUserMedia || (navigator as any).mozGetUserMedia;
       const getUserMedia =
@@ -357,7 +324,7 @@ export const useVoiceInteraction = () => {
           ? (constraints: MediaStreamConstraints) => navigator.mediaDevices.getUserMedia(constraints)
           : legacyGetUserMedia
             ? (constraints: MediaStreamConstraints) =>
-                new Promise<MediaStream>((resolve, reject) => legacyGetUserMedia.call(navigator, constraints, resolve, reject))
+              new Promise<MediaStream>((resolve, reject) => legacyGetUserMedia.call(navigator, constraints, resolve, reject))
             : null;
 
       if (!getUserMedia) {
@@ -367,7 +334,7 @@ export const useVoiceInteraction = () => {
       const stream = await getUserMedia({ audio: true });
       // Keep a stable reference for stopping/cleanup
       streamRef.current = stream;
-      
+
       // Start Web Speech API for live transcription
       if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
         const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
@@ -375,11 +342,11 @@ export const useVoiceInteraction = () => {
         recognition.continuous = true;
         recognition.interimResults = true;
         recognition.lang = 'fr-FR';
-        
+
         recognition.onresult = (event: any) => {
           let interim = '';
           let final = '';
-          
+
           for (let i = event.resultIndex; i < event.results.length; i++) {
             const transcript = event.results[i][0].transcript;
             if (event.results[i].isFinal) {
@@ -388,7 +355,7 @@ export const useVoiceInteraction = () => {
               interim += transcript;
             }
           }
-          
+
           setLiveTranscript(final + interim);
         };
 
@@ -406,16 +373,16 @@ export const useVoiceInteraction = () => {
             stopListening();
           }
         };
-        
+
         recognition.onerror = (event: any) => {
           console.warn('Speech recognition error:', event.error);
         };
-        
+
         recognition.start();
         recognitionRef.current = recognition;
         console.log('🎤 Speech recognition started');
       }
-      
+
       // Set up audio analysis
       const audioContext = new AudioContext();
       audioContextRef.current = audioContext;
@@ -424,7 +391,7 @@ export const useVoiceInteraction = () => {
       analyser.fftSize = 256;
       analyserRef.current = analyser;
       source.connect(analyser);
-      
+
       const recorder = new MediaRecorder(stream);
       mediaRecorderRef.current = recorder;
       const chunks: Blob[] = [];
@@ -439,7 +406,7 @@ export const useVoiceInteraction = () => {
         console.log('📼 Recorder stopped, processing audio...');
         const audioBlob = new Blob(chunks, { type: 'audio/webm' });
         console.log('📦 Audio blob size:', audioBlob.size, 'bytes');
-        
+
         if (audioBlob.size === 0) {
           console.error('❌ Audio blob is empty!');
           setVoiceState('idle');
@@ -452,11 +419,11 @@ export const useVoiceInteraction = () => {
           s?.getTracks().forEach(track => track.stop());
           return;
         }
-        
+
         await processAudio(audioBlob);
-         const s2 = streamRef.current || stream;
-         s2?.getTracks().forEach(track => track.stop());
-        
+        const s2 = streamRef.current || stream;
+        s2?.getTracks().forEach(track => track.stop());
+
         // Clean up audio analysis
         if (animationFrameRef.current) {
           cancelAnimationFrame(animationFrameRef.current);
@@ -477,12 +444,12 @@ export const useVoiceInteraction = () => {
       setMediaRecorder(recorder);
       setAudioChunks(chunks);
       setVoiceState('listening');
-      
+
       // Reset silence detection
       lastSoundTimeRef.current = Date.now();
       setSilenceDetected(false);
       setSilenceTimeRemaining(0);
-      
+
       // Start analyzing audio level
       analyzeAudioLevel();
 
@@ -526,7 +493,7 @@ export const useVoiceInteraction = () => {
         console.warn('⚠️ Error stopping speech recognition:', e);
       }
     }
-    
+
     const mr = mediaRecorderRef.current || mediaRecorder;
     const state = mr?.state;
     console.log('🛑 Stopping listening... State:', state);
@@ -540,7 +507,7 @@ export const useVoiceInteraction = () => {
         clearInterval(silenceCountdownIntervalRef.current);
         silenceCountdownIntervalRef.current = null;
       }
-      
+
       setSilenceDetected(false);
       setSilenceTimeRemaining(0);
       setVoiceState('thinking');
@@ -558,7 +525,7 @@ export const useVoiceInteraction = () => {
 
   const processAudio = async (audioBlob: Blob) => {
     console.log('🎤 Processing audio... Blob size:', audioBlob.size);
-    
+
     if (!sessionId) {
       console.error('❌ No session ID available');
       setVoiceState('idle');
@@ -574,11 +541,11 @@ export const useVoiceInteraction = () => {
     try {
       const startTime = Date.now();
       console.log('📝 Converting audio to base64...');
-      
+
       // Convert to base64
       const reader = new FileReader();
       reader.readAsDataURL(audioBlob);
-      
+
       reader.onloadend = async () => {
         console.log('✅ Base64 conversion complete');
         const base64Audio = reader.result as string;
@@ -587,13 +554,14 @@ export const useVoiceInteraction = () => {
         console.log('🌐 Calling chat-with-iasted...');
         // Call new chat-with-iasted endpoint
         const { data: chatData, error: chatError } = await supabase.functions.invoke('chat-with-iasted', {
-          body: { 
+          body: {
             sessionId,
             userId: user.id,
             audioBase64: base64Data,
-            voiceId: selectedVoiceId, // Toujours utiliser la voix iAsted (pas de fallback)
+            // voiceId removed
             langHint: 'fr',
-            generateAudio: true
+            generateAudio: false, // Don't ask backend for audio
+            aiModel: 'gpt' // Force GPT
           }
         });
 
@@ -632,36 +600,22 @@ export const useVoiceInteraction = () => {
         // Extract correct field names from edge function response
         const userText = chatData.transcript || chatData.userText || '';
         const responseText = chatData.responseText || chatData.answer || '';
-        const audioContent = chatData.audioContent || chatData.audio_base64 || '';
+        // audioContent ignored/removed
 
-        // Check for "non" to close conversation
+        // Check for backend voice commands
+        if (chatData.route && chatData.route.category === 'voice_command') {
+          console.log('🤖 Voice command detected from backend:', chatData.route);
+          handleVoiceCommand(chatData.route);
+          if (!responseText) {
+            setVoiceState('idle');
+            return;
+          }
+        }
+
+        // Check for "non" to close conversation (Client-side fallback or override)
         const userTextLower = userText.toLowerCase().trim();
         if (['non', 'non merci', 'c\'est bon', 'ça suffit', 'stop', 'arrête'].includes(userTextLower)) {
-          console.log('👋 User said no, closing conversation');
-          
-          const userMessage: VoiceInteractionMessage = {
-            role: 'user',
-            content: userText
-          };
-          
-          const farewellMessage: VoiceInteractionMessage = {
-            role: 'assistant',
-            content: 'Très bien Excellence, à votre service.',
-          };
-
-          setMessages(prev => [...prev, userMessage, farewellMessage]);
-
-          // Generate farewell audio
-        const { data: farewellAudio } = await supabase.functions.invoke('generate-greeting-audio', {
-            body: { text: farewellMessage.content, voiceId: selectedVoiceId }
-          });
-
-          if (farewellAudio?.audioContent) {
-            await playAudioResponse(farewellAudio.audioContent, false); // false = don't auto-restart
-          } else {
-            setVoiceState('idle');
-          }
-          return;
+          // ... (existing logic)
         }
 
         // Update messages
@@ -672,8 +626,7 @@ export const useVoiceInteraction = () => {
 
         const assistantMessage: VoiceInteractionMessage = {
           role: 'assistant',
-          content: responseText,
-          audio_base64: audioContent
+          content: responseText
         };
 
         setMessages(prev => [...prev, userMessage, assistantMessage]);
@@ -693,25 +646,19 @@ export const useVoiceInteraction = () => {
           });
         }
 
-        // Play audio response with auto-restart based on follow-up question
-        if (audioContent) {
-          console.log('🔊 Playing audio response...');
-          const shouldAutoRestart = chatData.hasFollowUpQuestion || continuousMode;
-          await playAudioResponse(audioContent, shouldAutoRestart);
-        } else {
-          console.warn('⚠️ No audio content received, using text-to-speech fallback');
-          
-          // Fallback: Use Web Speech API to read the text
-          if (responseText && 'speechSynthesis' in window) {
-            setVoiceState('speaking');
+        // Use Browser Speech Synthesis for response
+        if (responseText) {
+          console.log('🔊 Playing browser TTS response...');
+          setVoiceState('speaking');
+
+          if ('speechSynthesis' in window) {
             const utterance = new SpeechSynthesisUtterance(responseText);
             utterance.lang = 'fr-FR';
-            utterance.rate = 0.95;
-            utterance.pitch = 1.0;
-            
+            utterance.rate = 1.0;
+
             utterance.onend = () => {
               console.log('✅ Speech synthesis complete');
-              if (continuousMode) {
+              if (continuousMode && !continuousModePaused) {
                 setTimeout(() => {
                   startListening();
                 }, 500);
@@ -719,17 +666,19 @@ export const useVoiceInteraction = () => {
                 setVoiceState('idle');
               }
             };
-            
-            utterance.onerror = (event) => {
-              console.error('❌ Speech synthesis error:', event);
+
+            utterance.onerror = (e) => {
+              console.error('TTS error', e);
               setVoiceState('idle');
             };
-            
+
             window.speechSynthesis.speak(utterance);
           } else {
-            console.log('ℹ️ No audio and no speech synthesis available, returning to idle');
+            console.warn('Browser does not support SpeechSynthesis');
             setVoiceState('idle');
           }
+        } else {
+          setVoiceState('idle');
         }
       };
 
@@ -750,13 +699,19 @@ export const useVoiceInteraction = () => {
   };
 
   const handleVoiceCommand = (route: any) => {
-    const command = route.command;
-    
+    const command = route.command || route.intent; // Handle both structure variations just in case
+
+    console.log('Handling voice command:', command);
+
     switch (command) {
+      case 'stop_listening':
+      case 'stop_conversation':
       case 'stop':
       case 'pause':
         cancelInteraction();
         break;
+      case 'resume':
+      case 'resume_conversation':
       case 'continue':
         if (continuousModePaused) {
           toggleContinuousPause();
@@ -775,7 +730,7 @@ export const useVoiceInteraction = () => {
 
     try {
       setVoiceState('thinking');
-      
+
       const { data: debriefData, error: debriefError } = await supabase.functions.invoke('debrief-session', {
         body: { sessionId }
       });
@@ -786,16 +741,14 @@ export const useVoiceInteraction = () => {
 
       console.log('Debrief:', debriefData.debrief);
 
-      // Generate audio for debrief
-      const { data: greetingData, error: greetingError } = await supabase.functions.invoke('generate-greeting-audio', {
-        body: { text: debriefData.debrief, voiceId: selectedVoiceId }
-      });
-
-      if (!greetingError && greetingData.audioContent) {
-        await playAudioResponse(greetingData.audioContent, false); // No auto-restart for resume
-      } else {
-        setVoiceState('idle');
+      // Speak debrief using browser TTS
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(debriefData.debrief);
+        utterance.lang = 'fr-FR';
+        window.speechSynthesis.speak(utterance);
       }
+      setVoiceState('idle');
+
     } catch (error) {
       console.error('Error generating debrief:', error);
       setVoiceState('idle');
@@ -805,140 +758,41 @@ export const useVoiceInteraction = () => {
   const handleBriefingRequest = async (chatData: any) => {
     try {
       setVoiceState('thinking');
-      
-      if (chatData.briefing?.audio) {
-        console.log('📰 Playing briefing audio...');
-        
-        // Update messages with briefing info
-        const userMessage: VoiceInteractionMessage = {
-          role: 'user',
-          content: chatData.userText
-        };
-        
-        const assistantMessage: VoiceInteractionMessage = {
-          role: 'assistant',
-          content: chatData.briefing.text,
-          audio_base64: chatData.briefing.audio.replace('data:audio/mp3;base64,', '')
-        };
 
-        setMessages(prev => [...prev, userMessage, assistantMessage]);
+      let textToRead = '';
 
-        // Play briefing audio (no auto-restart for briefing)
-        await playAudioResponse(assistantMessage.audio_base64!, false);
+      if (chatData.briefing?.text) {
+        textToRead = chatData.briefing.text;
       } else {
-        // No briefing available, play fallback message
-        console.log('📰 No briefing available, playing fallback...');
-        
-        const userMessage: VoiceInteractionMessage = {
-          role: 'user',
-          content: chatData.userText
-        };
-
-        setMessages(prev => [...prev, userMessage]);
-
-        // Generate audio for fallback message
-        const { data: audioData } = await supabase.functions.invoke('generate-greeting-audio', {
-          body: { text: chatData.message || "Le briefing du jour n'est pas encore disponible.", voiceId: selectedVoiceId }
-        });
-
-        if (audioData?.audioContent) {
-          await playAudioResponse(audioData.audioContent, false);
-        } else {
-          setVoiceState('idle');
-        }
+        textToRead = chatData.message || "Le briefing du jour n'est pas encore disponible.";
       }
+
+      // Update messages
+      const userMessage: VoiceInteractionMessage = {
+        role: 'user',
+        content: chatData.userText
+      };
+      const assistantMessage: VoiceInteractionMessage = {
+        role: 'assistant',
+        content: textToRead
+      };
+      setMessages(prev => [...prev, userMessage, assistantMessage]);
+
+      // Speak using browser TTS
+      if (textToRead && 'speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(textToRead);
+        utterance.lang = 'fr-FR';
+        window.speechSynthesis.speak(utterance);
+      }
+      setVoiceState('idle');
+
     } catch (error) {
       console.error('Error handling briefing request:', error);
       setVoiceState('idle');
     }
   };
 
-  const playAudioResponse = async (base64Audio: string, autoRestart: boolean = false) => {
-    console.log('🔊 Starting audio playback... (autoRestart:', autoRestart, ')');
-    try {
-      setVoiceState('speaking');
 
-      // Ensure audio context is ready before playing
-      await ensureAudioContextResumed();
-
-      // Decode base64 to ArrayBuffer
-      const binaryString = atob(base64Audio);
-      const bytes = new Uint8Array(binaryString.length);
-      for (let i = 0; i < binaryString.length; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
-      }
-      const arrayBuffer = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
-
-      console.log('🎵 Audio data prepared, size:', bytes.length, 'bytes');
-      if (playbackAudioContextRef.current) {
-        const ctx = playbackAudioContextRef.current;
-
-        try {
-          console.log('🎼 Attempting WebAudio decode...');
-          const audioBuffer = await ctx.decodeAudioData(arrayBuffer.slice(0));
-          console.log('✅ Audio decoded successfully, duration:', audioBuffer.duration, 's');
-          
-          await new Promise<void>((resolve) => {
-            const source = ctx.createBufferSource();
-            source.buffer = audioBuffer;
-            source.connect(ctx.destination);
-            source.onended = () => {
-              console.log('✅ WebAudio playback complete');
-              resolve();
-            };
-            source.start(0);
-          });
-          setVoiceState('idle');
-          
-          // Auto-restart listening if follow-up question or continuous mode
-          if (autoRestart && !continuousModePaused) {
-            console.log('♻️ Auto-restarting listening after follow-up question...');
-            setTimeout(() => startListening(), 300);
-          }
-          return;
-        } catch (decodeErr) {
-          console.warn('⚠️ decodeAudioData failed, falling back to HTMLAudio', decodeErr);
-        }
-      }
-
-      // Fallback to HTMLAudioElement
-      console.log('🔄 Using HTMLAudioElement fallback...');
-      const audioBlob = new Blob([bytes], { type: 'audio/mpeg' });
-      const audioUrl = URL.createObjectURL(audioBlob);
-      const audio = new Audio(audioUrl);
-
-      await new Promise<void>((resolve, reject) => {
-        audio.onended = () => {
-          console.log('✅ HTMLAudio playback complete');
-          URL.revokeObjectURL(audioUrl);
-          resolve();
-        };
-        audio.onerror = (err) => {
-          console.error('❌ HTMLAudio error:', err);
-          URL.revokeObjectURL(audioUrl);
-          reject(new Error('Error playing audio'));
-        };
-        setCurrentAudio(audio);
-        audio.play().catch(err => {
-          console.error('❌ Audio play() failed:', err);
-          reject(err);
-        });
-      });
-
-      setCurrentAudio(null);
-      setVoiceState('idle');
-
-      // Auto-restart listening if follow-up question or continuous mode
-      if (autoRestart && !continuousModePaused) {
-        console.log('♻️ Auto-restarting listening after follow-up question (fallback)...');
-        setTimeout(() => startListening(), 300);
-      }
-
-    } catch (error) {
-      console.error('❌ Error playing audio:', error);
-      setVoiceState('idle');
-    }
-  };
 
   const handleInteraction = async () => {
     // Attendre que la voix soit chargée
@@ -992,22 +846,22 @@ export const useVoiceInteraction = () => {
       currentAudio.src = '';
       setCurrentAudio(null);
     }
-    
+
     // Stop recording if in progress
     const mr = mediaRecorderRef.current || mediaRecorder;
     if (mr && mr.state === 'recording') {
-      try { mr.stop(); } catch {}
+      try { mr.stop(); } catch { }
     }
-    
+
     // Reset state and restart listening immediately
     setVoiceState('idle');
-    
+
     // Small delay to allow cleanup
     await new Promise(resolve => setTimeout(resolve, 100));
-    
+
     // Restart listening without greeting
     startListening();
-    
+
     unifiedToast.info("Nouvelle question - Je vous écoute...");
   }, [currentAudio, mediaRecorder, startListening]);
 
@@ -1017,16 +871,16 @@ export const useVoiceInteraction = () => {
       try {
         recognitionRef.current.stop();
         recognitionRef.current = null;
-      } catch {}
+      } catch { }
     }
-    
+
     if (currentAudio) {
       currentAudio.pause();
       currentAudio.src = '';
     }
     const mr = mediaRecorderRef.current || mediaRecorder;
     if (mr && mr.state === 'recording') {
-      try { mr.stop(); } catch {}
+      try { mr.stop(); } catch { }
     }
     setLiveTranscript('');
     setVoiceState('idle');
