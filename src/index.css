@@ -2,118 +2,90 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
-
 @layer base {
   :root {
-    /* Neomorphic design with soft shadows */
-    --background: 0 0% 88%; /* #e0e0e0 */
-    --foreground: 220 26% 14%; /* #111827 */
+    /* === DESIGN NEOMORPHIQUE (Administrative Theme) === */
+    --background: 0 0% 88%;
+    --foreground: 0 0% 5%;
 
-    --card: 0 0% 88%;
-    --card-foreground: 220 26% 14%;
+    --card: 0 0% 96%;
+    --card-foreground: 0 0% 5%;
 
-    --popover: 0 0% 88%;
-    --popover-foreground: 220 26% 14%;
+    --primary: 0 0% 20%;
+    --primary-foreground: 0 0% 98%;
 
-    /* Gabon flag colors inspired - Blue and Green */
-    --primary: 142 69% 26%; /* Gabon green */
-    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 75%;
+    --secondary-foreground: 0 0% 10%;
 
-    --secondary: 214 84% 56%; /* Gabon blue */
-    --secondary-foreground: 0 0% 100%;
+    --accent: 0 0% 70%;
+    --accent-foreground: 0 0% 8%;
 
-    --muted: 0 0% 92%;
-    --muted-foreground: 220 13% 46%; /* #6b7280 */
-
-    --accent: 47 96% 53%; /* Gabon yellow accent */
-    --accent-foreground: 220 26% 14%;
+    --muted: 0 0% 80%;
+    --muted-foreground: 0 0% 25%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 142 69% 26%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 8%;
+
+    --success: 142 71% 45%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 38 92% 50%;
-    --warning-foreground: 0 0% 100%;
+    --border: 0 0% 68%;
+    --input: 0 0% 92%;
+    --ring: 0 0% 25%;
 
-    --info: 214 84% 56%;
-    --info-foreground: 0 0% 100%;
+    --radius: 1rem;
 
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 142 69% 26%;
+    /* === OMBRES NEOMORPHIQUES === */
+    --neo-shadow-sm: 6px 6px 12px rgba(130, 130, 130, 0.4), -6px -6px 12px rgba(255, 255, 255, 0.9);
+    --neo-shadow-md: 10px 10px 20px rgba(120, 120, 120, 0.45), -10px -10px 20px rgba(255, 255, 255, 0.95);
+    --neo-shadow-lg: 15px 15px 30px rgba(110, 110, 110, 0.5), -15px -15px 30px rgba(255, 255, 255, 1);
+    --neo-shadow-inset: inset 6px 6px 12px rgba(130, 130, 130, 0.35), inset -6px -6px 12px rgba(255, 255, 255, 0.8);
+    --neo-shadow-inset-lg: inset 10px 10px 20px rgba(120, 120, 120, 0.4), inset -10px -10px 20px rgba(255, 255, 255, 0.85);
 
-    --radius: 1.125rem;
-    
-    /* Neomorphic shadows */
-    --neu-light: 0 0% 100%; /* #ffffff */
-    --neu-dark: 0 0% 75%; /* #bebebe */
-    
-    --shadow-neu: 8px 8px 16px hsl(var(--neu-dark)), -8px -8px 16px hsl(var(--neu-light));
-    --shadow-neu-sm: 4px 4px 8px hsl(var(--neu-dark)), -4px -4px 8px hsl(var(--neu-light));
-    --shadow-neu-inset: inset 6px 6px 12px hsl(var(--neu-dark)), inset -6px -6px 12px hsl(var(--neu-light));
-    --shadow-neu-button: 3px 3px 6px hsl(var(--neu-dark)), -3px -3px 6px hsl(var(--neu-light));
-    --shadow-neu-button-hover: 4px 4px 8px hsl(var(--neu-dark)), -4px -4px 8px hsl(var(--neu-light));
-    --shadow-neu-button-active: inset 2px 2px 4px hsl(var(--neu-dark)), inset -2px -2px 4px hsl(var(--neu-light));
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 
+    /* Sidebar Variables (Mapped to Main Theme) */
     --sidebar-background: var(--background);
     --sidebar-foreground: var(--foreground);
     --sidebar-primary: var(--primary);
     --sidebar-primary-foreground: var(--primary-foreground);
-    --sidebar-accent: var(--background);
-    --sidebar-accent-foreground: var(--foreground);
+    --sidebar-accent: var(--accent);
+    --sidebar-accent-foreground: var(--accent-foreground);
     --sidebar-border: var(--border);
     --sidebar-ring: var(--ring);
   }
 
   .dark {
-    --background: 215 25% 10%;
-    --foreground: 0 0% 95%;
-
-    --card: 215 25% 12%;
-    --card-foreground: 0 0% 95%;
-
-    --popover: 215 25% 12%;
-    --popover-foreground: 0 0% 95%;
-
-    --primary: 142 69% 35%;
+    --background: 0 0% 8%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 12%;
+    --card-foreground: 0 0% 98%;
+    --primary: 0 0% 60%;
     --primary-foreground: 0 0% 100%;
-
-    --secondary: 214 84% 45%;
+    --secondary: 0 0% 45%;
     --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 18%;
+    --muted-foreground: 0 0% 65%;
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
 
-    --muted: 215 25% 20%;
-    --muted-foreground: 215 15% 65%;
+    /* Ombres néomorphiques pour mode sombre */
+    --neo-shadow-sm: 4px 4px 8px rgba(0, 0, 0, 0.5), -4px -4px 8px rgba(255, 255, 255, 0.05);
+    --neo-shadow-md: 8px 8px 16px rgba(0, 0, 0, 0.6), -8px -8px 16px rgba(255, 255, 255, 0.08);
+    --neo-shadow-lg: 12px 12px 24px rgba(0, 0, 0, 0.7), -12px -12px 24px rgba(255, 255, 255, 0.1);
+    --neo-shadow-inset: inset 4px 4px 8px rgba(0, 0, 0, 0.5), inset -4px -4px 8px rgba(255, 255, 255, 0.05);
 
-    --accent: 47 96% 60%;
-    --accent-foreground: 215 25% 10%;
-
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 100%;
-
-    --success: 142 69% 35%;
-    --success-foreground: 0 0% 100%;
-
-    --warning: 38 92% 55%;
-    --warning-foreground: 0 0% 100%;
-
-    --info: 214 84% 50%;
-    --info-foreground: 0 0% 100%;
-
-    --border: 215 25% 25%;
-    --input: 215 25% 25%;
-    --ring: 142 69% 35%;
-
+    /* Sidebar Variables (Dark Mode) */
     --sidebar-background: var(--background);
     --sidebar-foreground: var(--foreground);
     --sidebar-primary: var(--primary);
     --sidebar-primary-foreground: var(--primary-foreground);
-    --sidebar-accent: var(--background);
-    --sidebar-accent-foreground: var(--foreground);
+    --sidebar-accent: var(--accent);
+    --sidebar-accent-foreground: var(--accent-foreground);
     --sidebar-border: var(--border);
     --sidebar-ring: var(--ring);
   }
@@ -129,116 +101,63 @@ All colors MUST be HSL.
   }
 }
 
-/* Neomorphic component styles */
-@layer components {
+@layer utilities {
+
+  /* Classes utilitaires pour le Neumorphisme */
   .neu-card {
-    background: hsl(var(--background));
-    box-shadow: var(--shadow-neu);
-    border-radius: 1.125rem;
-    border: none;
+    background: hsl(var(--card));
+    box-shadow:
+      4px 4px 8px rgba(150, 150, 150, 0.5),
+      -4px -4px 8px rgba(255, 255, 255, 1),
+      inset 1px 1px 2px rgba(255, 255, 255, 0.8),
+      inset -1px -1px 2px rgba(150, 150, 150, 0.3);
+    border-radius: var(--radius);
+    transition: var(--transition-smooth);
+    border: 1px solid rgba(255, 255, 255, 0.5);
   }
 
-  .neu-card-sm {
-    background: hsl(var(--background));
-    box-shadow: var(--shadow-neu-sm);
-    border-radius: 0.875rem;
-    border: none;
-  }
-
-  .neu-inset {
-    background: hsl(var(--background));
-    box-shadow: var(--shadow-neu-inset);
-    border-radius: 0.875rem;
+  .dark .neu-card {
+    box-shadow:
+      4px 4px 8px rgba(0, 0, 0, 0.4),
+      -4px -4px 8px rgba(255, 255, 255, 0.05),
+      inset 1px 1px 2px rgba(0, 0, 0, 0.3),
+      inset -1px -1px 2px rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
   }
 
   .neu-raised {
-    background: hsl(var(--background));
-    box-shadow: 6px 6px 12px hsl(var(--neu-dark)), -6px -6px 12px hsl(var(--neu-light));
-    border-radius: 9999px;
+    background: hsl(var(--card));
+    box-shadow:
+      3px 3px 6px rgba(150, 150, 150, 0.4),
+      -3px -3px 6px rgba(255, 255, 255, 0.9),
+      inset 1px 1px 1px rgba(255, 255, 255, 0.7),
+      inset -1px -1px 1px rgba(150, 150, 150, 0.25);
+    border-radius: var(--radius);
+    transition: var(--transition-fast);
+    border: 1px solid rgba(255, 255, 255, 0.4);
   }
 
-  .hover\:neu-raised:hover {
-    background: hsl(var(--background));
-    box-shadow: 6px 6px 12px hsl(var(--neu-dark)), -6px -6px 12px hsl(var(--neu-light));
+  .dark .neu-raised {
+    box-shadow:
+      3px 3px 6px rgba(0, 0, 0, 0.3),
+      -3px -3px 6px rgba(255, 255, 255, 0.04),
+      inset 1px 1px 1px rgba(0, 0, 0, 0.25),
+      inset -1px -1px 1px rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.06);
   }
 
-  .neu-button {
-    background: hsl(var(--background));
-    box-shadow: var(--shadow-neu-button);
-    border: none;
-    border-radius: 0.875rem;
-    padding: 0.75rem 1.5rem;
-    font-size: 0.95rem;
-    font-weight: 500;
-    color: hsl(var(--foreground));
-    cursor: pointer;
-    transition: all 0.15s ease;
-    min-height: 44px;
-    min-width: 44px;
+  .neu-raised:hover {
+    box-shadow:
+      4px 4px 8px rgba(140, 140, 140, 0.5),
+      -4px -4px 8px rgba(255, 255, 255, 1),
+      inset 1px 1px 1px rgba(255, 255, 255, 0.8),
+      inset -1px -1px 1px rgba(140, 140, 140, 0.3);
   }
 
-  .neu-button:hover {
-    box-shadow: var(--shadow-neu-button-hover);
-    transform: translateY(-1px);
-  }
-
-  .neu-button:active {
-    box-shadow: var(--shadow-neu-button-active);
-    transform: translateY(0);
-  }
-
-  /* Bouton pour agents/admin (interne) - Bleu autorité */
-  .neu-button-admin {
-    background: linear-gradient(145deg, hsl(var(--secondary)), hsl(214 84% 52%));
-    color: hsl(var(--secondary-foreground));
-    box-shadow: 
-      4px 4px 10px rgba(37, 99, 235, 0.3),
-      -4px -4px 10px hsl(var(--neu-light)),
-      inset 0 1px 0 rgba(255, 255, 255, 0.15);
-  }
-
-  .neu-button-admin:hover {
-    background: linear-gradient(145deg, hsl(214 84% 58%), hsl(214 84% 54%));
-    box-shadow: 
-      5px 5px 12px rgba(37, 99, 235, 0.35),
-      -5px -5px 12px hsl(var(--neu-light)),
-      inset 0 1px 0 rgba(255, 255, 255, 0.15);
-  }
-
-  /* Bouton pour citoyens (externe) - Vert accueillant */
-  .neu-button-citizen {
-    background: linear-gradient(145deg, hsl(var(--primary)), hsl(142 69% 23%));
-    color: hsl(var(--primary-foreground));
-    box-shadow: 
-      4px 4px 10px rgba(16, 185, 129, 0.3),
-      -4px -4px 10px hsl(var(--neu-light)),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  }
-
-  .neu-button-citizen:hover {
-    background: linear-gradient(145deg, hsl(142 69% 28%), hsl(142 69% 25%));
-    box-shadow: 
-      5px 5px 12px rgba(16, 185, 129, 0.35),
-      -5px -5px 12px hsl(var(--neu-light)),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  }
-
-  .icon-pill {
-    width: 40px;
-    height: 40px;
-    border-radius: 9999px;
-    background: hsl(var(--background));
-    box-shadow: 4px 4px 8px hsl(var(--neu-dark)), -4px -4px 8px hsl(var(--neu-light));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  /* Responsive adjustments */
-  @media (max-width: 768px) {
-    .neu-card {
-      border-radius: 0.875rem;
-      box-shadow: var(--shadow-neu-sm);
-    }
+  .neu-inset {
+    background: hsl(var(--card));
+    box-shadow: var(--neo-shadow-inset);
+    border-radius: var(--radius);
+    transition: var(--transition-fast);
   }
 }

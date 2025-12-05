@@ -70,11 +70,6 @@ export default {
           ring: "hsl(var(--sidebar-ring))",
         },
       },
-      borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
-      },
       boxShadow: {
         'neu': 'var(--shadow-neu)',
         'neu-sm': 'var(--shadow-neu-sm)',
@@ -82,7 +77,18 @@ export default {
         'neu-button': 'var(--shadow-neu-button)',
         'neu-button-hover': 'var(--shadow-neu-button-hover)',
         'neu-button-active': 'var(--shadow-neu-button-active)',
+        'neo-sm': 'var(--neo-shadow-sm)',
+        'neo-md': 'var(--neo-shadow-md)',
+        'neo-lg': 'var(--neo-shadow-lg)',
+        'neo-inset': 'var(--neo-shadow-inset)',
+        'neo-inset-lg': 'var(--neo-shadow-inset-lg)',
       },
+      borderRadius: {
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
+      },
+
       keyframes: {
         "accordion-down": {
           from: {

@@ -1,22 +1,22 @@
 import { useState, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { 
-  Users, 
-  FileCheck, 
+import {
+  Users,
+  FileCheck,
   Building2,
   UserCheck,
   Shield,
 } from "lucide-react";
 import { IAstedButton } from "@/components/ministre/IAstedButton";
-import { IastedChat } from "@/components/ministre/IastedChat";
+import { IAstedChatModal } from "@/components/ministre/IAstedChatModal";
 import { useVoiceInteraction } from "@/hooks/useVoiceInteraction";
 
 export default function MinistreDashboard() {
   const [isIastedChatOpen, setIsIastedChatOpen] = useState(false);
   const [clickCount, setClickCount] = useState(0);
   const clickTimerRef = useRef<NodeJS.Timeout | null>(null);
-  
+
   const {
     handleInteraction,
     isListening,
@@ -47,7 +47,7 @@ export default function MinistreDashboard() {
       const { data: agents } = await supabase
         .from('agents')
         .select('type_agent, statut, grade, categorie, sexe');
-      
+
       if (!agents) return null;
 
       return {
@@ -77,7 +77,7 @@ export default function MinistreDashboard() {
         .in('statut', ['brouillon', 'en_validation'])
         .order('created_at', { ascending: false })
         .limit(10);
-      
+
       return data || [];
     },
   });
@@ -88,11 +88,11 @@ export default function MinistreDashboard() {
       const { data: structures } = await supabase
         .from('structures')
         .select('type_structure, localisation');
-      
+
       const { data: postes } = await supabase
         .from('postes')
         .select('statut');
-      
+
       return {
         totalStructures: structures?.length || 0,
         totalPostes: postes?.length || 0,
@@ -123,10 +123,10 @@ export default function MinistreDashboard() {
 
           <div className="space-y-6 mt-6">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <div className="neu-card p-5">
+              <div className="neu-card p-5 border-l-4 border-l-primary/70">
                 <div className="flex items-center justify-between mb-3">
-                  <div className="neu-raised w-10 h-10 flex items-center justify-center">
-                    <Users className="h-5 w-5 text-primary" />
+                  <div className="p-2 rounded-full bg-primary/10">
+                    <Users className="h-6 w-6 text-primary" />
                   </div>
                 </div>
                 <div className="text-3xl font-bold mb-1">{statsAgents?.total || 0}</div>
@@ -134,10 +134,10 @@ export default function MinistreDashboard() {
                 <p className="text-xs text-muted-foreground">Fonction publique gabonaise</p>
               </div>
 
-              <div className="neu-card p-5">
+              <div className="neu-card p-5 border-l-4 border-l-secondary/70">
                 <div className="flex items-center justify-between mb-3">
-                  <div className="neu-raised w-10 h-10 flex items-center justify-center">
-                    <Building2 className="h-5 w-5 text-secondary" />
+                  <div className="p-2 rounded-full bg-secondary/10">
+                    <Building2 className="h-6 w-6 text-secondary" />
                   </div>
                 </div>
                 <div className="text-3xl font-bold mb-1">{statsStructures?.totalStructures || 0}</div>
@@ -145,10 +145,10 @@ export default function MinistreDashboard() {
                 <p className="text-xs text-muted-foreground">Ministères et directions</p>
               </div>
 
-              <div className="neu-card p-5">
+              <div className="neu-card p-5 border-l-4 border-l-sky-500/70">
                 <div className="flex items-center justify-between mb-3">
-                  <div className="neu-raised w-10 h-10 flex items-center justify-center">
-                    <UserCheck className="h-5 w-5 text-info" />
+                  <div className="p-2 rounded-full bg-sky-500/10">
+                    <UserCheck className="h-6 w-6 text-sky-500" />
                   </div>
                 </div>
                 <div className="text-3xl font-bold mb-1">{statsStructures?.postesVacants || 0}</div>
@@ -156,10 +156,10 @@ export default function MinistreDashboard() {
                 <p className="text-xs text-muted-foreground">Sur {statsStructures?.totalPostes || 0} postes</p>
               </div>
 
-              <div className="neu-card p-5">
+              <div className="neu-card p-5 border-l-4 border-l-orange-500/70">
                 <div className="flex items-center justify-between mb-3">
-                  <div className="neu-raised w-10 h-10 flex items-center justify-center">
-                    <FileCheck className="h-5 w-5 text-accent" />
+                  <div className="p-2 rounded-full bg-orange-500/10">
+                    <FileCheck className="h-6 w-6 text-orange-500" />
                   </div>
                 </div>
                 <div className="text-3xl font-bold mb-1">{actesEnAttente?.length || 0}</div>
@@ -198,8 +198,8 @@ export default function MinistreDashboard() {
           </div>
         </div>
       </div>
-      
-      <IAstedButton 
+
+      <IAstedButton
         onClick={handleIAstedClick}
         size="lg"
         isInterfaceOpen={isIastedChatOpen}
@@ -207,8 +207,8 @@ export default function MinistreDashboard() {
         voiceSpeaking={isSpeaking}
         voiceProcessing={isThinking}
       />
-      
-      <IastedChat 
+
+      <IAstedChatModal
         isOpen={isIastedChatOpen}
         onClose={() => setIsIastedChatOpen(false)}
       />

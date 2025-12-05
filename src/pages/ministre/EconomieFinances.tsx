@@ -81,34 +81,40 @@ export default function EconomieFinances() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
+          <Card className="border-l-4 border-l-primary/70">
             <CardHeader className="pb-2">
               <CardTitle className="text-xs font-medium text-muted-foreground">Budget voté (an.)</CardTitle>
             </CardHeader>
             <CardContent className="flex items-center justify-between">
               <div className="text-3xl font-bold">{kpis.budgetVote.toLocaleString()} Md</div>
-              <PieChart className="w-5 h-5 text-muted-foreground" />
+              <div className="p-2 rounded-full bg-primary/10">
+                <PieChart className="w-5 h-5 text-primary" />
+              </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="border-l-4 border-l-secondary/70">
             <CardHeader className="pb-2">
               <CardTitle className="text-xs font-medium text-muted-foreground">Budget consommé (est.)</CardTitle>
             </CardHeader>
             <CardContent className="flex items-center justify-between">
               <div className="text-3xl font-bold">{kpis.budgetConsomme.toLocaleString()} Md</div>
-              <BarChart2 className="w-5 h-5 text-secondary" />
+              <div className="p-2 rounded-full bg-secondary/10">
+                <BarChart2 className="w-5 h-5 text-secondary" />
+              </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="border-l-4 border-l-green-500/70">
             <CardHeader className="pb-2">
               <CardTitle className="text-xs font-medium text-muted-foreground">Taux d'exécution</CardTitle>
             </CardHeader>
             <CardContent className="flex items-center justify-between">
-              <div className="text-3xl font-bold">{kpis.tauxExecution}%</div>
-              <TrendingUp className="w-5 h-5 text-success" />
+              <div className="text-3xl font-bold text-green-600 dark:text-green-400">{kpis.tauxExecution}%</div>
+              <div className="p-2 rounded-full bg-green-500/10">
+                <TrendingUp className="w-5 h-5 text-green-500" />
+              </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="border-l-4 border-l-orange-500/70">
             <CardHeader className="pb-2">
               <CardTitle className="text-xs font-medium text-muted-foreground">Solde (recettes - dépenses)</CardTitle>
             </CardHeader>
@@ -116,7 +122,9 @@ export default function EconomieFinances() {
               <div className="text-3xl font-bold">
                 {(kpis.totalRecettes - kpis.totalDepenses).toLocaleString()} Md
               </div>
-              <TrendingDown className="w-5 h-5 text-accent" />
+              <div className="p-2 rounded-full bg-orange-500/10">
+                <TrendingDown className="w-5 h-5 text-orange-500" />
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -144,12 +152,22 @@ export default function EconomieFinances() {
                   }}
                 >
                   <BarChart data={data}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="mois" />
-                    <YAxis />
+                    <defs>
+                      <linearGradient id="fillRecettes" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8} />
+                        <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0.1} />
+                      </linearGradient>
+                      <linearGradient id="fillDepenses" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="hsl(var(--secondary))" stopOpacity={0.8} />
+                        <stop offset="95%" stopColor="hsl(var(--secondary))" stopOpacity={0.1} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                    <XAxis dataKey="mois" axisLine={false} tickLine={false} tickMargin={10} />
+                    <YAxis axisLine={false} tickLine={false} tickMargin={10} />
                     <ChartTooltip content={<ChartTooltipContent />} />
-                    <Bar dataKey="recettes" fill="var(--color-recettes)" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="depenses" fill="var(--color-depenses)" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="recettes" fill="url(#fillRecettes)" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="depenses" fill="url(#fillDepenses)" radius={[4, 4, 0, 0]} />
                     <ChartLegend content={<ChartLegendContent />} />
                   </BarChart>
                 </ChartContainer>
@@ -169,11 +187,17 @@ export default function EconomieFinances() {
                   }}
                 >
                   <LineChart data={data}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="mois" />
-                    <YAxis />
+                    <defs>
+                      <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stopColor="#10b981" />
+                        <stop offset="100%" stopColor="#3b82f6" />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                    <XAxis dataKey="mois" axisLine={false} tickLine={false} tickMargin={10} />
+                    <YAxis axisLine={false} tickLine={false} tickMargin={10} />
                     <ChartTooltip content={<ChartTooltipContent />} />
-                    <Line type="monotone" dataKey="execution" stroke="var(--color-execution)" strokeWidth={2} />
+                    <Line type="monotone" dataKey="execution" stroke="url(#lineGradient)" strokeWidth={3} dot={{ r: 4, fill: "#3b82f6" }} activeDot={{ r: 6 }} />
                     <ChartLegend content={<ChartLegendContent />} />
                   </LineChart>
                 </ChartContainer>
@@ -193,16 +217,23 @@ export default function EconomieFinances() {
                   config={{ depenses: { label: "Dépenses", color: "hsl(var(--secondary))" } }}
                 >
                   <AreaChart data={data}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="mois" />
-                    <YAxis />
+                    <defs>
+                      <linearGradient id="colorDepenses" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="hsl(var(--secondary))" stopOpacity={0.8} />
+                        <stop offset="95%" stopColor="hsl(var(--secondary))" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                    <XAxis dataKey="mois" axisLine={false} tickLine={false} tickMargin={10} />
+                    <YAxis axisLine={false} tickLine={false} tickMargin={10} />
                     <ChartTooltip content={<ChartTooltipContent />} />
                     <Area
                       type="monotone"
                       dataKey="depenses"
-                      stroke="var(--color-depenses)"
-                      fill="var(--color-depenses)"
-                      fillOpacity={0.2}
+                      stroke="hsl(var(--secondary))"
+                      strokeWidth={2}
+                      fillOpacity={1}
+                      fill="url(#colorDepenses)"
                     />
                   </AreaChart>
                 </ChartContainer>
@@ -222,16 +253,23 @@ export default function EconomieFinances() {
                   config={{ recettes: { label: "Recettes", color: "hsl(var(--primary))" } }}
                 >
                   <AreaChart data={data}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="mois" />
-                    <YAxis />
+                    <defs>
+                      <linearGradient id="colorRecettes" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8} />
+                        <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                    <XAxis dataKey="mois" axisLine={false} tickLine={false} tickMargin={10} />
+                    <YAxis axisLine={false} tickLine={false} tickMargin={10} />
                     <ChartTooltip content={<ChartTooltipContent />} />
                     <Area
                       type="monotone"
                       dataKey="recettes"
-                      stroke="var(--color-recettes)"
-                      fill="var(--color-recettes)"
-                      fillOpacity={0.2}
+                      stroke="hsl(var(--primary))"
+                      strokeWidth={2}
+                      fillOpacity={1}
+                      fill="url(#colorRecettes)"
                     />
                   </AreaChart>
                 </ChartContainer>

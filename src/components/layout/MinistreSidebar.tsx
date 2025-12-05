@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 const menuItems = [
   {
@@ -233,16 +234,21 @@ export function MinistreSidebar() {
               <p className="text-xs font-medium text-foreground truncate">{user.email}</p>
             </div>
           )}
-          <button
-            onClick={handleSignOut}
-            className={cn(
-              "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-foreground transition-all hover:neu-raised",
-              collapsed && "justify-center"
-            )}
-          >
-            <LogOut className="h-4 w-4 flex-shrink-0" />
-            {!collapsed && <span className="text-sm">Déconnexion</span>}
-          </button>
+
+          <div className="flex gap-2">
+            <ThemeToggle />
+            <button
+              onClick={handleSignOut}
+              className={cn(
+                "flex flex-1 items-center gap-3 rounded-lg px-3 py-2.5 text-foreground transition-all hover:neu-raised",
+                collapsed && "justify-center"
+              )}
+              title="Déconnexion"
+            >
+              <LogOut className="h-4 w-4 flex-shrink-0" />
+              {!collapsed && <span className="text-sm">Déconnexion</span>}
+            </button>
+          </div>
         </div>
       </div>
     </SidebarUI>

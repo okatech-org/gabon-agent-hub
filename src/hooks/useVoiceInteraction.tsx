@@ -3,6 +3,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { toast as unifiedToast } from '@/lib/toast';
+import { useNavigate } from 'react-router-dom';
+import { useTheme } from 'next-themes';
+import { commandService } from '@/services/CommandService';
 
 export type VoiceState = 'idle' | 'listening' | 'thinking' | 'speaking';
 
@@ -42,6 +45,16 @@ export const useVoiceInteraction = () => {
   const streamRef = useRef<MediaStream | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const { setTheme } = useTheme();
+
+  // Initialize command service with navigation and theme context
+  useEffect(() => {
+    commandService.setContext({
+      navigate,
+      setTheme
+    });
+  }, [navigate, setTheme]);
 
   // Initialize playback audio context once
   useEffect(() => {
@@ -551,6 +564,26 @@ export const useVoiceInteraction = () => {
         const base64Audio = reader.result as string;
         const base64Data = base64Audio.split(',')[1];
 
+        // --- ACTIVE LISTENING FILLERS (Pour masquer la latence) ---
+        // Jouer un petit mot de confirmation immédiat pour que l'utilisateur sente qu'il est écouté
+        if ('speechSynthesis' in window) {
+          const fillers = [
+            "Je regarde...",
+            "Un instant...",
+            "Bien reçu...",
+            "Je vérifie...",
+            "Très bien...",
+            "Je consulte..."
+          ];
+          const randomFiller = fillers[Math.floor(Math.random() * fillers.length)];
+          const fillerUtterance = new SpeechSynthesisUtterance(randomFiller);
+          fillerUtterance.lang = 'fr-FR';
+          fillerUtterance.rate = 1.1; // Un peu plus rapide pour le dynamisme
+          fillerUtterance.volume = 0.6; // Un peu plus discret
+          window.speechSynthesis.speak(fillerUtterance);
+        }
+        // -----------------------------------------------------------
+
         console.log('🌐 Calling chat-with-iasted...');
         // Call new chat-with-iasted endpoint
         const { data: chatData, error: chatError } = await supabase.functions.invoke('chat-with-iasted', {
@@ -564,6 +597,9 @@ export const useVoiceInteraction = () => {
             aiModel: 'gpt' // Force GPT
           }
         });
+
+        // Cancel filler if it's still playing when response arrives (optional, but good for speed)
+        // window.speechSynthesis.cancel(); // Risky if we want smooth transition, keeping it playing is often more natural unless response is instant.
 
         if (chatError) {
           console.error('❌ Chat error:', chatError);
@@ -600,7 +636,26 @@ export const useVoiceInteraction = () => {
         // Extract correct field names from edge function response
         const userText = chatData.transcript || chatData.userText || '';
         const responseText = chatData.responseText || chatData.answer || '';
-        // audioContent ignored/removed
+        const route = chatData.route;
+        const toolCalls = chatData.tool_calls;
+
+        // Check for tool calls and execute them
+        if (toolCalls && Array.isArray(toolCalls)) {
+          console.log('🛠️ Executing tool calls:', toolCalls);
+          for (const tool of toolCalls) {
+            if (tool.function && tool.function.name) {
+              try {
+                const args = typeof tool.function.arguments === 'string'
+                  ? JSON.parse(tool.function.arguments)
+                  : tool.function.arguments;
+
+                await commandService.execute(tool.function.name, args);
+              } catch (err) {
+                console.error('Error executing tool:', tool.function.name, err);
+              }
+            }
+          }
+        }
 
         // Check for backend voice commands
         if (chatData.route && chatData.route.category === 'voice_command') {
@@ -694,6 +749,79 @@ export const useVoiceInteraction = () => {
         description: "Impossible de traiter l'audio.",
         variant: "destructive"
       });
+      setVoiceState('idle');
+    }
+  };
+
+
+
+  /**
+   * Envoie un message texte direct à l'assistant (Chat Mode)
+   */
+  const sendMessage = async (text: string) => {
+    if (!text.trim() || !sessionId) return;
+
+    const userMessage: VoiceInteractionMessage = {
+      role: 'user',
+      content: text.trim()
+    };
+    setMessages(prev => [...prev, userMessage]);
+    setVoiceState('thinking');
+
+    try {
+      const { data: chatData, error: chatError } = await supabase.functions.invoke('chat-with-iasted', {
+        body: {
+          sessionId,
+          userId: user?.id,
+          textMessage: text.trim(), // Backend handles this vs audioBase64
+          langHint: 'fr',
+          generateAudio: false,
+          aiModel: 'gpt'
+        }
+      });
+
+      if (chatError) throw chatError;
+
+      // Common logic for response (similar to processAudio)
+      const responseText = chatData.responseText || chatData.answer || '';
+      const toolCalls = chatData.tool_calls;
+
+      // Handle Tools
+      if (toolCalls && Array.isArray(toolCalls)) {
+        for (const tool of toolCalls) {
+          if (tool.function && tool.function.name) {
+            try {
+              const args = typeof tool.function.arguments === 'string'
+                ? JSON.parse(tool.function.arguments)
+                : tool.function.arguments;
+              await commandService.execute(tool.function.name, args);
+            } catch (err) { console.error('Error executing tool:', tool.function.name, err); }
+          }
+        }
+      }
+
+      // Update messages
+      const assistantMessage: VoiceInteractionMessage = {
+        role: 'assistant',
+        content: responseText
+      };
+      setMessages(prev => [...prev, assistantMessage]);
+
+      // Speak response if desired (or maybe silent for text chat? User didn't specify, but hybrid usually speaks)
+      // Let's speak it for consistency with "Universal Agent" flow unless we add a specific flag.
+      if (responseText) {
+        if ('speechSynthesis' in window) {
+          const utterance = new SpeechSynthesisUtterance(responseText);
+          utterance.lang = 'fr-FR';
+          window.speechSynthesis.speak(utterance);
+        }
+      }
+
+      setVoiceState('idle');
+
+    } catch (error) {
+      console.error("Error sending message:", error);
+      toast({ title: "Erreur", description: "Impossible d'envoyer le message.", variant: "destructive" });
       setVoiceState('idle');
     }
   };
