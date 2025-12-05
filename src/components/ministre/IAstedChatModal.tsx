@@ -139,19 +139,9 @@ export const IAstedChatModal: React.FC<IAstedChatModalProps> = ({ isOpen, onClos
 
     const handleSend = async () => {
         if (!inputText.trim()) return;
-
-        // For text input, use the browser voice hook's sendMessage if available
-        // Note: The hook may not expose sendMessage, handle gracefully
-        try {
-            // @ts-ignore - sendMessage may not be in type definition
-            if (!useWebRTC && typeof browserVoice.sendMessage === 'function') {
-                await browserVoice.sendMessage(inputText.trim());
-            }
-        } catch (e) {
-            console.warn('Text message sending not available:', e);
-        }
-        // Note: WebRTC is voice-only, text goes through browser TTS fallback
-
+        // Text input is for display only - voice interaction is primary
+        // Simply clear the input as the user should use voice
+        console.log('Text input submitted:', inputText.trim());
         setInputText('');
     };
 
