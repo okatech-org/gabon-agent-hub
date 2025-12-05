@@ -1,7 +1,7 @@
 project_id = "vnsspatmudluflqfcmap"
 
 [functions.initialize-demo-accounts]
-verify_jwt = false
+verify_jwt = true
 
 [functions.iasted-agent]
 verify_jwt = true
